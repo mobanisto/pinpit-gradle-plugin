@@ -1,0 +1,39 @@
+import org.jetbrains.compose.desktop.application.dsl.TargetFormat
+
+plugins {
+    id "org.jetbrains.kotlin.jvm"
+    id "org.jetbrains.compose"
+}
+
+dependencies {
+    implementation "org.jetbrains.kotlin:kotlin-stdlib"
+    implementation compose.desktop.currentOs
+}
+
+def extraInfoPlistKeys = """
+  <key>CFBundleURLTypes</key>
+  <array>
+    <dict>
+      <key>CFBundleURLName</key>
+      <string>Exameple URL</string>
+      <key>CFBundleURLSchemes</key>
+      <array>
+        <string>exampleUrl</string>
+      </array>
+    </dict>
+  </array>"""
+
+compose.desktop {
+    application {
+        mainClass = "MainKt"
+        nativeDistributions {
+            packageName = "TestPackage"
+            macOS {
+                dockName = "CustomDockName"
+                infoPlist {
+                    extraKeysRawXml = extraInfoPlistKeys
+                }
+            }
+        }
+    }
+}
