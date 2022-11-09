@@ -71,7 +71,6 @@ dependencies {
     embedded("org.jetbrains.kotlinx:kotlinx-serialization-json:${BuildProperties.serializationVersion}")
     embedded("org.jetbrains.kotlinx:kotlinx-serialization-core:${BuildProperties.serializationVersion}")
     embedded("org.jetbrains.kotlinx:kotlinx-serialization-core-jvm:${BuildProperties.serializationVersion}")
-    embedded(project(":preview-rpc"))
 }
 
 val shadow = tasks.named<ShadowJar>("shadowJar") {

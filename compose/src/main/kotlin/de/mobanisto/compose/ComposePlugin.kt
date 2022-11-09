@@ -22,7 +22,6 @@ import de.mobanisto.compose.desktop.DesktopExtension
 import de.mobanisto.compose.desktop.application.internal.ComposeProperties
 import de.mobanisto.compose.desktop.application.internal.configureDesktop
 import de.mobanisto.compose.desktop.application.internal.currentTarget
-import de.mobanisto.compose.desktop.preview.internal.initializePreview
 import de.mobanisto.compose.experimental.dsl.ExperimentalExtension
 import de.mobanisto.compose.experimental.internal.checkExperimentalTargetsWithSkikoIsEnabled
 import de.mobanisto.compose.experimental.internal.configureExperimental
@@ -45,7 +44,6 @@ class ComposePlugin : Plugin<Project> {
             setUpGroovyDslExtensions(project)
         }
 
-        project.initializePreview(desktopExtension)
         composeExtension.extensions.create("web", WebExtension::class.java)
 
         project.plugins.apply(de.mobanisto.compose.ComposeCompilerKotlinSupportPlugin::class.java)

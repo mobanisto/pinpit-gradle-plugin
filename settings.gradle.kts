@@ -6,4 +6,3 @@ pluginManagement {
 }
 
 include(":compose")
-include(":preview-rpc")
