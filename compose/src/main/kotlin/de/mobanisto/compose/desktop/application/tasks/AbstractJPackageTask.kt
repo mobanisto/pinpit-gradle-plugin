@@ -6,7 +6,6 @@
 package de.mobanisto.compose.desktop.application.tasks
 
 import org.gradle.api.file.*
-import org.gradle.api.internal.file.FileOperations
 import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.provider.Provider
@@ -25,14 +24,12 @@ import de.mobanisto.compose.desktop.application.internal.validation.validate
 import java.io.*
 import java.util.*
 import javax.inject.Inject
-import kotlin.collections.HashMap
 import kotlin.collections.HashSet
-import kotlin.collections.ArrayList
 
 abstract class AbstractJPackageTask @Inject constructor(
     @get:Input
     val targetFormat: TargetFormat,
-) : AbstractJvmToolOperationTask("jpackage") {
+) : AbstractJvmToolOperationTask("jpackage"), WindowsTask {
     @get:InputFiles
     val files: ConfigurableFileCollection = objects.fileCollection()
 
@@ -65,7 +62,7 @@ abstract class AbstractJPackageTask @Inject constructor(
     @get:InputDirectory
     @get:Optional
     /** @see internal/wixToolset.kt */
-    val wixToolsetDir: DirectoryProperty = objects.directoryProperty()
+    override val wixToolsetDir: DirectoryProperty = objects.directoryProperty()
 
     @get:Input
     @get:Optional
@@ -592,82 +589,4 @@ abstract class AbstractJPackageTask @Inject constructor(
         plist[PlistKeys.NSSupportsAutomaticGraphicsSwitching] = "true"
         plist[PlistKeys.NSHighResolutionCapable] = "true"
     }
-}
-
-// Serializable is only needed to avoid breaking configuration cache:
-// https://docs.gradle.org/current/userguide/configuration_cache.html#config_cache:requirements
-private class FilesMapping : Serializable {
-    private var mapping = HashMap<File, List<File>>()
-
-    operator fun get(key: File): List<File>? =
-        mapping[key]
-
-    operator fun set(key: File, value: List<File>) {
-        mapping[key] = value
-    }
-
-    fun remove(key: File): List<File>? =
-        mapping.remove(key)
-
-    fun loadFrom(mappingFile: File) {
-        mappingFile.readLines().forEach { line ->
-            if (line.isNotBlank()) {
-                val paths = line.splitToSequence(File.pathSeparatorChar)
-                val lib = File(paths.first())
-                val mappedFiles = paths.drop(1).mapTo(ArrayList()) { File(it) }
-                mapping[lib] = mappedFiles
-            }
-        }
-    }
-
-    fun saveTo(mappingFile: File) {
-        mappingFile.parentFile.mkdirs()
-        mappingFile.bufferedWriter().use { writer ->
-            mapping.entries
-                .sortedBy { (k, _) -> k.absolutePath }
-                .forEach { (k, values) ->
-                    (sequenceOf(k) + values.asSequence())
-                        .joinTo(writer, separator = File.pathSeparator, transform = { it.absolutePath })
-                }
-        }
-    }
-
-    private fun writeObject(stream: ObjectOutputStream) {
-        stream.writeObject(mapping)
-    }
-
-    private fun readObject(stream: ObjectInputStream) {
-        mapping = stream.readObject() as HashMap<File, List<File>>
-    }
-}
-
-private fun isSkikoForCurrentOS(lib: File): Boolean =
-    lib.name.startsWith("skiko-awt-runtime-${currentOS.id}-${currentArch.id}")
-            && lib.name.endsWith(".jar")
-
-private fun unpackSkikoForCurrentOS(sourceJar: File, skikoDir: File, fileOperations: FileOperations): List<File> {
-    val entriesToUnpack = when (currentOS) {
-        OS.MacOS -> setOf("libskiko-macos-${currentArch.id}.dylib")
-        OS.Windows -> setOf("skiko-windows-${currentArch.id}.dll", "icudtl.dat")
-        OS.Linux -> setOf("libskiko-linux-${currentArch.id}.so")
-    }
-
-    // output files: unpacked libs, corresponding .sha256 files, and target jar
-    val outputFiles = ArrayList<File>(entriesToUnpack.size * 2 + 1)
-    val targetJar = skikoDir.resolve(sourceJar.name)
-    outputFiles.add(targetJar)
-
-    fileOperations.delete(skikoDir)
-    fileOperations.mkdir(skikoDir)
-    transformJar(sourceJar, targetJar) { entry, zin, zout ->
-        // check both entry or entry.sha256
-        if (entry.name.removeSuffix(".sha256") in entriesToUnpack) {
-            val unpackedFile = skikoDir.resolve(entry.name.substringAfterLast("/"))
-            zin.copyTo(unpackedFile)
-            outputFiles.add(unpackedFile)
-        } else {
-            copyZipEntry(entry, zin, zout)
-        }
-    }
-    return outputFiles
 }

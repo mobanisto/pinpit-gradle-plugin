@@ -136,6 +136,26 @@ private fun JvmApplicationContext.configurePackagingTasks(
     }
 
     val packageFormats = app.nativeDistributions.targetFormats.map { targetFormat ->
+        if (targetFormat == TargetFormat.CustomDeb) {
+            return@map tasks.register<CustomDebTask>(taskNameAction = "mopackageCustomDeb") {
+                configureCustomPackageTask(
+                    this,
+                    createAppImage = createDistributable,
+                    checkRuntime = commonTasks.checkRuntime,
+                    unpackDefaultResources = commonTasks.unpackDefaultResources
+                )
+            }
+        } else if (targetFormat == TargetFormat.CustomMsi) {
+            return@map tasks.register<CustomMsiTask>(taskNameAction = "mopackageCustomMsi") {
+                configureCustomPackageTask(
+                    this,
+                    createAppImage = createDistributable,
+                    checkRuntime = commonTasks.checkRuntime,
+                    unpackDefaultResources = commonTasks.unpackDefaultResources
+                )
+            }
+        }
+
         val packageFormat = tasks.register<AbstractJPackageTask>(
             taskNameAction = "mopackage",
             taskNameObject = targetFormat.name,
@@ -154,10 +174,6 @@ private fun JvmApplicationContext.configurePackagingTasks(
                     checkRuntime = commonTasks.checkRuntime,
                     unpackDefaultResources = commonTasks.unpackDefaultResources
                 )
-            } else if (targetFormat == TargetFormat.CustomDeb) {
-                // TODO: configure with createDistributable task as base
-            } else if (targetFormat == TargetFormat.CustomMsi) {
-                // TODO: configure with createDistributable task as base
             } else {
                 configurePackageTask(
                     this,
@@ -268,6 +284,58 @@ private fun JvmApplicationContext.configureProguardTask(
     }
 }
 
+private fun JvmApplicationContext.configureCustomPackageTask(
+    packageTask: CustomPackageTask,
+    createAppImage: TaskProvider<AbstractJPackageTask>,
+    checkRuntime: TaskProvider<AbstractCheckNativeDistributionRuntime>,
+    unpackDefaultResources: TaskProvider<AbstractUnpackDefaultComposeApplicationResourcesTask>,
+    runProguard: Provider<AbstractProguardTask>? = null
+) {
+    packageTask.enabled = packageTask.targetFormat.isCompatibleWithCurrentOS
+
+    createAppImage.let { createAppImage ->
+        packageTask.dependsOn(createAppImage)
+        packageTask.appImage.set(createAppImage.flatMap { it.destinationDir })
+    }
+
+    checkRuntime.let { checkRuntime ->
+        packageTask.dependsOn(checkRuntime)
+        packageTask.javaRuntimePropertiesFile.set(checkRuntime.flatMap { it.javaRuntimePropertiesFile })
+    }
+
+    configurePlatformSettings(packageTask, unpackDefaultResources)
+
+    app.nativeDistributions.let { executables ->
+        packageTask.packageName.set(provider { executables.packageName })
+//        packageTask.packageDescription.set(packageTask.provider { executables.description })
+//        packageTask.packageCopyright.set(packageTask.provider { executables.copyright })
+//        packageTask.packageVendor.set(packageTask.provider { executables.vendor })
+//        packageTask.packageVersion.set(packageVersionFor(packageTask.targetFormat))
+//        packageTask.licenseFile.set(executables.licenseFile)
+    }
+
+    packageTask.destinationDir.set(app.nativeDistributions.outputBaseDir.map {
+        it.dir("$appDirName/${packageTask.targetFormat.outputDirName}")
+    })
+//    packageTask.javaHome.set(app.javaHomeProvider)
+
+    if (runProguard != null) {
+        packageTask.dependsOn(runProguard)
+        packageTask.files.from(project.fileTree(runProguard.flatMap { it.destinationDir }))
+        packageTask.launcherMainJar.set(runProguard.flatMap { it.mainJarInDestinationDir })
+        packageTask.mangleJarFilesNames.set(false)
+    } else {
+        packageTask.useAppRuntimeFiles { (runtimeJars, mainJar) ->
+            files.from(runtimeJars)
+            launcherMainJar.set(mainJar)
+        }
+    }
+
+    packageTask.launcherMainClass.set(provider { app.mainClass })
+//    packageTask.launcherJvmArgs.set(provider { defaultJvmArgs + app.jvmArgs })
+//    packageTask.launcherArgs.set(provider { app.args })
+}
+
 private fun JvmApplicationContext.configurePackageTask(
     packageTask: AbstractJPackageTask,
     createAppImage: TaskProvider<AbstractJPackageTask>? = null,
@@ -338,6 +406,58 @@ internal fun JvmApplicationContext.configureCommonNotarizationSettings(
 ) {
     notarizationTask.nonValidatedBundleID.set(app.nativeDistributions.macOS.bundleID)
     notarizationTask.nonValidatedNotarizationSettings = app.nativeDistributions.macOS.notarization
+}
+
+
+internal fun JvmApplicationContext.configurePlatformSettings(
+    packageTask: CustomPackageTask,
+    unpackDefaultResources: TaskProvider<AbstractUnpackDefaultComposeApplicationResourcesTask>
+) {
+    if (packageTask is CustomDebTask) {
+        configurePlatformSettings(packageTask, unpackDefaultResources)
+    } else if (packageTask is CustomMsiTask) {
+        configurePlatformSettings(packageTask, unpackDefaultResources)
+    }
+}
+
+internal fun JvmApplicationContext.configurePlatformSettings(
+    packageTask: CustomDebTask,
+    unpackDefaultResources: TaskProvider<AbstractUnpackDefaultComposeApplicationResourcesTask>
+) {
+    packageTask.dependsOn(unpackDefaultResources)
+    if (currentOS == OS.Linux) {
+        app.nativeDistributions.linux.also { linux ->
+            packageTask.linuxShortcut.set(provider { linux.shortcut })
+            packageTask.linuxAppCategory.set(provider { linux.appCategory })
+            packageTask.linuxAppRelease.set(provider { linux.appRelease })
+            packageTask.linuxDebMaintainer.set(provider { linux.debMaintainer })
+            packageTask.linuxMenuGroup.set(provider { linux.menuGroup })
+            packageTask.linuxPackageName.set(provider { linux.packageName })
+            packageTask.linuxRpmLicenseType.set(provider { linux.rpmLicenseType })
+            packageTask.iconFile.set(linux.iconFile.orElse(unpackDefaultResources.flatMap { it.resources.linuxIcon }))
+            packageTask.installationPath.set(linux.installationPath)
+        }
+    }
+}
+
+internal fun JvmApplicationContext.configurePlatformSettings(
+    packageTask: CustomMsiTask,
+    unpackDefaultResources: TaskProvider<AbstractUnpackDefaultComposeApplicationResourcesTask>
+) {
+    packageTask.dependsOn(unpackDefaultResources)
+    if (currentOS == OS.Windows) {
+        app.nativeDistributions.windows.also { win ->
+            packageTask.winConsole.set(provider { win.console })
+            packageTask.winDirChooser.set(provider { win.dirChooser })
+            packageTask.winPerUserInstall.set(provider { win.perUserInstall })
+            packageTask.winShortcut.set(provider { win.shortcut })
+            packageTask.winMenu.set(provider { win.menu })
+            packageTask.winMenuGroup.set(provider { win.menuGroup })
+            packageTask.winUpgradeUuid.set(provider { win.upgradeUuid })
+            packageTask.iconFile.set(win.iconFile.orElse(unpackDefaultResources.flatMap { it.resources.windowsIcon }))
+            packageTask.installationPath.set(win.installationPath)
+        }
+    }
 }
 
 internal fun JvmApplicationContext.configurePlatformSettings(

@@ -9,6 +9,8 @@ import de.undercouch.gradle.tasks.download.Download
 import org.gradle.api.Project
 import org.gradle.api.tasks.Copy
 import de.mobanisto.compose.desktop.application.tasks.AbstractJPackageTask
+import de.mobanisto.compose.desktop.application.tasks.CustomMsiTask
+import de.mobanisto.compose.desktop.application.tasks.WindowsTask
 import java.io.File
 
 internal const val DOWNLOAD_WIX_TOOLSET_TASK_NAME = "downloadWix"
@@ -51,8 +53,13 @@ internal fun JvmApplicationContext.configureWix() {
     }
 }
 
-private fun Project.eachWindowsPackageTask(fn: AbstractJPackageTask.() -> Unit) {
+private fun Project.eachWindowsPackageTask(fn: WindowsTask.() -> Unit) {
     tasks.withType(AbstractJPackageTask::class.java).configureEach { packageTask ->
+        if (packageTask.targetFormat.isCompatibleWith(OS.Windows)) {
+            packageTask.fn()
+        }
+    }
+    tasks.withType(CustomMsiTask::class.java).configureEach { packageTask ->
         if (packageTask.targetFormat.isCompatibleWith(OS.Windows)) {
             packageTask.fn()
         }
