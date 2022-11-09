@@ -34,12 +34,12 @@ internal val composeVersion get() = ComposeBuildConfig.composeVersion
 
 class ComposePlugin : Plugin<Project> {
     override fun apply(project: Project) {
-        val composeExtension = project.extensions.create("compose", ComposeExtension::class.java)
+        val composeExtension = project.extensions.create("mocompose", ComposeExtension::class.java)
         val desktopExtension = composeExtension.extensions.create("desktop", DesktopExtension::class.java)
         val androidExtension = composeExtension.extensions.create("android", AndroidExtension::class.java)
         val experimentalExtension = composeExtension.extensions.create("experimental", ExperimentalExtension::class.java)
 
-        project.dependencies.extensions.add("compose", Dependencies)
+        project.dependencies.extensions.add("mocompose", Dependencies)
 
         if (!project.buildFile.endsWith(".gradle.kts")) {
             setUpGroovyDslExtensions(project)

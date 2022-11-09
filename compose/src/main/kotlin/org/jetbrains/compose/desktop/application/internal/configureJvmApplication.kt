@@ -137,7 +137,7 @@ private fun JvmApplicationContext.configurePackagingTasks(
 
     val packageFormats = app.nativeDistributions.targetFormats.map { targetFormat ->
         val packageFormat = tasks.register<AbstractJPackageTask>(
-            taskNameAction = "package",
+            taskNameAction = "mopackage",
             taskNameObject = targetFormat.name,
             args = listOf(targetFormat)
         ) {
