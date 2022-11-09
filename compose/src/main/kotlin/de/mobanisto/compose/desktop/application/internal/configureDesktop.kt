@@ -20,7 +20,7 @@ internal fun configureDesktop(project: Project, desktopExtension: DesktopExtensi
 
     if (desktopExtension._isNativeApplicationInitialized) {
         val unpackDefaultResources = project.registerTask<AbstractUnpackDefaultComposeApplicationResourcesTask>(
-            "unpackDefaultComposeDesktopNativeApplicationResources"
+            "mounpackDefaultComposeDesktopNativeApplicationResources"
         ) {}
         configureNativeApplication(project, desktopExtension.nativeApplication, unpackDefaultResources)
     }

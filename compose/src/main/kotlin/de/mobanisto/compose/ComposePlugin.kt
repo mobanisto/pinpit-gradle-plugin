@@ -176,13 +176,15 @@ private fun composeDependency(groupWithArtifact: String) = "$groupWithArtifact:$
 private fun setUpGroovyDslExtensions(project: Project) {
     project.plugins.withId("org.jetbrains.kotlin.multiplatform") {
         (project.extensions.getByName("kotlin") as? ExtensionAware)?.apply {
-            extensions.add("compose", ComposePlugin.Dependencies)
+            extensions.add("mocompose", ComposePlugin.Dependencies)
         }
     }
     (project.repositories as? ExtensionAware)?.extensions?.apply {
-        add("jetbrainsCompose", object : Closure<MavenArtifactRepository>(project.repositories) {
-            fun doCall(): MavenArtifactRepository =
-                project.repositories.jetbrainsCompose()
-        })
+        if (findByName("jetbrainsCompose") == null) {
+            add("jetbrainsCompose", object : Closure<MavenArtifactRepository>(project.repositories) {
+                fun doCall(): MavenArtifactRepository =
+                    project.repositories.jetbrainsCompose()
+            })
+        }
     }
 }

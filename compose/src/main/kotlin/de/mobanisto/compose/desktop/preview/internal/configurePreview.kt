@@ -41,4 +41,4 @@ private fun registerConfigurePreviewTask(
 }
 
 private fun previewTaskName(targetName: String) =
-    "configureDesktopPreview${targetName.uppercaseFirstChar()}"
+    "moconfigureDesktopPreview${targetName.uppercaseFirstChar()}"

@@ -49,19 +49,19 @@ internal class CommonJvmDesktopTasks(
 
 private fun JvmApplicationContext.configureCommonJvmDesktopTasks(): CommonJvmDesktopTasks {
     val unpackDefaultResources = tasks.register<AbstractUnpackDefaultComposeApplicationResourcesTask>(
-        taskNameAction = "unpack",
+        taskNameAction = "mounpack",
         taskNameObject = "DefaultComposeDesktopJvmApplicationResources"
     ) {}
 
     val checkRuntime = tasks.register<AbstractCheckNativeDistributionRuntime>(
-        taskNameAction = "check",
+        taskNameAction = "mocheck",
         taskNameObject = "runtime"
     ) {
         javaHome.set(app.javaHomeProvider)
     }
 
     val suggestRuntimeModules = tasks.register<AbstractSuggestModulesTask>(
-        taskNameAction = "suggest",
+        taskNameAction = "mosuggest",
         taskNameObject = "runtimeModules"
     ) {
         dependsOn(checkRuntime)
@@ -75,7 +75,7 @@ private fun JvmApplicationContext.configureCommonJvmDesktopTasks(): CommonJvmDes
     }
 
     val prepareAppResources = tasks.register<Sync>(
-        taskNameAction = "prepare",
+        taskNameAction = "moprepare",
         taskNameObject = "appResources"
     ) {
         val appResourcesRootDir = app.nativeDistributions.appResourcesRootDir
@@ -88,7 +88,7 @@ private fun JvmApplicationContext.configureCommonJvmDesktopTasks(): CommonJvmDes
     }
 
     val createRuntimeImage = tasks.register<AbstractJLinkTask>(
-        taskNameAction = "create",
+        taskNameAction = "mocreate",
         taskNameObject = "runtimeImage"
     ) {
         dependsOn(checkRuntime)
@@ -113,7 +113,7 @@ private fun JvmApplicationContext.configurePackagingTasks(
 ) {
     val runProguard = if (buildType.proguard.isEnabled.orNull == true) {
         tasks.register<AbstractProguardTask>(
-            taskNameAction = "proguard",
+            taskNameAction = "moproguard",
             taskNameObject = "Jars"
         ) {
             configureProguardTask(this, commonTasks.unpackDefaultResources)
@@ -121,7 +121,7 @@ private fun JvmApplicationContext.configurePackagingTasks(
     } else null
 
     val createDistributable = tasks.register<AbstractJPackageTask>(
-        taskNameAction = "create",
+        taskNameAction = "mocreate",
         taskNameObject = "distributable",
         args = listOf(TargetFormat.AppImage)
     ) {
@@ -173,7 +173,7 @@ private fun JvmApplicationContext.configurePackagingTasks(
 
             val notarizationRequestsDir = project.layout.buildDirectory.dir("compose/notarization/$app")
             tasks.register<AbstractUploadAppForNotarizationTask>(
-                taskNameAction = "notarize",
+                taskNameAction = "monotarize",
                 taskNameObject = targetFormat.name,
                 args = listOf(targetFormat)
             ) {
@@ -184,7 +184,7 @@ private fun JvmApplicationContext.configurePackagingTasks(
             }
 
             tasks.register<AbstractCheckNotarizationStatusTask>(
-                taskNameAction = "check",
+                taskNameAction = "mocheck",
                 taskNameObject = "notarizationStatus"
             ) {
                 requestDir.set(notarizationRequestsDir)
@@ -196,7 +196,7 @@ private fun JvmApplicationContext.configurePackagingTasks(
     }
 
     val packageForCurrentOS = tasks.register<DefaultTask>(
-        taskNameAction = "package",
+        taskNameAction = "mopackage",
         taskNameObject = "distributionForCurrentOS"
     ) {
         dependsOn(packageFormats)
@@ -204,7 +204,7 @@ private fun JvmApplicationContext.configurePackagingTasks(
 
     if (buildType === app.buildTypes.default) {
         // todo: remove
-        tasks.register<DefaultTask>("package") {
+        tasks.register<DefaultTask>("mopackage") {
             dependsOn(packageForCurrentOS)
 
             doLast {
@@ -216,19 +216,19 @@ private fun JvmApplicationContext.configurePackagingTasks(
     }
 
     val packageUberJarForCurrentOS = tasks.register<Jar>(
-        taskNameAction = "package",
+        taskNameAction = "mopackage",
         taskNameObject = "uberJarForCurrentOS"
     ) {
         configurePackageUberJarForCurrentOS(this)
     }
 
     val runDistributable = tasks.register<AbstractRunDistributableTask>(
-        taskNameAction = "run",
+        taskNameAction = "morun",
         taskNameObject = "distributable",
         args = listOf(createDistributable)
     )
 
-    val run = tasks.register<JavaExec>(taskNameAction = "run") {
+    val run = tasks.register<JavaExec>(taskNameAction = "morun") {
         configureRunTask(this, commonTasks.prepareAppResources)
     }
 }
