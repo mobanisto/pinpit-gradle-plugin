@@ -18,7 +18,10 @@ enum class TargetFormat(
     Dmg("dmg", OS.MacOS),
     Pkg("pkg", OS.MacOS),
     Exe("exe", OS.Windows),
-    Msi("msi", OS.Windows);
+    Msi("msi", OS.Windows),
+
+    CustomDeb("custom-deb", OS.Linux),
+    CustomMsi("custom-msi", OS.Windows);
 
     val isCompatibleWithCurrentOS: Boolean by lazy { isCompatibleWith(currentOS) }
 

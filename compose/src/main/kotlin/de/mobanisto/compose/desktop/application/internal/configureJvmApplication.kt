@@ -147,7 +147,18 @@ private fun JvmApplicationContext.configurePackagingTasks(
             // We could create an installer the same way on other platforms, but
             // in some cases there are failures with JDK 15.
             // See [AbstractJPackageTask.patchInfoPlistIfNeeded]
-            if (currentOS != OS.MacOS) {
+            if (currentOS == OS.MacOS) {
+                configurePackageTask(
+                    this,
+                    createAppImage = createDistributable,
+                    checkRuntime = commonTasks.checkRuntime,
+                    unpackDefaultResources = commonTasks.unpackDefaultResources
+                )
+            } else if (targetFormat == TargetFormat.CustomDeb) {
+                // TODO: configure with createDistributable task as base
+            } else if (targetFormat == TargetFormat.CustomMsi) {
+                // TODO: configure with createDistributable task as base
+            } else {
                 configurePackageTask(
                     this,
                     createRuntimeImage = commonTasks.createRuntimeImage,
@@ -155,13 +166,6 @@ private fun JvmApplicationContext.configurePackagingTasks(
                     checkRuntime = commonTasks.checkRuntime,
                     unpackDefaultResources = commonTasks.unpackDefaultResources,
                     runProguard = runProguard
-                )
-            } else {
-                configurePackageTask(
-                    this,
-                    createAppImage = createDistributable,
-                    checkRuntime = commonTasks.checkRuntime,
-                    unpackDefaultResources = commonTasks.unpackDefaultResources
                 )
             }
         }

@@ -29,6 +29,8 @@ private fun JvmApplicationDistributions.packageVersionFor(
         TargetFormat.Pkg -> macOS.pkgPackageVersion
         TargetFormat.Exe -> windows.exePackageVersion
         TargetFormat.Msi -> windows.msiPackageVersion
+        TargetFormat.CustomDeb -> linux.debPackageVersion
+        TargetFormat.CustomMsi -> windows.msiPackageVersion
     }
     val osSpecificVersion: String? = when (targetFormat.targetOS) {
         OS.Linux -> linux.packageVersion
