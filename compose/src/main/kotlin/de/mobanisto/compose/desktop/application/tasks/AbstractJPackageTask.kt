@@ -22,6 +22,7 @@ import de.mobanisto.compose.desktop.application.internal.files.MacJarSignFileCop
 import de.mobanisto.compose.desktop.application.internal.JvmRuntimeProperties
 import de.mobanisto.compose.desktop.application.internal.validation.validate
 import java.io.*
+import java.lang.IllegalStateException
 import java.util.*
 import javax.inject.Inject
 import kotlin.collections.HashSet
@@ -280,7 +281,7 @@ abstract class AbstractJPackageTask @Inject constructor(
     @get:InputDirectory
     @get:Optional
     internal val appResourcesDirInputDirHackForVerification: Provider<Directory>
-        get() = appResourcesDir.map { it.takeIf { it.asFile.exists() } }
+        get() = appResourcesDir.map { it.takeIf { it.asFile.exists() } ?: throw IllegalStateException() }
 
     @get:Internal
     private val libsMappingFile: Provider<RegularFile> = workingDir.map {

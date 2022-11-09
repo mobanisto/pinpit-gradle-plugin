@@ -13,7 +13,6 @@ import de.mobanisto.compose.desktop.application.internal.files.isJarFile
 import de.mobanisto.compose.desktop.application.internal.files.mangledName
 import de.mobanisto.compose.desktop.application.internal.ioFile
 import de.mobanisto.compose.desktop.application.internal.ioFileOrNull
-import de.mobanisto.compose.desktop.application.internal.notNullProperty
 import de.mobanisto.compose.desktop.application.internal.nullableProperty
 import de.mobanisto.compose.desktop.application.internal.stacktraceToString
 import org.gradle.api.file.Directory
@@ -145,7 +144,7 @@ abstract class CustomDebTask @Inject constructor() : CustomPackageTask(TargetFor
     @get:InputDirectory
     @get:Optional
     internal val appResourcesDirInputDirHackForVerification: Provider<Directory>
-        get() = appResourcesDir.map { it.takeIf { it.asFile.exists() } }
+        get() = appResourcesDir.map { it.takeIf { it.asFile.exists() } ?: throw IllegalStateException() }
 
     @get:Internal
     private val libsMappingFile: Provider<RegularFile> = workingDir.map {

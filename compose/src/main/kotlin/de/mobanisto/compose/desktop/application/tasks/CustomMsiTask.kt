@@ -13,7 +13,6 @@ import de.mobanisto.compose.desktop.application.internal.files.isJarFile
 import de.mobanisto.compose.desktop.application.internal.files.mangledName
 import de.mobanisto.compose.desktop.application.internal.ioFile
 import de.mobanisto.compose.desktop.application.internal.ioFileOrNull
-import de.mobanisto.compose.desktop.application.internal.notNullProperty
 import de.mobanisto.compose.desktop.application.internal.nullableProperty
 import de.mobanisto.compose.desktop.application.internal.stacktraceToString
 import org.gradle.api.file.Directory
@@ -35,6 +34,7 @@ import org.gradle.process.ExecResult
 import org.gradle.work.ChangeType
 import org.gradle.work.InputChanges
 import java.io.File
+import java.lang.IllegalStateException
 import java.util.*
 import javax.inject.Inject
 
@@ -151,7 +151,7 @@ abstract class CustomMsiTask @Inject constructor() : CustomPackageTask(TargetFor
     @get:InputDirectory
     @get:Optional
     internal val appResourcesDirInputDirHackForVerification: Provider<Directory>
-        get() = appResourcesDir.map { it.takeIf { it.asFile.exists() } }
+        get() = appResourcesDir.map { it.takeIf { it.asFile.exists() } ?: throw IllegalStateException() }
 
     @get:Internal
     private val libsMappingFile: Provider<RegularFile> = workingDir.map {
