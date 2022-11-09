@@ -8,7 +8,7 @@ import org.gradle.api.Project
 // "Global" properties
 object BuildProperties {
     const val name = "JetBrains Compose Plugin"
-    const val group = "org.jetbrains.compose"
+    const val group = "de.mobanisto.compose"
     const val website = "https://www.jetbrains.com/lp/compose/"
     const val vcs = "https://github.com/JetBrains/compose-jb"
     const val serializationVersion = "1.2.1"

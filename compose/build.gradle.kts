@@ -12,7 +12,7 @@ plugins {
 }
 
 gradlePluginConfig {
-    pluginId = "org.jetbrains.compose"
+    pluginId = "de.mobanisto.compose"
     implementationClass = "org.jetbrains.compose.ComposePlugin"
     pluginPortalTags = listOf("ui-framework")
 }
