@@ -13,7 +13,7 @@ plugins {
 
 gradlePluginConfig {
     pluginId = "de.mobanisto.compose"
-    implementationClass = "org.jetbrains.compose.ComposePlugin"
+    implementationClass = "de.mobanisto.compose.ComposePlugin"
     pluginPortalTags = listOf("ui-framework")
 }
 
@@ -26,7 +26,7 @@ mavenPublicationConfig {
 val buildConfigDir
     get() = project.layout.buildDirectory.dir("generated/buildconfig")
 val buildConfig = tasks.register("buildConfig", GenerateBuildConfig::class.java) {
-    classFqName.set("org.jetbrains.compose.ComposeBuildConfig")
+    classFqName.set("de.mobanisto.compose.ComposeBuildConfig")
     generatedOutputDir.set(buildConfigDir)
     fieldsToGenerate.put("composeVersion", BuildProperties.composeVersion(project))
     fieldsToGenerate.put("composeGradlePluginVersion", BuildProperties.deployVersion(project))
