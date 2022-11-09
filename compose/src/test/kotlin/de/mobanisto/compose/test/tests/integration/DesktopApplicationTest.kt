@@ -7,9 +7,19 @@ package de.mobanisto.compose.test.tests.integration
 
 import org.gradle.internal.impldep.org.testng.Assert
 import org.gradle.testkit.runner.TaskOutcome
-import org.jetbrains.compose.desktop.application.internal.*
-import org.jetbrains.compose.internal.uppercaseFirstChar
-import org.jetbrains.compose.test.utils.*
+import de.mobanisto.compose.desktop.application.internal.*
+import de.mobanisto.compose.internal.uppercaseFirstChar
+import de.mobanisto.compose.test.utils.GradlePluginTestBase
+import de.mobanisto.compose.test.utils.ProcessRunResult
+import de.mobanisto.compose.test.utils.TestProject
+import de.mobanisto.compose.test.utils.TestProjects
+import de.mobanisto.compose.test.utils.assertEqualTextFiles
+import de.mobanisto.compose.test.utils.assertNotEqualTextFiles
+import de.mobanisto.compose.test.utils.checkContains
+import de.mobanisto.compose.test.utils.checkExists
+import de.mobanisto.compose.test.utils.checks
+import de.mobanisto.compose.test.utils.modify
+import de.mobanisto.compose.test.utils.runProcess
 
 import java.io.File
 import java.util.*

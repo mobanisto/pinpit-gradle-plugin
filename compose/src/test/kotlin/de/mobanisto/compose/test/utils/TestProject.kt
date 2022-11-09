@@ -6,7 +6,7 @@
 package de.mobanisto.compose.test.utils
 
 import org.gradle.testkit.runner.GradleRunner
-import org.jetbrains.compose.desktop.application.internal.ComposeProperties
+import de.mobanisto.compose.desktop.application.internal.ComposeProperties
 import java.io.File
 import java.util.Properties
 

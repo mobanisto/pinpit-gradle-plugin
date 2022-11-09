@@ -5,9 +5,9 @@
 
 package de.mobanisto.compose.test.tests.unit
 
-import org.jetbrains.compose.internal.ComposeCompilerArtifactProvider
-import org.jetbrains.compose.internal.copy
-import org.jetbrains.compose.test.utils.TestProperties
+import de.mobanisto.compose.internal.ComposeCompilerArtifactProvider
+import de.mobanisto.compose.internal.copy
+import de.mobanisto.compose.test.utils.TestProperties
 import org.jetbrains.kotlin.gradle.plugin.SubpluginArtifact
 import org.junit.jupiter.api.Test
 

@@ -5,9 +5,9 @@
 
 package de.mobanisto.compose.test.tests.unit
 
-import org.jetbrains.compose.desktop.application.internal.OS
-import org.jetbrains.compose.desktop.application.internal.currentOS
-import org.jetbrains.compose.desktop.application.internal.files.contentHash
+import de.mobanisto.compose.desktop.application.internal.OS
+import de.mobanisto.compose.desktop.application.internal.currentOS
+import de.mobanisto.compose.desktop.application.internal.files.contentHash
 
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
