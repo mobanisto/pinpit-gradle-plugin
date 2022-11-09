@@ -11,15 +11,11 @@ import org.gradle.api.plugins.JavaPluginExtension
 import org.gradle.api.tasks.SourceSetContainer
 import org.gradle.util.GradleVersion
 import de.mobanisto.compose.ComposeExtension
-import de.mobanisto.compose.web.WebExtension
 import org.jetbrains.kotlin.gradle.dsl.KotlinJsProjectExtension
 import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
 
 internal val Project.composeExt: ComposeExtension?
     get() = extensions.findByType(ComposeExtension::class.java)
-
-internal val Project.webExt: WebExtension?
-    get() = composeExt?.extensions?.findByType(WebExtension::class.java)
 
 internal val Project.mppExt: KotlinMultiplatformExtension
     get() = mppExtOrNull ?: error("Could not find KotlinMultiplatformExtension ($project)")

@@ -17,15 +17,10 @@ import org.gradle.api.artifacts.dsl.DependencyHandler
 import org.gradle.api.artifacts.dsl.RepositoryHandler
 import org.gradle.api.artifacts.repositories.MavenArtifactRepository
 import org.gradle.api.plugins.ExtensionAware
-import de.mobanisto.compose.android.AndroidExtension
 import de.mobanisto.compose.desktop.DesktopExtension
 import de.mobanisto.compose.desktop.application.internal.ComposeProperties
 import de.mobanisto.compose.desktop.application.internal.configureDesktop
 import de.mobanisto.compose.desktop.application.internal.currentTarget
-import de.mobanisto.compose.experimental.dsl.ExperimentalExtension
-import de.mobanisto.compose.experimental.internal.checkExperimentalTargetsWithSkikoIsEnabled
-import de.mobanisto.compose.experimental.internal.configureExperimental
-import de.mobanisto.compose.web.WebExtension
 import org.jetbrains.kotlin.gradle.plugin.KotlinDependencyHandler
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
@@ -35,8 +30,6 @@ class ComposePlugin : Plugin<Project> {
     override fun apply(project: Project) {
         val composeExtension = project.extensions.create("mocompose", ComposeExtension::class.java)
         val desktopExtension = composeExtension.extensions.create("desktop", DesktopExtension::class.java)
-        val androidExtension = composeExtension.extensions.create("android", AndroidExtension::class.java)
-        val experimentalExtension = composeExtension.extensions.create("experimental", ExperimentalExtension::class.java)
 
         project.dependencies.extensions.add("mocompose", Dependencies)
 
@@ -44,22 +37,10 @@ class ComposePlugin : Plugin<Project> {
             setUpGroovyDslExtensions(project)
         }
 
-        composeExtension.extensions.create("web", WebExtension::class.java)
-
         project.plugins.apply(de.mobanisto.compose.ComposeCompilerKotlinSupportPlugin::class.java)
 
         project.afterEvaluate {
             configureDesktop(project, desktopExtension)
-            project.configureExperimental(composeExtension, experimentalExtension)
-            project.checkExperimentalTargetsWithSkikoIsEnabled()
-
-            if (androidExtension.useAndroidX) {
-                project.logger.warn("useAndroidX is an experimental feature at the moment!")
-                RedirectAndroidVariants.androidxVersion = androidExtension.androidxVersion
-                listOf(
-                    RedirectAndroidVariants::class.java,
-                ).forEach(project.dependencies.components::all)
-            }
 
             fun ComponentModuleMetadataHandler.replaceAndroidx(original: String, replacement: String) {
                 module(original) {

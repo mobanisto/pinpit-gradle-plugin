@@ -8,9 +8,7 @@ package de.mobanisto.compose
 import org.gradle.api.Project
 import org.gradle.api.provider.Provider
 import de.mobanisto.compose.internal.ComposeCompilerArtifactProvider
-import de.mobanisto.compose.internal.webExt
 import org.jetbrains.kotlin.gradle.plugin.*
-import org.jetbrains.kotlin.gradle.targets.js.ir.KotlinJsIrTarget
 
 class ComposeCompilerKotlinSupportPlugin : KotlinCompilerPluginSupportPlugin {
     private lateinit var composeCompilerArtifactProvider: ComposeCompilerArtifactProvider
@@ -41,19 +39,10 @@ class ComposeCompilerKotlinSupportPlugin : KotlinCompilerPluginSupportPlugin {
         when (kotlinCompilation.target.platformType) {
             KotlinPlatformType.common -> true
             KotlinPlatformType.jvm -> true
-            KotlinPlatformType.js -> isApplicableJsTarget(kotlinCompilation.target)
+            KotlinPlatformType.js -> false
             KotlinPlatformType.androidJvm -> true
             KotlinPlatformType.native -> true
         }
-
-    private fun isApplicableJsTarget(kotlinTarget: KotlinTarget): Boolean {
-        if (kotlinTarget !is KotlinJsIrTarget) return false
-
-        val project = kotlinTarget.project
-        val webExt = project.webExt ?: return false
-
-        return kotlinTarget in webExt.targetsToConfigure(project)
-    }
 
     override fun applyToCompilation(kotlinCompilation: KotlinCompilation<*>): Provider<List<SubpluginOption>> {
         val target = kotlinCompilation.target
