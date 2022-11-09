@@ -171,7 +171,7 @@ private fun JvmApplicationContext.configurePackagingTasks(
                 "Unexpected target format for MacOS: $targetFormat"
             }
 
-            val notarizationRequestsDir = project.layout.buildDirectory.dir("compose/notarization/$app")
+            val notarizationRequestsDir = project.layout.buildDirectory.dir("mocompose/notarization/$app")
             tasks.register<AbstractUploadAppForNotarizationTask>(
                 taskNameAction = "monotarize",
                 taskNameObject = targetFormat.name,
@@ -437,7 +437,7 @@ private fun JvmApplicationContext.configurePackageUberJarForCurrentOS(jar: Jar) 
     jar.archiveAppendix.set(currentTarget.id)
     jar.archiveBaseName.set(packageNameProvider)
     jar.archiveVersion.set(packageVersionFor(TargetFormat.AppImage))
-    jar.destinationDirectory.set(jar.project.layout.buildDirectory.dir("compose/jars"))
+    jar.destinationDirectory.set(jar.project.layout.buildDirectory.dir("mocompose/jars"))
 
     jar.doLast {
         jar.logger.lifecycle("The jar is written to ${jar.archiveFile.ioFile.canonicalPath}")

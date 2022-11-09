@@ -247,13 +247,13 @@ abstract class AbstractJPackageTask @Inject constructor(
     }
 
     @get:LocalState
-    protected val signDir: Provider<Directory> = project.layout.buildDirectory.dir("compose/tmp/sign")
+    protected val signDir: Provider<Directory> = project.layout.buildDirectory.dir("mocompose/tmp/sign")
 
     @get:LocalState
-    protected val jpackageResources: Provider<Directory> = project.layout.buildDirectory.dir("compose/tmp/resources")
+    protected val jpackageResources: Provider<Directory> = project.layout.buildDirectory.dir("mocompose/tmp/resources")
 
     @get:LocalState
-    protected val skikoDir: Provider<Directory> = project.layout.buildDirectory.dir("compose/tmp/skiko")
+    protected val skikoDir: Provider<Directory> = project.layout.buildDirectory.dir("mocompose/tmp/skiko")
 
     @get:Internal
     private val libsDir: Provider<Directory> = workingDir.map {

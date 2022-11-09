@@ -31,7 +31,7 @@ internal data class JvmApplicationContext(
 
     val appTmpDir: Provider<Directory>
         get() = project.layout.buildDirectory.dir(
-            "compose/tmp/$appDirName"
+            "mocompose/tmp/$appDirName"
         )
 
     fun <T : Task> T.useAppRuntimeFiles(fn: T.(JvmApplicationRuntimeFiles) -> Unit) {

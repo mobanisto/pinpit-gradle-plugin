@@ -67,7 +67,7 @@ abstract class AbstractProguardTask : AbstractComposeDesktopTask() {
     val destinationDir: DirectoryProperty = objects.directoryProperty()
 
     @get:LocalState
-    protected val workingDir: Provider<Directory> = project.layout.buildDirectory.dir("compose/tmp/$name")
+    protected val workingDir: Provider<Directory> = project.layout.buildDirectory.dir("mocompose/tmp/$name")
 
     private val rootConfigurationFile = workingDir.map { it.file("root-config.pro") }
 

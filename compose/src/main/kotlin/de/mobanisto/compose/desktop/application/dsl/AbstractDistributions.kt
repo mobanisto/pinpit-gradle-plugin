@@ -20,7 +20,7 @@ abstract class AbstractDistributions {
     internal abstract val layout: ProjectLayout
 
     val outputBaseDir: DirectoryProperty = objects.directoryProperty().apply {
-        set(layout.buildDirectory.dir("compose/binaries"))
+        set(layout.buildDirectory.dir("mocompose/binaries"))
     }
 
     var packageName: String? = null

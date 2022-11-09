@@ -41,7 +41,7 @@ abstract class AbstractSuggestModulesTask : AbstractComposeDesktopTask() {
     val jvmTarget: Property<String> = objects.notNullProperty(MIN_JAVA_RUNTIME_VERSION.toString())
 
     @get:LocalState
-    protected val workingDir: Provider<Directory> = project.layout.buildDirectory.dir("compose/tmp/$name")
+    protected val workingDir: Provider<Directory> = project.layout.buildDirectory.dir("mocompose/tmp/$name")
 
     @TaskAction
     fun run() {

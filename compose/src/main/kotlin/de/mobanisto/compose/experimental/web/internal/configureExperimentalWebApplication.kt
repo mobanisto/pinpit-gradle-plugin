@@ -12,7 +12,7 @@ import org.jetbrains.kotlin.gradle.targets.js.ir.KotlinJsIrTarget
 
 internal fun KotlinJsIrTarget.configureExperimentalWebApplication(app: ExperimentalWebApplication) {
     val mainCompilation = compilations.getByName("main")
-    val unpackedRuntimeDir = project.layout.buildDirectory.dir("compose/skiko-wasm/$targetName")
+    val unpackedRuntimeDir = project.layout.buildDirectory.dir("mocompose/skiko-wasm/$targetName")
     val taskName = "unpackSkikoWasmRuntime${targetName.capitalize()}"
     mainCompilation.defaultSourceSet.resources.srcDir(unpackedRuntimeDir)
     val unpackRuntime = project.registerTask<ExperimentalUnpackSkikoWasmRuntimeTask>(taskName) {

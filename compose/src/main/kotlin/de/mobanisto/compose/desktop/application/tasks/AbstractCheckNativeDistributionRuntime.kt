@@ -28,7 +28,7 @@ abstract class AbstractCheckNativeDistributionRuntime : AbstractComposeDesktopTa
     @get:InputDirectory
     val javaHome: Property<String> = objects.notNullProperty()
 
-    private val taskDir = project.layout.buildDirectory.dir("compose/tmp/$name")
+    private val taskDir = project.layout.buildDirectory.dir("mocompose/tmp/$name")
 
     @get:OutputFile
     val javaRuntimePropertiesFile: Provider<RegularFile> = taskDir.map { it.file("properties.bin") }
