@@ -74,6 +74,9 @@ abstract class CustomPackageTask @Inject constructor(
     @get:Input
     val packageName: Property<String> = objects.notNullProperty()
 
+    @get:Input
+    val packageDescription: Property<String> = objects.notNullProperty()
+
     @get:InputDirectory
     @get:Optional
     val appImage: DirectoryProperty = objects.directoryProperty()

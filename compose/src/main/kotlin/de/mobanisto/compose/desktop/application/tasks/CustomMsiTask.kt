@@ -69,10 +69,6 @@ abstract class CustomMsiTask @Inject constructor() : CustomPackageTask(TargetFor
 
     @get:Input
     @get:Optional
-    val packageDescription: Property<String?> = objects.nullableProperty()
-
-    @get:Input
-    @get:Optional
     val packageCopyright: Property<String?> = objects.nullableProperty()
 
     @get:Input

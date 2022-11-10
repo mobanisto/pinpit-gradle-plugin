@@ -18,6 +18,7 @@ import de.mobanisto.compose.desktop.application.internal.*
 import de.mobanisto.compose.desktop.application.internal.ioFile
 import de.mobanisto.compose.desktop.application.internal.files.mangledName
 import de.mobanisto.compose.desktop.application.internal.files.normalizedPath
+import de.mobanisto.compose.desktop.application.internal.files.writeLn
 import de.mobanisto.compose.desktop.application.internal.notNullProperty
 import de.mobanisto.compose.desktop.application.internal.nullableProperty
 import de.mobanisto.compose.desktop.tasks.AbstractComposeDesktopTask
@@ -149,10 +150,5 @@ abstract class AbstractProguardTask : AbstractComposeDesktopTask() {
             environment = emptyMap(),
             logToConsole = ExternalToolRunner.LogToConsole.Always
         ).assertNormalExitValue()
-    }
-
-    private fun Writer.writeLn(s: String) {
-        write(s)
-        write("\n")
     }
 }

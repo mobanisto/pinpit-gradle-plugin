@@ -110,3 +110,8 @@ internal val File.isJarFile: Boolean
 
 internal fun File.normalizedPath() =
     if (currentOS == OS.Windows) absolutePath.replace("\\", "\\\\") else absolutePath
+
+internal fun Writer.writeLn(s: String) {
+    write(s)
+    write("\n")
+}

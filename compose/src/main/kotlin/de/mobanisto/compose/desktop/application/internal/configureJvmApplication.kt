@@ -307,7 +307,7 @@ private fun JvmApplicationContext.configureCustomPackageTask(
 
     app.nativeDistributions.let { executables ->
         packageTask.packageName.set(provider { executables.packageName })
-//        packageTask.packageDescription.set(packageTask.provider { executables.description })
+        packageTask.packageDescription.set(packageTask.provider { executables.description })
 //        packageTask.packageCopyright.set(packageTask.provider { executables.copyright })
 //        packageTask.packageVendor.set(packageTask.provider { executables.vendor })
 //        packageTask.packageVersion.set(packageVersionFor(packageTask.targetFormat))
@@ -430,6 +430,7 @@ internal fun JvmApplicationContext.configurePlatformSettings(
             packageTask.linuxShortcut.set(provider { linux.shortcut })
             packageTask.linuxAppCategory.set(provider { linux.appCategory })
             packageTask.linuxAppRelease.set(provider { linux.appRelease })
+            packageTask.linuxDebPackageVersion.set(provider { linux.debPackageVersion })
             packageTask.linuxDebMaintainer.set(provider { linux.debMaintainer })
             packageTask.linuxMenuGroup.set(provider { linux.menuGroup })
             packageTask.linuxPackageName.set(provider { linux.packageName })

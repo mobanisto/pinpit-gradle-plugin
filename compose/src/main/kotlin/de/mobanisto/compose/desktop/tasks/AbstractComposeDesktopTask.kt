@@ -18,6 +18,7 @@ import org.gradle.api.tasks.LocalState
 import org.gradle.process.ExecOperations
 import de.mobanisto.compose.desktop.application.internal.ComposeProperties
 import de.mobanisto.compose.desktop.application.internal.ExternalToolRunner
+import de.mobanisto.compose.desktop.application.internal.ExternalToolRunnerWithOutput
 import de.mobanisto.compose.desktop.application.internal.notNullProperty
 import javax.inject.Inject
 
@@ -47,6 +48,10 @@ abstract class AbstractComposeDesktopTask : DefaultTask() {
     @get:Internal
     internal val runExternalTool: ExternalToolRunner
         get() = ExternalToolRunner(verbose, logsDir, execOperations)
+
+    @get:Internal
+    internal val runExternalToolAndGetOutput: ExternalToolRunnerWithOutput
+        get() = ExternalToolRunnerWithOutput(execOperations)
 
     protected fun cleanDirs(vararg dirs: Provider<out FileSystemLocation>) {
         for (dir in dirs) {
