@@ -7,35 +7,18 @@
 
 package de.mobanisto.compose
 
-import groovy.lang.Closure
-import org.gradle.api.Plugin
-import org.gradle.api.Project
-import org.gradle.api.artifacts.ComponentMetadataContext
-import org.gradle.api.artifacts.ComponentMetadataRule
-import org.gradle.api.artifacts.dsl.ComponentModuleMetadataHandler
-import org.gradle.api.artifacts.dsl.DependencyHandler
-import org.gradle.api.artifacts.dsl.RepositoryHandler
-import org.gradle.api.artifacts.repositories.MavenArtifactRepository
-import org.gradle.api.plugins.ExtensionAware
 import de.mobanisto.compose.desktop.DesktopExtension
 import de.mobanisto.compose.desktop.application.internal.ComposeProperties
 import de.mobanisto.compose.desktop.application.internal.configureDesktop
-import de.mobanisto.compose.desktop.application.internal.currentTarget
-import org.jetbrains.kotlin.gradle.plugin.KotlinDependencyHandler
+import org.gradle.api.Plugin
+import org.gradle.api.Project
+import org.gradle.api.artifacts.dsl.ComponentModuleMetadataHandler
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
-
-internal val composeVersion get() = ComposeBuildConfig.composeVersion
 
 class ComposePlugin : Plugin<Project> {
     override fun apply(project: Project) {
         val composeExtension = project.extensions.create("mocompose", ComposeExtension::class.java)
         val desktopExtension = composeExtension.extensions.create("desktop", DesktopExtension::class.java)
-
-        project.dependencies.extensions.add("mocompose", Dependencies)
-
-        if (!project.buildFile.endsWith(".gradle.kts")) {
-            setUpGroovyDslExtensions(project)
-        }
 
         project.plugins.apply(de.mobanisto.compose.ComposeCompilerKotlinSupportPlugin::class.java)
 
@@ -58,112 +41,6 @@ class ComposePlugin : Plugin<Project> {
                     }
                 }
             }
-        }
-    }
-
-    class RedirectAndroidVariants : ComponentMetadataRule {
-        override fun execute(context: ComponentMetadataContext) = with(context.details) {
-            if (id.group.startsWith("org.jetbrains.compose")) {
-                val group = id.group.replaceFirst("org.jetbrains.compose", "androidx.compose")
-                val newReference = "$group:${id.module.name}:$androidxVersion"
-                listOf(
-                    "debugApiElements-published",
-                    "debugRuntimeElements-published",
-                    "releaseApiElements-published",
-                    "releaseRuntimeElements-published"
-                ).forEach { variantNameToAlter ->
-                    withVariant(variantNameToAlter) { variantMetadata ->
-                        variantMetadata.withDependencies { dependencies ->
-                            dependencies.removeAll { true } //there are references to org.jetbrains artifacts now
-                            dependencies.add(newReference)
-                        }
-                    }
-                }
-            }
-        }
-
-        companion object {
-            var androidxVersion: String? = null
-        }
-    }
-
-    object Dependencies {
-        val desktop = DesktopDependencies
-        val animation get() = composeDependency("org.jetbrains.compose.animation:animation")
-        val animationGraphics get() = composeDependency("org.jetbrains.compose.animation:animation-graphics")
-        val foundation get() = composeDependency("org.jetbrains.compose.foundation:foundation")
-        val material get() = composeDependency("org.jetbrains.compose.material:material")
-        @ExperimentalComposeLibrary
-        val material3 get() = composeDependency("org.jetbrains.compose.material3:material3")
-        val runtime get() = composeDependency("org.jetbrains.compose.runtime:runtime")
-        val ui get() = composeDependency("org.jetbrains.compose.ui:ui")
-        @ExperimentalComposeLibrary
-        val uiTestJUnit4 get() = composeDependency("org.jetbrains.compose.ui:ui-test-junit4")
-        val uiTooling get() = composeDependency("org.jetbrains.compose.ui:ui-tooling")
-        val preview get() = composeDependency("org.jetbrains.compose.ui:ui-tooling-preview")
-        val materialIconsExtended get() = composeDependency("org.jetbrains.compose.material:material-icons-extended")
-        val web: WebDependencies get() = WebDependencies
-    }
-
-    object DesktopDependencies {
-        val components = DesktopComponentsDependencies
-
-        val common = composeDependency("org.jetbrains.compose.desktop:desktop")
-        val linux_x64 = composeDependency("org.jetbrains.compose.desktop:desktop-jvm-linux-x64")
-        val linux_arm64 = composeDependency("org.jetbrains.compose.desktop:desktop-jvm-linux-arm64")
-        val windows_x64 = composeDependency("org.jetbrains.compose.desktop:desktop-jvm-windows-x64")
-        val macos_x64 = composeDependency("org.jetbrains.compose.desktop:desktop-jvm-macos-x64")
-        val macos_arm64 = composeDependency("org.jetbrains.compose.desktop:desktop-jvm-macos-arm64")
-
-        val currentOs by lazy {
-            composeDependency("org.jetbrains.compose.desktop:desktop-jvm-${currentTarget.id}")
-        }
-    }
-
-    object DesktopComponentsDependencies {
-        @ExperimentalComposeLibrary
-        val splitPane = composeDependency("org.jetbrains.compose.components:components-splitpane")
-
-        @ExperimentalComposeLibrary
-        val animatedImage = composeDependency("org.jetbrains.compose.components:components-animatedimage")
-    }
-
-    object WebDependencies {
-        val core by lazy {
-            composeDependency("org.jetbrains.compose.web:web-core")
-        }
-
-        val svg by lazy {
-            composeDependency("org.jetbrains.compose.web:web-svg")
-        }
-
-        val testUtils by lazy {
-            composeDependency("org.jetbrains.compose.web:test-utils")
-        }
-    }
-}
-
-fun RepositoryHandler.jetbrainsCompose(): MavenArtifactRepository =
-    maven { repo -> repo.setUrl("https://maven.pkg.jetbrains.space/public/p/compose/dev") }
-
-fun KotlinDependencyHandler.compose(groupWithArtifact: String) = composeDependency(groupWithArtifact)
-
-fun DependencyHandler.compose(groupWithArtifact: String) = composeDependency(groupWithArtifact)
-
-private fun composeDependency(groupWithArtifact: String) = "$groupWithArtifact:$composeVersion"
-
-private fun setUpGroovyDslExtensions(project: Project) {
-    project.plugins.withId("org.jetbrains.kotlin.multiplatform") {
-        (project.extensions.getByName("kotlin") as? ExtensionAware)?.apply {
-            extensions.add("mocompose", ComposePlugin.Dependencies)
-        }
-    }
-    (project.repositories as? ExtensionAware)?.extensions?.apply {
-        if (findByName("jetbrainsCompose") == null) {
-            add("jetbrainsCompose", object : Closure<MavenArtifactRepository>(project.repositories) {
-                fun doCall(): MavenArtifactRepository =
-                    project.repositories.jetbrainsCompose()
-            })
         }
     }
 }
