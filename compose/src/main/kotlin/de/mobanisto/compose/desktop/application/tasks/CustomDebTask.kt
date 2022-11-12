@@ -8,6 +8,7 @@ package de.mobanisto.compose.desktop.application.tasks
 import de.mobanisto.compose.desktop.application.dsl.TargetFormat
 import de.mobanisto.compose.desktop.application.internal.DebianUtils
 import de.mobanisto.compose.desktop.application.internal.JvmRuntimeProperties
+import de.mobanisto.compose.desktop.application.internal.currentArch
 import de.mobanisto.compose.desktop.application.internal.dir
 import de.mobanisto.compose.desktop.application.internal.files.SimpleFileCopyingProcessor
 import de.mobanisto.compose.desktop.application.internal.files.findOutputFileOrDir
@@ -265,10 +266,12 @@ abstract class CustomDebTask @Inject constructor() : CustomPackageTask(TargetFor
         logger.lifecycle("building debian file tree at: $debFileTree")
         debFileTree.asFile.mkdirs()
 
-        buildDebFileTree(appImage, debFileTree)
-        buildDebControlFile(appImage, debFileTree)
+        val debArch = getDebArch()
 
-        val deb = destination.file("${packageName.get()}.deb")
+        buildDebFileTree(appImage, debFileTree)
+        buildDebControlFile(appImage, debFileTree, debArch)
+
+        val deb = destination.file("${linuxPackageName.get()}_${linuxDebPackageVersion.get()}-1_${debArch}.deb")
         runExternalTool(
             tool = DebianUtils.dpkgDeb,
             args = listOf("-b", debFileTree.toString(), deb.toString())
@@ -287,13 +290,15 @@ abstract class CustomDebTask @Inject constructor() : CustomPackageTask(TargetFor
         syncDir(appImage.dir("lib"), dirLib)
     }
 
-    private fun buildDebControlFile(appImage: Directory, debFileTree: Directory) {
+    private fun getDebArch(): String {
         val result = runExternalToolAndGetOutput(
             tool = DebianUtils.dpkg,
             args = listOf("--print-architecture")
         )
-        val debArch = result.stdout.lines()[0]
+        return result.stdout.lines()[0]
+    }
 
+    private fun buildDebControlFile(appImage: Directory, debFileTree: Directory, debArch: String) {
         val dirDebian = debFileTree.dir("DEBIAN")
         dirDebian.asFile.mkdirs()
         val fileControl = dirDebian.file("control")
