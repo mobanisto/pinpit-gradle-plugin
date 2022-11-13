@@ -5,9 +5,12 @@
 
 package de.mobanisto.compose.test.tests.integration
 
-import org.gradle.internal.impldep.org.testng.Assert
-import org.gradle.testkit.runner.TaskOutcome
-import de.mobanisto.compose.desktop.application.internal.*
+import de.mobanisto.compose.desktop.application.internal.MacUtils
+import de.mobanisto.compose.desktop.application.internal.OS
+import de.mobanisto.compose.desktop.application.internal.currentArch
+import de.mobanisto.compose.desktop.application.internal.currentOS
+import de.mobanisto.compose.desktop.application.internal.currentOsArch
+import de.mobanisto.compose.desktop.application.internal.currentTarget
 import de.mobanisto.compose.internal.uppercaseFirstChar
 import de.mobanisto.compose.test.utils.GradlePluginTestBase
 import de.mobanisto.compose.test.utils.ProcessRunResult
@@ -20,15 +23,16 @@ import de.mobanisto.compose.test.utils.checkExists
 import de.mobanisto.compose.test.utils.checks
 import de.mobanisto.compose.test.utils.modify
 import de.mobanisto.compose.test.utils.runProcess
-
-import java.io.File
-import java.util.*
-import java.util.jar.JarFile
-import kotlin.collections.HashSet
+import de.mobanisto.compose.validation.ValidateDeb
+import org.gradle.internal.impldep.org.testng.Assert
+import org.gradle.testkit.runner.TaskOutcome
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assumptions
 import org.junit.jupiter.api.Test
+import java.io.File
+import java.util.*
+import java.util.jar.JarFile
 
 class DesktopApplicationTest : GradlePluginTestBase() {
     @Test
@@ -104,6 +108,7 @@ class DesktopApplicationTest : GradlePluginTestBase() {
         fun checkImageBeforeBuild() {
             assertFalse(actualMainImage.exists(), "'$actualMainImage' exists")
         }
+
         fun checkImageAfterBuild() {
             assert(actualMainImage.readBytes().contentEquals(expectedMainImage.readBytes())) {
                 "The actual image '$actualMainImage' does not match the expected image '$expectedMainImage'"
@@ -219,6 +224,11 @@ class DesktopApplicationTest : GradlePluginTestBase() {
         }
 
     @Test
+    fun packageCustomDeb() = with(testProject(TestProjects.jvm)) {
+        testPackageCustomDeb()
+    }
+
+    @Test
     fun packageUberJarForCurrentOSJvm() = with(testProject(TestProjects.jvm)) {
         testPackageUberJarForCurrentOS()
     }
@@ -242,6 +252,19 @@ class DesktopApplicationTest : GradlePluginTestBase() {
                 jar.entries().toList().mapTo(HashSet()) { it.name }.apply {
                     checkContains("MainKt.class", "org/jetbrains/skiko/SkiaLayer.class")
                 }
+            }
+        }
+    }
+
+    private fun TestProject.testPackageCustomDeb() {
+        gradle(":mopackageCustomDeb").build().let { result ->
+            assertEquals(TaskOutcome.SUCCESS, result.task(":mopackageCustomDeb")?.outcome)
+
+            val resultFile = file("build/mocompose/binaries/main/custom-deb/test-package_1.0.0-1_${currentOsArch}.deb")
+            resultFile.checkExists()
+
+            resultFile.inputStream().use { fis ->
+                ValidateDeb().validate(fis)
             }
         }
     }

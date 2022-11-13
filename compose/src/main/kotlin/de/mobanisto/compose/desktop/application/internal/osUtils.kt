@@ -30,6 +30,10 @@ internal val currentTarget by lazy {
     Target(currentOS, currentArch)
 }
 
+internal val currentOsArch by lazy {
+    System.getProperty("os.arch")
+}
+
 internal val currentArch by lazy {
     val osArch = System.getProperty("os.arch")
     when (osArch) {
@@ -56,6 +60,9 @@ internal fun javaExecutable(javaHome: String): String =
     File(javaHome).resolve("bin/${executableName("java")}").absolutePath
 
 internal object DebianUtils {
+    val fakeroot: File by lazy {
+        File("/usr/bin/fakeroot").checkExistingFile()
+    }
     val dpkg: File by lazy {
         File("/usr/bin/dpkg").checkExistingFile()
     }

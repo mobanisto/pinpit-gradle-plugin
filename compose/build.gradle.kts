@@ -64,6 +64,8 @@ dependencies {
     testImplementation(platform("org.junit:junit-bom:5.7.0"))
     testImplementation("org.junit.jupiter:junit-jupiter")
     testImplementation(kotlin("gradle-plugin-api"))
+    testImplementation("org.apache.commons:commons-compress:1.22")
+    testImplementation("org.tukaani:xz:1.9")
 
     // include relocated download task to avoid potential runtime conflicts
     embedded("de.undercouch:gradle-download-task:4.1.1")

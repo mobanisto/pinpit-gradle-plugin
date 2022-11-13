@@ -8,7 +8,6 @@ package de.mobanisto.compose.desktop.application.tasks
 import de.mobanisto.compose.desktop.application.dsl.TargetFormat
 import de.mobanisto.compose.desktop.application.internal.DebianUtils
 import de.mobanisto.compose.desktop.application.internal.JvmRuntimeProperties
-import de.mobanisto.compose.desktop.application.internal.currentArch
 import de.mobanisto.compose.desktop.application.internal.dir
 import de.mobanisto.compose.desktop.application.internal.files.SimpleFileCopyingProcessor
 import de.mobanisto.compose.desktop.application.internal.files.findOutputFileOrDir
@@ -41,6 +40,7 @@ import java.io.File
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.Paths
+import java.nio.file.attribute.PosixFilePermissions
 import java.util.regex.Matcher
 import java.util.regex.Pattern
 import javax.inject.Inject
@@ -268,13 +268,14 @@ abstract class CustomDebTask @Inject constructor() : CustomPackageTask(TargetFor
 
         val debArch = getDebArch()
 
+        fileOperations.delete(debFileTree)
         buildDebFileTree(appImage, debFileTree)
         buildDebControlFile(appImage, debFileTree, debArch)
 
         val deb = destination.file("${linuxPackageName.get()}_${linuxDebPackageVersion.get()}-1_${debArch}.deb")
         runExternalTool(
-            tool = DebianUtils.dpkgDeb,
-            args = listOf("-b", debFileTree.toString(), deb.toString())
+            tool = DebianUtils.fakeroot,
+            args = listOf(DebianUtils.dpkgDeb.toString(), "-b", debFileTree.toString(), deb.toString())
         )
     }
 
@@ -410,7 +411,15 @@ abstract class CustomDebTask @Inject constructor() : CustomPackageTask(TargetFor
             val pathSource = file.toPath()
             val relative = pathSourceDir.relativize(pathSource)
             val pathTarget = pathTargetDir.resolve(relative)
-            Files.createDirectories(pathTarget.parent)
+            Files.createDirectories(
+                pathTarget.parent,
+                PosixFilePermissions.asFileAttribute(PosixFilePermissions.fromString("rwxr-xr-x"))
+            )
+            if (Files.isExecutable(pathSource)) {
+                Files.setPosixFilePermissions(pathSource, PosixFilePermissions.fromString("rwxr-xr-x"))
+            } else {
+                Files.setPosixFilePermissions(pathSource, PosixFilePermissions.fromString("rw-r--r--"))
+            }
             Files.copy(pathSource, pathTarget)
         }
     }

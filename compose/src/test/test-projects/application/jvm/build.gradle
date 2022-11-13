@@ -15,13 +15,15 @@ dependencies {
     implementation compose.desktop.currentOs
 }
 
+ext.versionCode = "1.0.0"
+
 mocompose.desktop {
     application {
         mainClass = "MainKt"
         nativeDistributions {
-            targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb)
+            targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb, TargetFormat.CustomDeb)
 
-            packageVersion = "1.0.0"
+            packageVersion = versionCode
             packageName = "TestPackage"
             description = "Test description"
             copyright = "Test Copyright Holder"
@@ -32,6 +34,9 @@ mocompose.desktop {
                 packageName = "test-package"
                 debMaintainer = "example@example.com"
                 menuGroup = "menu-group"
+                debPackageVersion = versionCode
+                appCategory = "utils"
+                menuGroup = "System;Utility;"
             }
             windows {
                 console = true
