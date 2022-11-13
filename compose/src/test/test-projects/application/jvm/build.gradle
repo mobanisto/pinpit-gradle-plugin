@@ -1,8 +1,9 @@
-import org.jetbrains.compose.desktop.application.dsl.TargetFormat
+import de.mobanisto.compose.desktop.application.dsl.TargetFormat
 
 plugins {
     id "org.jetbrains.kotlin.jvm"
     id "org.jetbrains.compose"
+    id "de.mobanisto.compose"
 }
 
 repositories {
@@ -14,7 +15,7 @@ dependencies {
     implementation compose.desktop.currentOs
 }
 
-compose.desktop {
+mocompose.desktop {
     application {
         mainClass = "MainKt"
         nativeDistributions {

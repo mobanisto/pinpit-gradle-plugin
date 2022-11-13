@@ -102,7 +102,7 @@ val javaHomeForTests: String? = when {
 }
 val isWindows = getCurrentOperatingSystem().isWindows
 
-val gradleTestsPattern = "org.jetbrains.compose.test.tests.integration.*"
+val gradleTestsPattern = "de.mobanisto.compose.test.tests.integration.*"
 
 // check we don't accidentally including unexpected classes (e.g. from embedded dependencies)
 val checkJar by tasks.registering {
@@ -175,7 +175,8 @@ tasks.withType<Test>().configureEach {
 
     dependsOn(":publishToMavenLocal")
 
-    systemProperty("compose.tests.compose.gradle.plugin.version", BuildProperties.deployVersion(project))
+    systemProperty("compose.tests.compose.gradle.plugin.version", "1.2.0")
+    systemProperty("compose.tests.mocompose.gradle.plugin.version", BuildProperties.deployVersion(project))
     for ((k, v) in project.properties) {
         if (k.startsWith("compose.")) {
             systemProperty(k, v.toString())
