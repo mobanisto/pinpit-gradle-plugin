@@ -200,6 +200,12 @@ class DesktopApplicationTest : GradlePluginTestBase() {
     fun testJdk15() = with(customJdkProject(15)) {
         testPackageJvmDistributions()
     }
+
+    @Test
+    fun testJdk17() = with(customJdkProject(17)) {
+        testPackageJvmDistributions()
+    }
+
     @Test
     fun testJdk18() = with(customJdkProject(18)) {
         testPackageJvmDistributions()
