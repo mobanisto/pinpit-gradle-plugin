@@ -122,7 +122,8 @@ val checkJar by tasks.registering {
 fun checkJarContainsExpectedPackages(jar: ZipFile) {
     val expectedPackages = arrayOf(
         "org/jetbrains/compose",
-        "kotlinx/serialization"
+        "kotlinx/serialization",
+        "de/mobanisto/compose",
     )
     val unexpectedClasses = arrayListOf<String>()
 
