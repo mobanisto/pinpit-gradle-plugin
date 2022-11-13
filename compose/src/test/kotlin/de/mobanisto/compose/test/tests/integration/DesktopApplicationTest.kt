@@ -40,22 +40,22 @@ class DesktopApplicationTest : GradlePluginTestBase() {
         file("build.gradle").modify {
             it + """
                 afterEvaluate {
-                    tasks.getByName("run").doFirst {
+                    tasks.getByName("morun").doFirst {
                         throw new StopExecutionException("Skip run task")
                     }
                     
-                    tasks.getByName("runDistributable").doFirst {
+                    tasks.getByName("morunDistributable").doFirst {
                         throw new StopExecutionException("Skip runDistributable task")
                     }
                 }
             """.trimIndent()
         }
-        gradle("run").build().let { result ->
-            assertEquals(TaskOutcome.SUCCESS, result.task(":run")?.outcome)
+        gradle("morun").build().let { result ->
+            assertEquals(TaskOutcome.SUCCESS, result.task(":morun")?.outcome)
         }
-        gradle("runDistributable").build().let { result ->
-            assertEquals(TaskOutcome.SUCCESS, result.task(":createDistributable")!!.outcome)
-            assertEquals(TaskOutcome.SUCCESS, result.task(":runDistributable")?.outcome)
+        gradle("morunDistributable").build().let { result ->
+            assertEquals(TaskOutcome.SUCCESS, result.task(":mocreateDistributable")!!.outcome)
+            assertEquals(TaskOutcome.SUCCESS, result.task(":morunDistributable")?.outcome)
         }
     }
 
@@ -152,13 +152,13 @@ class DesktopApplicationTest : GradlePluginTestBase() {
             """.trimIndent()
         }
 
-        val packagingTask = ":packageDistributionForCurrentOS"
+        val packagingTask = ":mopackageDistributionForCurrentOS"
         gradle(packagingTask).build().checks { check ->
             check.taskOutcome(packagingTask, TaskOutcome.SUCCESS)
         }
 
         gradle("clean", packagingTask).build().checks { check ->
-            check.taskOutcome(":checkRuntime", TaskOutcome.FROM_CACHE)
+            check.taskOutcome(":mocheckRuntime", TaskOutcome.FROM_CACHE)
             check.taskOutcome(packagingTask, TaskOutcome.SUCCESS)
         }
     }
@@ -169,13 +169,13 @@ class DesktopApplicationTest : GradlePluginTestBase() {
     }
 
     private fun TestProject.testPackageJvmDistributions() {
-        val result = gradle(":packageDistributionForCurrentOS").build()
+        val result = gradle(":mopackageDistributionForCurrentOS").build()
         val ext = when (currentOS) {
             OS.Linux -> "deb"
             OS.Windows -> "msi"
             OS.MacOS -> "dmg"
         }
-        val packageDir = file("build/compose/binaries/main/$ext")
+        val packageDir = file("build/mocompose/binaries/main/$ext")
         val packageDirFiles = packageDir.listFiles() ?: arrayOf()
         check(packageDirFiles.size == 1) {
             "Expected single package in $packageDir, got [${packageDirFiles.joinToString(", ") { it.name }}]"
@@ -192,8 +192,10 @@ class DesktopApplicationTest : GradlePluginTestBase() {
         } else {
             Assert.assertEquals(packageFile.name, "TestPackage-1.0.0.$ext", "Unexpected package name")
         }
-        assertEquals(TaskOutcome.SUCCESS, result.task(":package${ext.uppercaseFirstChar()}")?.outcome)
-        assertEquals(TaskOutcome.SUCCESS, result.task(":packageDistributionForCurrentOS")?.outcome)
+        // TODO: compare contents, user ids and permissions of deb and customDeb
+        // TODO: assert outcome of mopackageCustomDeb task
+        assertEquals(TaskOutcome.SUCCESS, result.task(":mopackage${ext.uppercaseFirstChar()}")?.outcome)
+        assertEquals(TaskOutcome.SUCCESS, result.task(":mopackageDistributionForCurrentOS")?.outcome)
     }
 
     @Test
@@ -245,10 +247,10 @@ class DesktopApplicationTest : GradlePluginTestBase() {
     }
 
     private fun TestProject.testPackageUberJarForCurrentOS() {
-        gradle(":packageUberJarForCurrentOS").build().let { result ->
-            assertEquals(TaskOutcome.SUCCESS, result.task(":packageUberJarForCurrentOS")?.outcome)
+        gradle(":mopackageUberJarForCurrentOS").build().let { result ->
+            assertEquals(TaskOutcome.SUCCESS, result.task(":mopackageUberJarForCurrentOS")?.outcome)
 
-            val resultJarFile = file("build/compose/jars/TestPackage-${currentTarget.id}-1.0.0.jar")
+            val resultJarFile = file("build/mocompose/jars/TestPackage-${currentTarget.id}-1.0.0.jar")
             resultJarFile.checkExists()
 
             JarFile(resultJarFile).use { jar ->
@@ -434,8 +436,8 @@ class DesktopApplicationTest : GradlePluginTestBase() {
     @Test
     fun testSuggestModules() {
         with(testProject(TestProjects.jvm)) {
-            gradle(":suggestRuntimeModules").build().checks { check ->
-                check.taskOutcome(":suggestRuntimeModules", TaskOutcome.SUCCESS)
+            gradle(":mosuggestRuntimeModules").build().checks { check ->
+                check.taskOutcome(":mosuggestRuntimeModules", TaskOutcome.SUCCESS)
                 check.logContains("Suggested runtime modules to include:")
                 check.logContains("modules(\"java.instrument\", \"jdk.unsupported\")")
             }
