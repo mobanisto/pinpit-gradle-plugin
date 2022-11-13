@@ -14,6 +14,7 @@ import de.mobanisto.compose.desktop.application.internal.files.mangledName
 import de.mobanisto.compose.desktop.application.internal.ioFile
 import de.mobanisto.compose.desktop.application.internal.ioFileOrNull
 import de.mobanisto.compose.desktop.application.internal.nullableProperty
+import de.mobanisto.compose.desktop.application.internal.provider
 import de.mobanisto.compose.desktop.application.internal.stacktraceToString
 import org.gradle.api.file.Directory
 import org.gradle.api.file.DirectoryProperty
@@ -146,8 +147,8 @@ abstract class CustomMsiTask @Inject constructor() : CustomPackageTask(TargetFor
     @Suppress("unused")
     @get:InputDirectory
     @get:Optional
-    internal val appResourcesDirInputDirHackForVerification: Provider<Directory>
-        get() = appResourcesDir.map { it.takeIf { it.asFile.exists() } ?: throw IllegalStateException() }
+    internal val appResourcesDirInputDirHackForVerification: Provider<Directory?>
+        get() = provider { appResourcesDir.orNull?.let { if (it.asFile.exists()) it else null} }
 
     @get:Internal
     private val libsMappingFile: Provider<RegularFile> = workingDir.map {

@@ -280,8 +280,8 @@ abstract class AbstractJPackageTask @Inject constructor(
     @Suppress("unused")
     @get:InputDirectory
     @get:Optional
-    internal val appResourcesDirInputDirHackForVerification: Provider<Directory>
-        get() = appResourcesDir.map { it.takeIf { it.asFile.exists() } ?: throw IllegalStateException() }
+    internal val appResourcesDirInputDirHackForVerification: Provider<Directory?>
+        get() = provider { appResourcesDir.orNull?.let { if (it.asFile.exists()) it else null} }
 
     @get:Internal
     private val libsMappingFile: Provider<RegularFile> = workingDir.map {
