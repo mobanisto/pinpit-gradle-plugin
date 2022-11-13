@@ -29,7 +29,7 @@ internal class ComposeCompilerArtifactProvider(
 
     private val autoCompilerVersion by lazy {
         requireNotNull(
-            de.mobanisto.compose.ComposeCompilerCompatability.compilerVersionFor(kotlinVersion)
+            ComposeCompilerCompatability.compilerVersionFor(kotlinVersion)
         ) {
             "This version of Compose Multiplatform doesn't support Kotlin " +
                     "$kotlinVersion. " +
