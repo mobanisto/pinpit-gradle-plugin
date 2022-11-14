@@ -309,7 +309,9 @@ abstract class CustomDebTask @Inject constructor() : CustomPackageTask(TargetFor
         val dirShare = dirOpt.dir("share")
 
         syncDir(appImage.dir("bin"), dirBin)
-        syncDir(appImage.dir("lib"), dirLib)
+        syncDir(appImage.dir("lib"), dirLib) {
+            it != Paths.get("app/.jpackage.xml")
+        }
     }
 
     private fun getDebArch(): String {
@@ -437,12 +439,15 @@ abstract class CustomDebTask @Inject constructor() : CustomPackageTask(TargetFor
         return split("\r?\n".toRegex())
     }
 
-    private fun syncDir(source: Directory, target: Directory) {
+    private fun syncDir(source: Directory, target: Directory, takeFile: (file: Path) -> Boolean = {_ -> true}) {
         val pathSourceDir = source.asFile.toPath()
         val pathTargetDir = target.asFile.toPath()
         for (file in source.asFileTree.files) {
             val pathSource = file.toPath()
             val relative = pathSourceDir.relativize(pathSource)
+            if (!takeFile(relative)) {
+                continue
+            }
             val pathTarget = pathTargetDir.resolve(relative)
             Files.createDirectories(
                 pathTarget.parent,
