@@ -23,7 +23,9 @@ import de.mobanisto.compose.test.utils.checkExists
 import de.mobanisto.compose.test.utils.checks
 import de.mobanisto.compose.test.utils.modify
 import de.mobanisto.compose.test.utils.runProcess
-import de.mobanisto.compose.validation.ValidateDeb
+import de.mobanisto.compose.validation.deb.DebContentBuilder
+import de.mobanisto.compose.validation.deb.DebContentUtils
+import de.mobanisto.compose.validation.deb.ValidateDeb
 import org.gradle.internal.impldep.org.testng.Assert
 import org.gradle.testkit.runner.TaskOutcome
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -192,7 +194,6 @@ class DesktopApplicationTest : GradlePluginTestBase() {
         } else {
             Assert.assertEquals(packageFile.name, "TestPackage-1.0.0.$ext", "Unexpected package name")
         }
-        // TODO: compare contents, user ids and permissions of deb and customDeb
         // TODO: assert outcome of mopackageCustomDeb task
         assertEquals(TaskOutcome.SUCCESS, result.task(":mopackage${ext.uppercaseFirstChar()}")?.outcome)
         assertEquals(TaskOutcome.SUCCESS, result.task(":mopackageDistributionForCurrentOS")?.outcome)
@@ -237,6 +238,11 @@ class DesktopApplicationTest : GradlePluginTestBase() {
     }
 
     @Test
+    fun packageDebsAndCompareContent() = with(testProject(TestProjects.jvm)) {
+        testPackageDebsAndCompareContent()
+    }
+
+    @Test
     fun packageUberJarForCurrentOSJvm() = with(testProject(TestProjects.jvm)) {
         testPackageUberJarForCurrentOS()
     }
@@ -272,9 +278,58 @@ class DesktopApplicationTest : GradlePluginTestBase() {
             resultFile.checkExists()
 
             resultFile.inputStream().use { fis ->
-                ValidateDeb().validate(fis)
+                ValidateDeb.validate(fis)
             }
         }
+    }
+
+    private fun TestProject.testPackageDebsAndCompareContent() {
+        val result = gradle(":mopackageDeb", ":mopackageCustomDeb").build()
+
+        val packageDirStock = file("build/mocompose/binaries/main/deb")
+        val packageDirCustom = file("build/mocompose/binaries/main/custom-deb")
+        val packageDirs = listOf(packageDirStock, packageDirCustom)
+
+        val debs = mutableListOf<File>()
+
+        for (packageDir in packageDirs) {
+            val packageDirFiles = packageDir.listFiles() ?: arrayOf()
+            check(packageDirFiles.size == 1) {
+                "Expected single package in $packageDir, got [${packageDirFiles.joinToString(", ") { it.name }}]"
+            }
+            val packageFile = packageDirFiles.single()
+            debs.add(packageFile)
+            val isTestPackage = packageFile.name.contains("test-package", ignoreCase = true) ||
+                    packageFile.name.contains("testpackage", ignoreCase = true)
+            val isDeb = packageFile.name.endsWith(".deb")
+            check(isTestPackage && isDeb) {
+                "Expected contain testpackage*.deb or test-package*.deb package in $packageDir, got '${packageFile.name}'"
+            }
+            println("got package file at ${packageFile}")
+        }
+        assertEquals(TaskOutcome.SUCCESS, result.task(":mopackageDeb")?.outcome)
+        assertEquals(TaskOutcome.SUCCESS, result.task(":mopackageCustomDeb")?.outcome)
+
+        check(debs.size == 2)
+        val debContent = debs.map { file ->
+            file.inputStream().use { input ->
+                DebContentBuilder().buildContent(input)
+            }
+        }
+        val deb1 = debContent[0]
+        val deb2 = debContent[1]
+        val comparison = DebContentUtils.compare(deb1, deb2)
+        var allClear = true
+        for (entry in comparison.entries) {
+            println(entry.key)
+            val tarComparison = entry.value
+            allClear = allClear && tarComparison.onlyIn1.isEmpty() && tarComparison.onlyIn2.isEmpty()
+                    && tarComparison.different.isEmpty()
+            tarComparison.onlyIn1.forEach { println("only in stock deb:  $it") }
+            tarComparison.onlyIn2.forEach { println("only in custom deb: $it") }
+            tarComparison.different.forEach { println("diff: $it") }
+        }
+        check(allClear) { "Differences found in stock and custom deb" }
     }
 
     @Test
@@ -356,7 +411,8 @@ class DesktopApplicationTest : GradlePluginTestBase() {
                 gradle(":createDistributable").build().checks { check ->
                     check.taskOutcome(":createDistributable", TaskOutcome.SUCCESS)
                     val appDir = testWorkDir.resolve("build/compose/binaries/main/app/TestPackage.app/")
-                    val result = runProcess(MacUtils.codesign, args = listOf("--verify", "--verbose", appDir.absolutePath))
+                    val result =
+                        runProcess(MacUtils.codesign, args = listOf("--verify", "--verbose", appDir.absolutePath))
                     val actualOutput = result.err.trim()
                     val expectedOutput = """
                         |${appDir.absolutePath}: valid on disk

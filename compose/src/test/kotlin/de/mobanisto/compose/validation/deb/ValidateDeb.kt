@@ -1,4 +1,4 @@
-package de.mobanisto.compose.validation
+package de.mobanisto.compose.validation.deb
 
 import org.apache.commons.compress.archivers.ar.ArArchiveEntry
 import org.apache.commons.compress.archivers.ar.ArArchiveInputStream
@@ -9,8 +9,7 @@ import java.io.InputStream
 import java.lang.Integer.toOctalString
 import java.nio.file.Paths
 
-class ValidateDeb {
-
+object ValidateDeb {
     fun validate(fis: InputStream) {
         // scripts located in DEBIAN source folder / control.tar.xz
         val scripts = setOf("preinst", "prerm", "postinst", "postrm")
