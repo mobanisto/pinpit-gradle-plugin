@@ -5,6 +5,11 @@
 
 package de.mobanisto.compose.desktop.application.tasks
 
+import de.mobanisto.compose.desktop.application.dsl.MacOSSigningSettings
+import de.mobanisto.compose.desktop.application.dsl.TargetFormat
+import de.mobanisto.compose.desktop.application.internal.*
+import de.mobanisto.compose.desktop.application.internal.files.*
+import de.mobanisto.compose.desktop.application.internal.validation.validate
 import org.gradle.api.file.*
 import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.Property
@@ -14,18 +19,9 @@ import org.gradle.api.tasks.Optional
 import org.gradle.process.ExecResult
 import org.gradle.work.ChangeType
 import org.gradle.work.InputChanges
-import de.mobanisto.compose.desktop.application.dsl.MacOSSigningSettings
-import de.mobanisto.compose.desktop.application.dsl.TargetFormat
-import de.mobanisto.compose.desktop.application.internal.*
-import de.mobanisto.compose.desktop.application.internal.files.*
-import de.mobanisto.compose.desktop.application.internal.files.MacJarSignFileCopyingProcessor
-import de.mobanisto.compose.desktop.application.internal.JvmRuntimeProperties
-import de.mobanisto.compose.desktop.application.internal.validation.validate
 import java.io.*
-import java.lang.IllegalStateException
 import java.util.*
 import javax.inject.Inject
-import kotlin.collections.HashSet
 
 abstract class AbstractJPackageTask @Inject constructor(
     @get:Input

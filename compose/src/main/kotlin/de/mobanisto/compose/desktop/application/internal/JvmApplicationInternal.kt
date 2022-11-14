@@ -5,14 +5,14 @@
 
 package de.mobanisto.compose.desktop.application.internal
 
+import de.mobanisto.compose.desktop.application.dsl.JvmApplication
+import de.mobanisto.compose.desktop.application.dsl.JvmApplicationBuildTypes
+import de.mobanisto.compose.desktop.application.dsl.JvmApplicationDistributions
 import org.gradle.api.Action
 import org.gradle.api.Task
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.model.ObjectFactory
 import org.gradle.api.tasks.SourceSet
-import de.mobanisto.compose.desktop.application.dsl.JvmApplication
-import de.mobanisto.compose.desktop.application.dsl.JvmApplicationDistributions
-import de.mobanisto.compose.desktop.application.dsl.JvmApplicationBuildTypes
 import org.jetbrains.kotlin.gradle.plugin.KotlinTarget
 import org.jetbrains.kotlin.gradle.targets.jvm.KotlinJvmTarget
 import javax.inject.Inject

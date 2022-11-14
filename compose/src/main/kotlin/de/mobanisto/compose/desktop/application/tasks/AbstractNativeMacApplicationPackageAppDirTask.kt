@@ -5,15 +5,18 @@
 
 package de.mobanisto.compose.desktop.application.tasks
 
-import org.gradle.api.file.RegularFileProperty
-import org.gradle.api.provider.Property
-import org.gradle.api.tasks.*
-import org.gradle.api.tasks.Optional
 import de.mobanisto.compose.desktop.application.internal.InfoPlistBuilder
 import de.mobanisto.compose.desktop.application.internal.PlistKeys
 import de.mobanisto.compose.desktop.application.internal.ioFile
 import de.mobanisto.compose.desktop.application.internal.notNullProperty
 import de.mobanisto.compose.desktop.application.internal.nullableProperty
+import org.gradle.api.file.RegularFileProperty
+import org.gradle.api.provider.Property
+import org.gradle.api.tasks.Input
+import org.gradle.api.tasks.InputFile
+import org.gradle.api.tasks.Optional
+import org.gradle.api.tasks.PathSensitive
+import org.gradle.api.tasks.PathSensitivity
 import java.io.File
 
 private const val KOTLIN_NATIVE_MIN_SUPPORTED_MAC_OS = "10.13"

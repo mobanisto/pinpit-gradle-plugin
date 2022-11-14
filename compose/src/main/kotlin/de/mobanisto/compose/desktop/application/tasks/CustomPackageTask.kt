@@ -2,8 +2,6 @@ package de.mobanisto.compose.desktop.application.tasks
 
 import de.mobanisto.compose.desktop.application.dsl.TargetFormat
 import de.mobanisto.compose.desktop.application.internal.ComposeProperties
-import de.mobanisto.compose.desktop.application.internal.ioFile
-import de.mobanisto.compose.desktop.application.internal.jvmToolFile
 import de.mobanisto.compose.desktop.application.internal.notNullProperty
 import de.mobanisto.compose.desktop.tasks.AbstractComposeDesktopTask
 import org.gradle.api.file.ConfigurableFileCollection

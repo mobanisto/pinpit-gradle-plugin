@@ -5,13 +5,14 @@
 
 package de.mobanisto.compose.desktop.application.tasks
 
-import org.gradle.api.file.DirectoryProperty
-import org.gradle.api.tasks.*
 import de.mobanisto.compose.desktop.application.internal.ExternalToolRunner
 import de.mobanisto.compose.desktop.application.internal.MacUtils
 import de.mobanisto.compose.desktop.application.internal.NOTARIZATION_REQUEST_INFO_FILE_NAME
 import de.mobanisto.compose.desktop.application.internal.NotarizationRequestInfo
 import de.mobanisto.compose.desktop.application.internal.ioFile
+import org.gradle.api.file.DirectoryProperty
+import org.gradle.api.tasks.Internal
+import org.gradle.api.tasks.TaskAction
 
 abstract class AbstractCheckNotarizationStatusTask : AbstractNotarizationTask() {
     @get:Internal

@@ -5,17 +5,17 @@
 
 package de.mobanisto.compose.desktop.application.tasks
 
+import de.mobanisto.compose.desktop.application.internal.OS
+import de.mobanisto.compose.desktop.application.internal.currentOS
+import de.mobanisto.compose.desktop.application.internal.executableName
+import de.mobanisto.compose.desktop.application.internal.ioFile
+import de.mobanisto.compose.desktop.tasks.AbstractComposeDesktopTask
 import org.gradle.api.file.Directory
 import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.InputDirectory
 import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.TaskProvider
-import de.mobanisto.compose.desktop.application.internal.OS
-import de.mobanisto.compose.desktop.application.internal.currentOS
-import de.mobanisto.compose.desktop.application.internal.executableName
-import de.mobanisto.compose.desktop.application.internal.ioFile
-import de.mobanisto.compose.desktop.tasks.AbstractComposeDesktopTask
 import javax.inject.Inject
 
 // Custom task is used instead of Exec, because Exec does not support

@@ -5,11 +5,15 @@
 
 package de.mobanisto.compose.desktop.application.internal.files
 
-import org.gradle.api.tasks.Internal
 import de.mobanisto.compose.desktop.application.dsl.TargetFormat
 import de.mobanisto.compose.desktop.application.internal.OS
 import de.mobanisto.compose.desktop.application.internal.currentOS
-import java.io.*
+import org.gradle.api.tasks.Internal
+import java.io.File
+import java.io.FileInputStream
+import java.io.FileOutputStream
+import java.io.InputStream
+import java.io.Writer
 import java.security.DigestInputStream
 import java.security.MessageDigest
 import java.util.zip.ZipEntry

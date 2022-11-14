@@ -5,9 +5,9 @@
 
 package de.mobanisto.compose.desktop.application.internal
 
-import org.gradle.api.provider.Provider
 import de.mobanisto.compose.desktop.application.internal.files.checkExistingFile
 import de.mobanisto.compose.desktop.application.tasks.MIN_JAVA_RUNTIME_VERSION
+import org.gradle.api.provider.Provider
 import java.io.File
 
 internal enum class OS(val id: String) {

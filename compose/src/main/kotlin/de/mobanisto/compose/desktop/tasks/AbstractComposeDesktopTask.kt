@@ -5,6 +5,10 @@
 
 package de.mobanisto.compose.desktop.tasks
 
+import de.mobanisto.compose.desktop.application.internal.ComposeProperties
+import de.mobanisto.compose.desktop.application.internal.ExternalToolRunner
+import de.mobanisto.compose.desktop.application.internal.ExternalToolRunnerWithOutput
+import de.mobanisto.compose.desktop.application.internal.notNullProperty
 import org.gradle.api.DefaultTask
 import org.gradle.api.file.Directory
 import org.gradle.api.file.FileSystemLocation
@@ -16,10 +20,6 @@ import org.gradle.api.provider.ProviderFactory
 import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.LocalState
 import org.gradle.process.ExecOperations
-import de.mobanisto.compose.desktop.application.internal.ComposeProperties
-import de.mobanisto.compose.desktop.application.internal.ExternalToolRunner
-import de.mobanisto.compose.desktop.application.internal.ExternalToolRunnerWithOutput
-import de.mobanisto.compose.desktop.application.internal.notNullProperty
 import javax.inject.Inject
 
 abstract class AbstractComposeDesktopTask : DefaultTask() {

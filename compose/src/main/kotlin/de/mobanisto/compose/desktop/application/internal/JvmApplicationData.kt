@@ -5,13 +5,13 @@
 
 package de.mobanisto.compose.desktop.application.internal
 
+import de.mobanisto.compose.desktop.application.dsl.JvmApplicationBuildTypes
+import de.mobanisto.compose.desktop.application.dsl.JvmApplicationDistributions
 import org.gradle.api.file.ConfigurableFileCollection
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.model.ObjectFactory
 import org.gradle.api.provider.Provider
 import org.gradle.api.provider.ProviderFactory
-import de.mobanisto.compose.desktop.application.dsl.JvmApplicationDistributions
-import de.mobanisto.compose.desktop.application.dsl.JvmApplicationBuildTypes
 import javax.inject.Inject
 
 internal open class JvmApplicationData @Inject constructor(

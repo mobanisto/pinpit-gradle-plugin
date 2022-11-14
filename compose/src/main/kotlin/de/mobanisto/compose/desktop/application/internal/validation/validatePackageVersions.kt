@@ -5,12 +5,12 @@
 
 package de.mobanisto.compose.desktop.application.internal.validation
 
-import org.gradle.api.GradleException
 import de.mobanisto.compose.desktop.application.dsl.TargetFormat
 import de.mobanisto.compose.desktop.application.internal.JvmApplicationContext
 import de.mobanisto.compose.desktop.application.internal.OS
 import de.mobanisto.compose.desktop.application.internal.packageBuildVersionFor
 import de.mobanisto.compose.desktop.application.internal.packageVersionFor
+import org.gradle.api.GradleException
 
 internal fun JvmApplicationContext.validatePackageVersions() {
     val errors = ErrorsCollector()

@@ -9,9 +9,8 @@ import de.mobanisto.compose.internal.ComposeCompilerArtifactProvider
 import de.mobanisto.compose.internal.copy
 import de.mobanisto.compose.test.utils.TestProperties
 import org.jetbrains.kotlin.gradle.plugin.SubpluginArtifact
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
-
-import org.junit.jupiter.api.Assertions.*
 
 internal class ComposeCompilerArtifactProviderTest {
     @Test

@@ -8,8 +8,7 @@ package de.mobanisto.compose.test.tests.unit
 import de.mobanisto.compose.desktop.application.internal.OS
 import de.mobanisto.compose.desktop.application.internal.currentOS
 import de.mobanisto.compose.desktop.application.internal.files.contentHash
-
-import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.io.TempDir
 import java.io.File

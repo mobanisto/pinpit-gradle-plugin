@@ -5,14 +5,14 @@
 
 package de.mobanisto.compose.desktop.application.tasks
 
-import org.gradle.api.provider.Property
-import org.gradle.api.tasks.Input
-import org.gradle.api.tasks.Nested
-import org.gradle.api.tasks.Optional
 import de.mobanisto.compose.desktop.application.dsl.MacOSNotarizationSettings
 import de.mobanisto.compose.desktop.application.internal.nullableProperty
 import de.mobanisto.compose.desktop.application.internal.validation.validate
 import de.mobanisto.compose.desktop.tasks.AbstractComposeDesktopTask
+import org.gradle.api.provider.Property
+import org.gradle.api.tasks.Input
+import org.gradle.api.tasks.Nested
+import org.gradle.api.tasks.Optional
 
 abstract class AbstractNotarizationTask : AbstractComposeDesktopTask() {
     @get:Input

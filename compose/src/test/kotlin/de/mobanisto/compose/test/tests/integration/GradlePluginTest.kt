@@ -5,8 +5,11 @@
 
 package de.mobanisto.compose.test.tests.integration
 
+import de.mobanisto.compose.test.utils.GradlePluginTestBase
+import de.mobanisto.compose.test.utils.TestProjects
+import de.mobanisto.compose.test.utils.TestProperties
+import de.mobanisto.compose.test.utils.checks
 import org.gradle.testkit.runner.TaskOutcome
-import de.mobanisto.compose.test.utils.*
 import org.junit.jupiter.api.Test
 
 class GradlePluginTest : GradlePluginTestBase() {

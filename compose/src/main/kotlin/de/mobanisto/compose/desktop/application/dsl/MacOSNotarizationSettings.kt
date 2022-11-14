@@ -5,13 +5,13 @@
 
 package de.mobanisto.compose.desktop.application.dsl
 
+import de.mobanisto.compose.desktop.application.internal.ComposeProperties
+import de.mobanisto.compose.desktop.application.internal.nullableProperty
 import org.gradle.api.model.ObjectFactory
 import org.gradle.api.provider.Property
 import org.gradle.api.provider.ProviderFactory
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.Optional
-import de.mobanisto.compose.desktop.application.internal.ComposeProperties
-import de.mobanisto.compose.desktop.application.internal.nullableProperty
 import javax.inject.Inject
 
 abstract class MacOSNotarizationSettings {

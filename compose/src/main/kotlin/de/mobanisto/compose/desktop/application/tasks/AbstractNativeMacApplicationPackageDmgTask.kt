@@ -5,12 +5,16 @@
 
 package de.mobanisto.compose.desktop.application.tasks
 
+import de.mobanisto.compose.desktop.application.internal.ioFile
+import de.mobanisto.compose.desktop.application.internal.notNullProperty
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.provider.Property
-import org.gradle.api.tasks.*
-import de.mobanisto.compose.desktop.application.internal.ioFile
-import de.mobanisto.compose.desktop.application.internal.notNullProperty
+import org.gradle.api.tasks.Input
+import org.gradle.api.tasks.InputDirectory
+import org.gradle.api.tasks.InputFile
+import org.gradle.api.tasks.PathSensitive
+import org.gradle.api.tasks.PathSensitivity
 import java.io.File
 
 abstract class AbstractNativeMacApplicationPackageDmgTask : AbstractNativeMacApplicationPackageTask() {

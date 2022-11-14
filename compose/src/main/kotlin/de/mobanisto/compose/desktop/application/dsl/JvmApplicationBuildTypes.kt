@@ -5,9 +5,9 @@
 
 package de.mobanisto.compose.desktop.application.dsl
 
+import de.mobanisto.compose.desktop.application.internal.new
 import org.gradle.api.Action
 import org.gradle.api.model.ObjectFactory
-import de.mobanisto.compose.desktop.application.internal.new
 import javax.inject.Inject
 
 abstract class JvmApplicationBuildTypes @Inject constructor(

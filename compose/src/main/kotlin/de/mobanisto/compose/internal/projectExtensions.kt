@@ -5,12 +5,12 @@
 
 package de.mobanisto.compose.internal
 
+import de.mobanisto.compose.ComposeExtension
 import org.gradle.api.Project
 import org.gradle.api.plugins.JavaPluginConvention
 import org.gradle.api.plugins.JavaPluginExtension
 import org.gradle.api.tasks.SourceSetContainer
 import org.gradle.util.GradleVersion
-import de.mobanisto.compose.ComposeExtension
 import org.jetbrains.kotlin.gradle.dsl.KotlinJsProjectExtension
 import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
 

@@ -5,12 +5,18 @@
 
 package de.mobanisto.compose.desktop.application.tasks
 
-import org.gradle.api.file.DirectoryProperty
-import org.gradle.api.tasks.*
 import de.mobanisto.compose.desktop.application.dsl.TargetFormat
-import de.mobanisto.compose.desktop.application.internal.*
+import de.mobanisto.compose.desktop.application.internal.MacUtils
+import de.mobanisto.compose.desktop.application.internal.NOTARIZATION_REQUEST_INFO_FILE_NAME
+import de.mobanisto.compose.desktop.application.internal.NotarizationRequestInfo
 import de.mobanisto.compose.desktop.application.internal.files.checkExistingFile
 import de.mobanisto.compose.desktop.application.internal.files.findOutputFileOrDir
+import de.mobanisto.compose.desktop.application.internal.ioFile
+import org.gradle.api.file.DirectoryProperty
+import org.gradle.api.tasks.Input
+import org.gradle.api.tasks.InputDirectory
+import org.gradle.api.tasks.Internal
+import org.gradle.api.tasks.TaskAction
 import java.io.File
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter

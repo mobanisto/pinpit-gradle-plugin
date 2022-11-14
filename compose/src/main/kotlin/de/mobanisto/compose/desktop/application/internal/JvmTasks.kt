@@ -5,11 +5,11 @@
 
 package de.mobanisto.compose.desktop.application.internal
 
+import de.mobanisto.compose.desktop.application.dsl.JvmApplicationBuildType
+import de.mobanisto.compose.internal.uppercaseFirstChar
 import org.gradle.api.Project
 import org.gradle.api.Task
 import org.gradle.api.tasks.TaskProvider
-import de.mobanisto.compose.desktop.application.dsl.JvmApplicationBuildType
-import de.mobanisto.compose.internal.uppercaseFirstChar
 
 internal class JvmTasks(
     private val project: Project,

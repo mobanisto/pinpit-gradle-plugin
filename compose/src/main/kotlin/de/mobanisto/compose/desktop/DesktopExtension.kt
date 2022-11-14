@@ -5,12 +5,12 @@
 
 package de.mobanisto.compose.desktop
 
+import de.mobanisto.compose.desktop.application.dsl.JvmApplication
+import de.mobanisto.compose.desktop.application.dsl.NativeApplication
+import de.mobanisto.compose.desktop.application.internal.JvmApplicationInternal
 import org.gradle.api.Action
 import org.gradle.api.model.ObjectFactory
 import org.gradle.api.plugins.ExtensionAware
-import de.mobanisto.compose.desktop.application.dsl.JvmApplication
-import de.mobanisto.compose.desktop.application.internal.JvmApplicationInternal
-import de.mobanisto.compose.desktop.application.dsl.NativeApplication
 import javax.inject.Inject
 
 abstract class DesktopExtension @Inject constructor(private val objectFactory: ObjectFactory) : ExtensionAware {

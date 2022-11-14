@@ -5,14 +5,18 @@
 
 package de.mobanisto.compose.desktop.application.tasks
 
+import de.mobanisto.compose.desktop.application.internal.ioFile
+import de.mobanisto.compose.desktop.application.internal.notNullProperty
+import de.mobanisto.compose.desktop.tasks.AbstractComposeDesktopTask
 import org.gradle.api.file.Directory
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.provider.Provider
-import org.gradle.api.tasks.*
-import de.mobanisto.compose.desktop.application.internal.ioFile
-import de.mobanisto.compose.desktop.application.internal.notNullProperty
-import de.mobanisto.compose.desktop.tasks.AbstractComposeDesktopTask
+import org.gradle.api.tasks.Input
+import org.gradle.api.tasks.Internal
+import org.gradle.api.tasks.LocalState
+import org.gradle.api.tasks.OutputDirectory
+import org.gradle.api.tasks.TaskAction
 import java.io.File
 
 abstract class AbstractNativeMacApplicationPackageTask : AbstractComposeDesktopTask() {

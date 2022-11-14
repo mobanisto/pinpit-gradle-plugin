@@ -5,9 +5,9 @@
 
 package de.mobanisto.compose.desktop.application.internal
 
+import de.mobanisto.compose.desktop.application.internal.files.normalizedPath
 import org.gradle.api.file.FileSystemLocation
 import org.gradle.api.provider.Provider
-import de.mobanisto.compose.desktop.application.internal.files.normalizedPath
 import java.io.File
 
 internal fun <T : Any?> MutableCollection<String>.cliArg(

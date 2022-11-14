@@ -5,10 +5,6 @@
 
 package de.mobanisto.compose.desktop.application.internal
 
-import org.gradle.api.Project
-import org.gradle.api.Task
-import org.gradle.api.tasks.TaskContainer
-import org.gradle.api.tasks.TaskProvider
 import de.mobanisto.compose.desktop.application.dsl.NativeApplication
 import de.mobanisto.compose.desktop.application.dsl.TargetFormat
 import de.mobanisto.compose.desktop.application.tasks.AbstractNativeMacApplicationPackageAppDirTask
@@ -16,6 +12,10 @@ import de.mobanisto.compose.desktop.application.tasks.AbstractNativeMacApplicati
 import de.mobanisto.compose.desktop.application.tasks.AbstractNativeMacApplicationPackageTask
 import de.mobanisto.compose.desktop.tasks.AbstractUnpackDefaultComposeApplicationResourcesTask
 import de.mobanisto.compose.internal.joinLowerCamelCase
+import org.gradle.api.Project
+import org.gradle.api.Task
+import org.gradle.api.tasks.TaskContainer
+import org.gradle.api.tasks.TaskProvider
 import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeTarget
 import org.jetbrains.kotlin.gradle.plugin.mpp.NativeBinary
 import org.jetbrains.kotlin.gradle.plugin.mpp.NativeOutputKind

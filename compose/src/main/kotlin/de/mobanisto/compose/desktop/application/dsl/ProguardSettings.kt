@@ -5,11 +5,11 @@
 
 package de.mobanisto.compose.desktop.application.dsl
 
+import de.mobanisto.compose.desktop.application.internal.notNullProperty
+import de.mobanisto.compose.desktop.application.internal.nullableProperty
 import org.gradle.api.file.ConfigurableFileCollection
 import org.gradle.api.model.ObjectFactory
 import org.gradle.api.provider.Property
-import de.mobanisto.compose.desktop.application.internal.notNullProperty
-import de.mobanisto.compose.desktop.application.internal.nullableProperty
 import javax.inject.Inject
 
 private const val DEFAULT_PROGUARD_VERSION = "7.2.2"

@@ -5,16 +5,16 @@
 
 package de.mobanisto.compose.desktop.application.internal
 
-import org.gradle.api.Project
-import org.gradle.api.Task
-import org.gradle.api.file.Directory
-import org.gradle.api.provider.Provider
 import de.mobanisto.compose.desktop.application.dsl.JvmApplicationBuildType
 import de.mobanisto.compose.internal.KOTLIN_JVM_PLUGIN_ID
 import de.mobanisto.compose.internal.KOTLIN_MPP_PLUGIN_ID
 import de.mobanisto.compose.internal.javaSourceSets
 import de.mobanisto.compose.internal.joinDashLowercaseNonEmpty
 import de.mobanisto.compose.internal.mppExt
+import org.gradle.api.Project
+import org.gradle.api.Task
+import org.gradle.api.file.Directory
+import org.gradle.api.provider.Provider
 import org.jetbrains.kotlin.gradle.plugin.KotlinPlatformType
 
 internal data class JvmApplicationContext(

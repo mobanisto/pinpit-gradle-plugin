@@ -5,10 +5,10 @@
 
 package de.mobanisto.compose.test.utils
 
-import org.gradle.testkit.runner.GradleRunner
 import de.mobanisto.compose.desktop.application.internal.ComposeProperties
+import org.gradle.testkit.runner.GradleRunner
 import java.io.File
-import java.util.Properties
+import java.util.*
 
 data class TestEnvironment(
     val workingDir: File,

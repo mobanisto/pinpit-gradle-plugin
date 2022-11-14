@@ -5,12 +5,12 @@
 
 package de.mobanisto.compose.desktop.application.internal
 
-import de.undercouch.gradle.tasks.download.Download
-import org.gradle.api.Project
-import org.gradle.api.tasks.Copy
 import de.mobanisto.compose.desktop.application.tasks.AbstractJPackageTask
 import de.mobanisto.compose.desktop.application.tasks.CustomMsiTask
 import de.mobanisto.compose.desktop.application.tasks.WindowsTask
+import de.undercouch.gradle.tasks.download.Download
+import org.gradle.api.Project
+import org.gradle.api.tasks.Copy
 import java.io.File
 
 internal const val DOWNLOAD_WIX_TOOLSET_TASK_NAME = "downloadWix"

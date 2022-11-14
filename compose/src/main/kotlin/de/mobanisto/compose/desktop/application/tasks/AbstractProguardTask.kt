@@ -5,6 +5,16 @@
 
 package de.mobanisto.compose.desktop.application.tasks
 
+import de.mobanisto.compose.desktop.application.internal.ExternalToolRunner
+import de.mobanisto.compose.desktop.application.internal.cliArg
+import de.mobanisto.compose.desktop.application.internal.files.mangledName
+import de.mobanisto.compose.desktop.application.internal.files.normalizedPath
+import de.mobanisto.compose.desktop.application.internal.files.writeLn
+import de.mobanisto.compose.desktop.application.internal.ioFile
+import de.mobanisto.compose.desktop.application.internal.jvmToolFile
+import de.mobanisto.compose.desktop.application.internal.notNullProperty
+import de.mobanisto.compose.desktop.application.internal.nullableProperty
+import de.mobanisto.compose.desktop.tasks.AbstractComposeDesktopTask
 import org.gradle.api.file.ConfigurableFileCollection
 import org.gradle.api.file.Directory
 import org.gradle.api.file.DirectoryProperty
@@ -12,19 +22,15 @@ import org.gradle.api.file.RegularFile
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.provider.Provider
-import org.gradle.api.tasks.*
+import org.gradle.api.tasks.Input
+import org.gradle.api.tasks.InputFile
+import org.gradle.api.tasks.InputFiles
+import org.gradle.api.tasks.Internal
+import org.gradle.api.tasks.LocalState
 import org.gradle.api.tasks.Optional
-import de.mobanisto.compose.desktop.application.internal.*
-import de.mobanisto.compose.desktop.application.internal.ioFile
-import de.mobanisto.compose.desktop.application.internal.files.mangledName
-import de.mobanisto.compose.desktop.application.internal.files.normalizedPath
-import de.mobanisto.compose.desktop.application.internal.files.writeLn
-import de.mobanisto.compose.desktop.application.internal.notNullProperty
-import de.mobanisto.compose.desktop.application.internal.nullableProperty
-import de.mobanisto.compose.desktop.tasks.AbstractComposeDesktopTask
+import org.gradle.api.tasks.OutputDirectory
+import org.gradle.api.tasks.TaskAction
 import java.io.File
-import java.io.Writer
-import kotlin.collections.LinkedHashMap
 
 abstract class AbstractProguardTask : AbstractComposeDesktopTask() {
     @get:InputFiles

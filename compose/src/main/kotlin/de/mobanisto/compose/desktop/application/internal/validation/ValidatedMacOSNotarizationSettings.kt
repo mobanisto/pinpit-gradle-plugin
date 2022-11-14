@@ -5,9 +5,9 @@
 
 package de.mobanisto.compose.desktop.application.internal.validation
 
-import org.gradle.api.provider.Provider
 import de.mobanisto.compose.desktop.application.dsl.MacOSNotarizationSettings
 import de.mobanisto.compose.desktop.application.internal.ComposeProperties
+import org.gradle.api.provider.Provider
 
 internal data class ValidatedMacOSNotarizationSettings(
     val bundleID: String,

@@ -7,7 +7,6 @@ package de.mobanisto.compose.desktop.application.internal
 
 import java.io.PrintWriter
 import java.io.StringWriter
-import java.lang.Exception
 
 internal fun Exception.stacktraceToString(): String =
     StringWriter().also { w ->

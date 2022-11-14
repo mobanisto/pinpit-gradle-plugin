@@ -5,10 +5,10 @@
 
 package de.mobanisto.compose
 
+import de.mobanisto.compose.desktop.application.internal.nullableProperty
 import org.gradle.api.model.ObjectFactory
 import org.gradle.api.plugins.ExtensionAware
 import org.gradle.api.provider.Property
-import de.mobanisto.compose.desktop.application.internal.nullableProperty
 import javax.inject.Inject
 
 abstract class ComposeExtension @Inject constructor(

@@ -5,6 +5,8 @@
 
 package de.mobanisto.compose.desktop.tasks
 
+import de.mobanisto.compose.ComposeBuildConfig
+import de.mobanisto.compose.desktop.application.internal.ioFile
 import org.gradle.api.file.Directory
 import org.gradle.api.file.FileSystemLocation
 import org.gradle.api.file.RegularFile
@@ -12,8 +14,6 @@ import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.OutputDirectory
 import org.gradle.api.tasks.TaskAction
-import de.mobanisto.compose.ComposeBuildConfig
-import de.mobanisto.compose.desktop.application.internal.ioFile
 
 private const val DEFAULT_COMPOSE_PROGUARD_RULES_FILE_NAME = "default-compose-desktop-rules.pro"
 

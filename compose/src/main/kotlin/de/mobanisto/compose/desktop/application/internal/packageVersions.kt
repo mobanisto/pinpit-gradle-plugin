@@ -5,9 +5,9 @@
 
 package de.mobanisto.compose.desktop.application.internal
 
-import org.gradle.api.provider.Provider
 import de.mobanisto.compose.desktop.application.dsl.JvmApplicationDistributions
 import de.mobanisto.compose.desktop.application.dsl.TargetFormat
+import org.gradle.api.provider.Provider
 
 internal fun JvmApplicationContext.packageVersionFor(
     targetFormat: TargetFormat

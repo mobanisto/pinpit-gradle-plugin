@@ -5,19 +5,24 @@
 
 package de.mobanisto.compose.desktop.application.tasks
 
-import org.gradle.api.file.Directory
-import org.gradle.api.file.DirectoryProperty
-import org.gradle.api.provider.ListProperty
-import org.gradle.api.provider.Property
-import org.gradle.api.provider.Provider
-import org.gradle.api.tasks.*
-import org.gradle.process.ExecResult
-import org.gradle.work.InputChanges
 import de.mobanisto.compose.desktop.application.internal.ComposeProperties
 import de.mobanisto.compose.desktop.application.internal.ioFile
 import de.mobanisto.compose.desktop.application.internal.jvmToolFile
 import de.mobanisto.compose.desktop.application.internal.notNullProperty
 import de.mobanisto.compose.desktop.tasks.AbstractComposeDesktopTask
+import org.gradle.api.file.Directory
+import org.gradle.api.file.DirectoryProperty
+import org.gradle.api.provider.ListProperty
+import org.gradle.api.provider.Property
+import org.gradle.api.provider.Provider
+import org.gradle.api.tasks.Input
+import org.gradle.api.tasks.Internal
+import org.gradle.api.tasks.LocalState
+import org.gradle.api.tasks.Optional
+import org.gradle.api.tasks.OutputDirectory
+import org.gradle.api.tasks.TaskAction
+import org.gradle.process.ExecResult
+import org.gradle.work.InputChanges
 import java.io.File
 
 abstract class AbstractJvmToolOperationTask(private val toolName: String) : AbstractComposeDesktopTask() {

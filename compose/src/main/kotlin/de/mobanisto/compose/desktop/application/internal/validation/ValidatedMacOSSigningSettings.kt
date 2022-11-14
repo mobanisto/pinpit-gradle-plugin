@@ -5,12 +5,12 @@
 
 package de.mobanisto.compose.desktop.application.internal.validation
 
-import org.gradle.api.Project
-import org.gradle.api.provider.Provider
 import de.mobanisto.compose.desktop.application.dsl.MacOSSigningSettings
 import de.mobanisto.compose.desktop.application.internal.ComposeProperties
 import de.mobanisto.compose.desktop.application.internal.OS
 import de.mobanisto.compose.desktop.application.internal.currentOS
+import org.gradle.api.Project
+import org.gradle.api.provider.Provider
 import java.io.File
 
 internal data class ValidatedMacOSSigningSettings(
