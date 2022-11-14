@@ -79,6 +79,7 @@ internal fun copyZipEntry(
     val newEntry = ZipEntry(entry.name).apply {
         comment = entry.comment
         extra = entry.extra
+        lastModifiedTime = entry.lastModifiedTime
     }
     to.withNewEntry(newEntry) {
         from.copyTo(to)
