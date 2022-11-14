@@ -41,8 +41,6 @@ import javax.inject.Inject
 
 abstract class CustomMsiTask @Inject constructor() : CustomPackageTask(TargetFormat.CustomMsi), WindowsTask {
 
-    @get:InputDirectory
-    @get:Optional
     /** @see internal/wixToolset.kt */
     override val wixToolsetDir: DirectoryProperty = objects.directoryProperty()
 

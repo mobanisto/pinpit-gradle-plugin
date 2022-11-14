@@ -60,8 +60,6 @@ abstract class AbstractJPackageTask @Inject constructor(
     @get:Input
     val mangleJarFilesNames: Property<Boolean> = objects.notNullProperty(true)
 
-    @get:InputDirectory
-    @get:Optional
     /** @see internal/wixToolset.kt */
     override val wixToolsetDir: DirectoryProperty = objects.directoryProperty()
 
