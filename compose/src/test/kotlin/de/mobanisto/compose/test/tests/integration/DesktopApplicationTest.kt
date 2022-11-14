@@ -62,13 +62,13 @@ class DesktopApplicationTest : GradlePluginTestBase() {
     @Test
     fun testRunMpp() = with(testProject(TestProjects.mpp)) {
         val logLine = "Kotlin MPP app is running!"
-        gradle("run").build().checks { check ->
-            check.taskOutcome(":run", TaskOutcome.SUCCESS)
+        gradle("morun").build().checks { check ->
+            check.taskOutcome(":morun", TaskOutcome.SUCCESS)
             check.logContains(logLine)
         }
-        gradle("runDistributable").build().checks { check ->
-            check.taskOutcome(":createDistributable", TaskOutcome.SUCCESS)
-            check.taskOutcome(":runDistributable", TaskOutcome.SUCCESS)
+        gradle("morunDistributable").build().checks { check ->
+            check.taskOutcome(":mocreateDistributable", TaskOutcome.SUCCESS)
+            check.taskOutcome(":morunDistributable", TaskOutcome.SUCCESS)
             check.logContains(logLine)
         }
     }
