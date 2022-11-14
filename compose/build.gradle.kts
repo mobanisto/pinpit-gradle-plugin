@@ -77,7 +77,7 @@ dependencies {
 
 val shadow = tasks.named<ShadowJar>("shadowJar") {
     val fromPackage = "de.undercouch"
-    val toPackage = "org.jetbrains.compose.$fromPackage"
+    val toPackage = "de.mobanisto.compose.$fromPackage"
     relocate(fromPackage, toPackage)
     archiveClassifier.set("shadow")
     configurations = listOf(embeddedDependencies)
@@ -121,7 +121,6 @@ val checkJar by tasks.registering {
 // we want to avoid accidentally including unexpected jars/packages, e.g kotlin-stdlib etc
 fun checkJarContainsExpectedPackages(jar: ZipFile) {
     val expectedPackages = arrayOf(
-        "org/jetbrains/compose",
         "kotlinx/serialization",
         "de/mobanisto/compose",
     )
