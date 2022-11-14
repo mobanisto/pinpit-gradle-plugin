@@ -37,6 +37,10 @@ mocompose.desktop {
                 debPackageVersion = versionCode
                 appCategory = "utils"
                 menuGroup = "System;Utility;"
+                debPreInst.set(project.file("src/main/packaging/deb/preinst"))
+                debPostInst.set(project.file("src/main/packaging/deb/postinst"))
+                debPreRm.set(project.file("src/main/packaging/deb/prerm"))
+                debPostRm.set(project.file("src/main/packaging/deb/postrm"))
             }
             windows {
                 console = true

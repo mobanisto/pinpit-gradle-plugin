@@ -124,6 +124,26 @@ abstract class CustomDebTask @Inject constructor() : CustomPackageTask(TargetFor
     @get:Optional
     val runtimeImage: DirectoryProperty = objects.directoryProperty()
 
+    @get:InputFile
+    @get:Optional
+    @get:PathSensitive(PathSensitivity.ABSOLUTE)
+    val linuxDebPreInst: RegularFileProperty = objects.fileProperty()
+
+    @get:InputFile
+    @get:Optional
+    @get:PathSensitive(PathSensitivity.ABSOLUTE)
+    val linuxDebPostInst: RegularFileProperty = objects.fileProperty()
+
+    @get:InputFile
+    @get:Optional
+    @get:PathSensitive(PathSensitivity.ABSOLUTE)
+    val linuxDebPreRm: RegularFileProperty = objects.fileProperty()
+
+    @get:InputFile
+    @get:Optional
+    @get:PathSensitive(PathSensitivity.ABSOLUTE)
+    val linuxDebPostRm: RegularFileProperty = objects.fileProperty()
+
     private lateinit var jvmRuntimeInfo: JvmRuntimeProperties
 
     @get:LocalState
@@ -160,7 +180,7 @@ abstract class CustomDebTask @Inject constructor() : CustomPackageTask(TargetFor
     @get:InputDirectory
     @get:Optional
     internal val appResourcesDirInputDirHackForVerification: Provider<Directory?>
-        get() = provider { appResourcesDir.orNull?.let { if (it.asFile.exists()) it else null} }
+        get() = provider { appResourcesDir.orNull?.let { if (it.asFile.exists()) it else null } }
 
     @get:Internal
     private val libsMappingFile: Provider<RegularFile> = workingDir.map {
@@ -271,7 +291,7 @@ abstract class CustomDebTask @Inject constructor() : CustomPackageTask(TargetFor
 
         fileOperations.delete(debFileTree)
         buildDebFileTree(appImage, debFileTree)
-        buildDebControlFile(appImage, debFileTree, debArch)
+        buildDebianDir(appImage, debFileTree, debArch)
 
         val deb = destination.file("${linuxPackageName.get()}_${linuxDebPackageVersion.get()}-1_${debArch}.deb")
         runExternalTool(
@@ -300,11 +320,23 @@ abstract class CustomDebTask @Inject constructor() : CustomPackageTask(TargetFor
         return result.stdout.lines()[0]
     }
 
-    private fun buildDebControlFile(appImage: Directory, debFileTree: Directory, debArch: String) {
+    private fun buildDebianDir(appImage: Directory, debFileTree: Directory, debArch: String) {
         val dirDebian = debFileTree.dir("DEBIAN")
         dirDebian.asFile.mkdirs()
         val fileControl = dirDebian.file("control")
         createControlFile(fileControl, appImage, debArch)
+        linuxDebPreInst.copy(dirDebian.file("preinst"), "rwxr-xr-x")
+        linuxDebPostInst.copy(dirDebian.file("postinst"), "rwxr-xr-x")
+        linuxDebPreRm.copy(dirDebian.file("prerm"), "rwxr-xr-x")
+        linuxDebPostRm.copy(dirDebian.file("postrm"), "rwxr-xr-x")
+    }
+
+    private fun RegularFileProperty.copy(file: RegularFile, permissions: String) {
+        if (ioFileOrNull == null) return
+        file.asFile.let { target ->
+            ioFile.copyTo(target)
+            Files.setPosixFilePermissions(target.toPath(), PosixFilePermissions.fromString(permissions))
+        }
     }
 
     private fun createControlFile(fileControl: RegularFile, appImage: Directory, debArch: String) {

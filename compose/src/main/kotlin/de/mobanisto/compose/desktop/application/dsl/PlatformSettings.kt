@@ -84,6 +84,10 @@ abstract class LinuxPlatformSettings : AbstractPlatformSettings() {
     var rpmLicenseType: String? = null
     var debPackageVersion: String? = null
     var rpmPackageVersion: String? = null
+    val debPreInst: RegularFileProperty = objects.fileProperty()
+    val debPostInst: RegularFileProperty = objects.fileProperty()
+    val debPreRm: RegularFileProperty = objects.fileProperty()
+    val debPostRm: RegularFileProperty = objects.fileProperty()
 }
 
 abstract class WindowsPlatformSettings : AbstractPlatformSettings() {

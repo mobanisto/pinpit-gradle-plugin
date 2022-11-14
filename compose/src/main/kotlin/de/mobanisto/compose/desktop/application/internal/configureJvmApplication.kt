@@ -241,7 +241,8 @@ private fun JvmApplicationContext.configurePackagingTasks(
             doLast {
                 it.logger.error(
                     "'${it.name}' task is deprecated and will be removed in next releases. " +
-                    "Use '${packageForCurrentOS.get().name}' task instead")
+                            "Use '${packageForCurrentOS.get().name}' task instead"
+                )
             }
         }
     }
@@ -448,6 +449,10 @@ internal fun JvmApplicationContext.configurePlatformSettings(
             packageTask.linuxRpmLicenseType.set(provider { linux.rpmLicenseType })
             packageTask.iconFile.set(linux.iconFile.orElse(unpackDefaultResources.flatMap { it.resources.linuxIcon }))
             packageTask.installationPath.set(linux.installationPath)
+            packageTask.linuxDebPreInst.set(linux.debPreInst)
+            packageTask.linuxDebPostInst.set(linux.debPostInst)
+            packageTask.linuxDebPreRm.set(linux.debPreRm)
+            packageTask.linuxDebPostRm.set(linux.debPostRm)
         }
     }
 }
@@ -491,6 +496,7 @@ internal fun JvmApplicationContext.configurePlatformSettings(
                 packageTask.installationPath.set(linux.installationPath)
             }
         }
+
         OS.Windows -> {
             app.nativeDistributions.windows.also { win ->
                 packageTask.winConsole.set(provider { win.console })
@@ -504,6 +510,7 @@ internal fun JvmApplicationContext.configurePlatformSettings(
                 packageTask.installationPath.set(win.installationPath)
             }
         }
+
         OS.MacOS -> {
             app.nativeDistributions.macOS.also { mac ->
                 packageTask.macPackageName.set(provider { mac.packageName })
@@ -582,4 +589,4 @@ private fun JvmApplicationContext.configurePackageUberJarForCurrentOS(jar: Jar) 
 
 private fun File.isZipOrJar() =
     name.endsWith(".jar", ignoreCase = true)
-        || name.endsWith(".zip", ignoreCase = true)
+            || name.endsWith(".zip", ignoreCase = true)
