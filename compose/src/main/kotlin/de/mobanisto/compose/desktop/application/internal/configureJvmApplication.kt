@@ -453,6 +453,7 @@ internal fun JvmApplicationContext.configurePlatformSettings(
             packageTask.linuxDebPostInst.set(linux.debPostInst)
             packageTask.linuxDebPreRm.set(linux.debPreRm)
             packageTask.linuxDebPostRm.set(linux.debPostRm)
+            packageTask.linuxDebAdditionalDependencies.set(provider { linux.debAdditionalDependencies })
         }
     }
 }

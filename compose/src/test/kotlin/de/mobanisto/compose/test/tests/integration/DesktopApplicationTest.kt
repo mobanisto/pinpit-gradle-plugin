@@ -30,6 +30,7 @@ import org.gradle.internal.impldep.org.testng.Assert
 import org.gradle.testkit.runner.TaskOutcome
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Assumptions
 import org.junit.jupiter.api.Test
 import java.io.File
@@ -542,4 +543,60 @@ class DesktopApplicationTest : GradlePluginTestBase() {
             check.taskOutcome(":runDistributable", TaskOutcome.SUCCESS)
         }
     }
+
+    @Test
+    fun debOneAdditionalDependency(): Unit = with(testProject(TestProjects.jvm)) {
+        val extraPackage = "libnotify4"
+        val addPackage = addDebPackage(listOf(extraPackage))
+        file("build.gradle").modify { "$it\n$addPackage" }
+
+        gradle(":mopackageCustomDeb").build().checks { check ->
+            check.taskOutcome(":mopackageCustomDeb", TaskOutcome.SUCCESS)
+            checkDebContent { content ->
+                assertTrue(content.contains(extraPackage))
+            }
+        }
+    }
+
+    @Test
+    fun debTwoAdditionalDependencies(): Unit = with(testProject(TestProjects.jvm)) {
+        val extraPackages = listOf("libnotify4", "bluez")
+        val addPackage = addDebPackage(extraPackages)
+        file("build.gradle").modify { "$it\n$addPackage" }
+
+        gradle(":mopackageCustomDeb").build().checks { check ->
+            check.taskOutcome(":mopackageCustomDeb", TaskOutcome.SUCCESS)
+            checkDebContent { content ->
+                for (extraPackage in extraPackages) {
+                    assertTrue(content.contains(extraPackage))
+                }
+            }
+        }
+    }
+
+    private fun addDebPackage(packages: List<String>): String {
+        return """
+                mocompose.desktop {
+                    application {
+                        nativeDistributions.linux {
+                            debAdditionalDependencies("${packages.joinToString(", ")}")
+                        }
+                    }
+                }
+            """.trimIndent()
+    }
+
+    private fun TestProject.checkDebContent(check: (content: String) -> Unit) {
+        val packageDir = file("build/mocompose/binaries/main/custom-deb")
+        val packageDirFiles = packageDir.listFiles() ?: arrayOf()
+        check(packageDirFiles.size == 1) {
+            "Expected single package in $packageDir, got [${packageDirFiles.joinToString(", ") { it.name }}]"
+        }
+        val packageFile = packageDirFiles.single()
+        val contentBytes = DebContentBuilder().getControl(packageFile)
+        checkNotNull(contentBytes)
+        val content = String(contentBytes)
+        check(content)
+    }
+
 }

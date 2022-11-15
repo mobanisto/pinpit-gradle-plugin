@@ -144,6 +144,10 @@ abstract class CustomDebTask @Inject constructor() : CustomPackageTask(TargetFor
     @get:PathSensitive(PathSensitivity.ABSOLUTE)
     val linuxDebPostRm: RegularFileProperty = objects.fileProperty()
 
+    @get:Input
+    @get:Optional
+    val linuxDebAdditionalDependencies: ListProperty<String> = objects.listProperty(String::class.java)
+
     private lateinit var jvmRuntimeInfo: JvmRuntimeProperties
 
     @get:LocalState
@@ -360,8 +364,7 @@ abstract class CustomDebTask @Inject constructor() : CustomPackageTask(TargetFor
         }
         // TODO: only add this if launcher is included (see jdk.jpackage.internal.DesktopIntegration)
         list.add("xdg-utils")
-        // TODO: make custom packages configurable
-        list.add("libnotify4")
+        linuxDebAdditionalDependencies.orNull?.let { list.addAll(it) }
         list.sort()
 
         fileControl.asFile.bufferedWriter().use { writer ->

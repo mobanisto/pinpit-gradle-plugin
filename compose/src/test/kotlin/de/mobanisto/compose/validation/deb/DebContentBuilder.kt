@@ -7,6 +7,8 @@ import org.apache.commons.compress.archivers.ar.ArArchiveInputStream
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream
 import org.apache.commons.compress.compressors.xz.XZCompressorInputStream
 import org.apache.commons.compress.utils.CountingInputStream
+import java.io.File
+import java.io.FileInputStream
 import java.io.InputStream
 
 data class DebContent(val arEntries: Map<String, ArEntry>, val tars: Map<String, Tar>)
@@ -101,5 +103,33 @@ class DebContentBuilder {
         }
 
         return map
+    }
+
+    fun getControl(packageFile: File): ByteArray? {
+        return getFile(packageFile, "control.tar.xz", "./control")
+    }
+
+    private fun getFile(packageFile: File, tarFile: String, path: String): ByteArray? {
+        val fis = FileInputStream(packageFile)
+        val ais = ArArchiveInputStream(fis)
+
+        while (true) {
+            val entry1: ArArchiveEntry = ais.nextArEntry ?: break
+            val name1 = entry1.name
+
+            if (name1 == tarFile) {
+                val xz = XZCompressorInputStream(ais)
+                val tis = TarArchiveInputStream(xz)
+                while (true) {
+                    val entry2 = tis.nextTarEntry ?: break
+                    if (entry2.isDirectory) continue
+                    val name2 = entry2.name
+                    if (name2 == path) {
+                        return tis.readBytes()
+                    }
+                }
+            }
+        }
+        return null
     }
 }

@@ -88,6 +88,10 @@ abstract class LinuxPlatformSettings : AbstractPlatformSettings() {
     val debPostInst: RegularFileProperty = objects.fileProperty()
     val debPreRm: RegularFileProperty = objects.fileProperty()
     val debPostRm: RegularFileProperty = objects.fileProperty()
+    var debAdditionalDependencies = arrayListOf<String>()
+    fun debAdditionalDependencies(vararg dependencies: String) {
+        this.debAdditionalDependencies.addAll(dependencies.toList())
+    }
 }
 
 abstract class WindowsPlatformSettings : AbstractPlatformSettings() {
