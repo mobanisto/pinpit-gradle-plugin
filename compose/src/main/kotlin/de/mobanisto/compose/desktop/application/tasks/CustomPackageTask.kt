@@ -3,6 +3,7 @@ package de.mobanisto.compose.desktop.application.tasks
 import de.mobanisto.compose.desktop.application.dsl.TargetFormat
 import de.mobanisto.compose.desktop.application.internal.ComposeProperties
 import de.mobanisto.compose.desktop.application.internal.notNullProperty
+import de.mobanisto.compose.desktop.application.internal.nullableProperty
 import de.mobanisto.compose.desktop.tasks.AbstractComposeDesktopTask
 import org.gradle.api.file.ConfigurableFileCollection
 import org.gradle.api.file.Directory
@@ -74,6 +75,14 @@ abstract class CustomPackageTask @Inject constructor(
 
     @get:Input
     val packageDescription: Property<String> = objects.notNullProperty()
+
+    @get:Input
+    @get:Optional
+    val packageCopyright: Property<String?> = objects.nullableProperty()
+
+    @get:Input
+    @get:Optional
+    val packageVendor: Property<String?> = objects.nullableProperty()
 
     @get:InputDirectory
     @get:Optional

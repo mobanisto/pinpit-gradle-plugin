@@ -78,14 +78,6 @@ abstract class CustomDebTask @Inject constructor() : CustomPackageTask(TargetFor
 
     @get:Input
     @get:Optional
-    val packageCopyright: Property<String?> = objects.nullableProperty()
-
-    @get:Input
-    @get:Optional
-    val packageVendor: Property<String?> = objects.nullableProperty()
-
-    @get:Input
-    @get:Optional
     val packageVersion: Property<String?> = objects.nullableProperty()
 
     @get:Input
@@ -369,9 +361,9 @@ abstract class CustomDebTask @Inject constructor() : CustomPackageTask(TargetFor
 
         fileControl.asFile.bufferedWriter().use { writer ->
             writer.writeLn("Package: ${linuxPackageName.get()}")
-            writer.writeLn("Version: ${linuxDebPackageVersion.get()}")
+            writer.writeLn("Version: ${linuxDebPackageVersion.get()}-1")
             writer.writeLn("Section: ${linuxAppCategory.get()}")
-            writer.writeLn("Maintainer: ${linuxDebMaintainer.get()}")
+            writer.writeLn("Maintainer: ${packageVendor.get()} <${linuxDebMaintainer.get()}>")
             writer.writeLn("Priority: optional")
             writer.writeLn("Architecture: amd64")
             writer.writeLn("Provides: ${linuxPackageName.get()}")

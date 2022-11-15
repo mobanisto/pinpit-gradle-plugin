@@ -320,8 +320,8 @@ private fun JvmApplicationContext.configureCustomPackageTask(
     app.nativeDistributions.let { executables ->
         packageTask.packageName.set(provider { executables.packageName })
         packageTask.packageDescription.set(packageTask.provider { executables.description })
-//        packageTask.packageCopyright.set(packageTask.provider { executables.copyright })
-//        packageTask.packageVendor.set(packageTask.provider { executables.vendor })
+        packageTask.packageCopyright.set(packageTask.provider { executables.copyright })
+        packageTask.packageVendor.set(packageTask.provider { executables.vendor })
 //        packageTask.packageVersion.set(packageVersionFor(packageTask.targetFormat))
 //        packageTask.licenseFile.set(executables.licenseFile)
     }
