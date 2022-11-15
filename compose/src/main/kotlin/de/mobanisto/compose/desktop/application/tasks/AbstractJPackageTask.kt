@@ -305,7 +305,8 @@ abstract class AbstractJPackageTask @Inject constructor(
 
             val mappedJar = libsMapping[launcherMainJar.ioFile]?.singleOrNull()
                 ?: error("Main jar was not processed correctly: ${launcherMainJar.ioFile}")
-            cliArg("--main-jar", mappedJar)
+            val mappedJarRelative = libsDir.ioFile.toPath().relativize(mappedJar.toPath())
+            cliArg("--main-jar", mappedJarRelative)
             cliArg("--main-class", launcherMainClass)
 
             when (currentOS) {
