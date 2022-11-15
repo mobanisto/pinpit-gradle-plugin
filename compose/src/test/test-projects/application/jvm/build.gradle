@@ -41,6 +41,8 @@ mocompose.desktop {
                 debPostInst.set(project.file("src/main/packaging/deb/postinst"))
                 debPreRm.set(project.file("src/main/packaging/deb/prerm"))
                 debPostRm.set(project.file("src/main/packaging/deb/postrm"))
+                debCopyright.set(project.file("src/main/packaging/deb/copyright"))
+                debLauncher.set(project.file("src/main/packaging/deb/launcher.desktop"))
             }
             windows {
                 console = true

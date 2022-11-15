@@ -92,6 +92,8 @@ abstract class LinuxPlatformSettings : AbstractPlatformSettings() {
     fun debAdditionalDependencies(vararg dependencies: String) {
         this.debAdditionalDependencies.addAll(dependencies.toList())
     }
+    val debCopyright: RegularFileProperty = objects.fileProperty()
+    val debLauncher: RegularFileProperty = objects.fileProperty()
 }
 
 abstract class WindowsPlatformSettings : AbstractPlatformSettings() {

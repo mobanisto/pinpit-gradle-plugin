@@ -140,6 +140,16 @@ abstract class CustomDebTask @Inject constructor() : CustomPackageTask(TargetFor
     @get:Optional
     val linuxDebAdditionalDependencies: ListProperty<String> = objects.listProperty(String::class.java)
 
+    @get:InputFile
+    @get:Optional
+    @get:PathSensitive(PathSensitivity.ABSOLUTE)
+    val linuxDebCopyright: RegularFileProperty = objects.fileProperty()
+
+    @get:InputFile
+    @get:Optional
+    @get:PathSensitive(PathSensitivity.ABSOLUTE)
+    val linuxDebLauncher: RegularFileProperty = objects.fileProperty()
+
     private lateinit var jvmRuntimeInfo: JvmRuntimeProperties
 
     @get:LocalState
@@ -301,8 +311,14 @@ abstract class CustomDebTask @Inject constructor() : CustomPackageTask(TargetFor
         val dirPackage = dirOpt.dir(linuxPackageName.get())
         val dirBin = dirPackage.dir("bin")
         val dirLib = dirPackage.dir("lib")
-        // TODO: put copyright notice into share/doc/copyright
-        val dirShare = dirOpt.dir("share")
+        val dirShareDoc = dirPackage.dir("share/doc/")
+        // TODO: create all directories with permissions below and check permissions in check later
+        Files.createDirectories(
+            dirShareDoc.asFile.toPath(),
+            PosixFilePermissions.asFileAttribute(PosixFilePermissions.fromString("rwxr-xr-x"))
+        )
+        linuxDebCopyright.copy(dirShareDoc.file("copyright"), "rw-r--r--")
+        linuxDebLauncher.copy(dirLib.file("${linuxPackageName.get()}-${packageName.get()}.desktop"), "rw-r--r--")
 
         syncDir(appImage.dir("bin"), dirBin)
         syncDir(appImage.dir("lib"), dirLib) {
