@@ -14,7 +14,13 @@ import java.io.InputStream
 data class DebContent(val arEntries: Map<String, ArEntry>, val tars: Map<String, Tar>)
 data class Tar(val name: String, val entries: List<TarEntry>)
 data class ArEntry(val name: String, val size: Long, val user: Long, val group: Long, val hash: String)
-data class TarEntry(val name: String, val size: Long, val user: Long, val group: Long, val hash: String)
+data class TarEntry(
+    val name: String, val size: Long, val user: Long, val group: Long, val mode: Int, val hash: String
+) {
+    override fun toString() =
+        "TarEntry(name=$name, size=$size, user=$user, group=$group, mode=${Integer.toOctalString(mode)}, hash=$hash)"
+}
+
 data class DebAddress(val tar: String, val path: String)
 
 class DebContentBuilder {
@@ -35,11 +41,16 @@ class DebContentBuilder {
                 val tis = TarArchiveInputStream(xz)
                 while (true) {
                     val entry2 = tis.nextTarEntry ?: break
-                    if (entry2.isDirectory) continue
-                    val name2 = entry2.name
-                    val counter = CountingInputStream(tis)
-                    val hash = DigestUtils.sha1Hex(counter)
-                    tarEntries.add(TarEntry(name2, counter.bytesRead, entry2.longUserId, entry2.longGroupId, hash))
+                    val name = entry2.name
+                    if (entry2.isDirectory) {
+                        tarEntries.add(TarEntry(name, 0, entry2.longUserId, entry2.longGroupId, entry2.mode, ""))
+                    } else {
+                        val counter = CountingInputStream(tis)
+                        val hash = DigestUtils.sha1Hex(counter)
+                        tarEntries.add(
+                            TarEntry(name, counter.bytesRead, entry2.longUserId, entry2.longGroupId, entry2.mode, hash)
+                        )
+                    }
                 }
             } else {
                 val counter = CountingInputStream(ais)
@@ -64,7 +75,7 @@ class DebContentBuilder {
             }
         }
         for (entry in tar.different) {
-            if (entry.name == name) {
+            if (entry.first.name == name) {
                 return true
             }
         }

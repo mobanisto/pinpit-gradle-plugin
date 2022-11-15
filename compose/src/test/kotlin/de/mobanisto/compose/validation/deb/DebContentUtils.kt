@@ -5,7 +5,9 @@ import com.github.difflib.UnifiedDiffUtils
 import com.github.difflib.algorithm.myers.MeyersDiff
 import java.io.File
 
-data class TarComparisonResult(val onlyIn1: List<TarEntry>, val onlyIn2: List<TarEntry>, val different: List<TarEntry>)
+data class TarComparisonResult(
+    val onlyIn1: List<TarEntry>, val onlyIn2: List<TarEntry>, val different: List<Pair<TarEntry, TarEntry>>
+)
 
 object DebContentUtils {
     fun compare(deb1: DebContent, deb2: DebContent): Map<String, TarComparisonResult> {
@@ -35,12 +37,12 @@ object DebContentUtils {
         return only
     }
 
-    private fun findDifferent(data: Tar, map: Map<String, TarEntry>): List<TarEntry> {
-        val diff = mutableListOf<TarEntry>()
+    private fun findDifferent(data: Tar, map: Map<String, TarEntry>): List<Pair<TarEntry, TarEntry>> {
+        val diff = mutableListOf<Pair<TarEntry, TarEntry>>()
         for (entry in data.entries) {
             val otherEntry = map[entry.name] ?: continue
             if (entry != otherEntry) {
-                diff.add(entry)
+                diff.add(entry to otherEntry)
             }
         }
         return diff
@@ -52,11 +54,11 @@ object DebContentUtils {
         for (tarEntry in comparison.entries) {
             val tarFile = tarEntry.key
             for (entry in tarEntry.value.different) {
-                val address = DebAddress(tarFile, entry.name)
+                val address = DebAddress(tarFile, entry.first.name)
                 val bytes1 = content1[address]
                 val bytes2 = content2[address]
                 if (bytes1 != null && bytes2 != null) {
-                    printDiff(tarFile, entry, String(bytes1), String(bytes2))
+                    printDiff(tarFile, entry.first, String(bytes1), String(bytes2))
                 }
             }
         }

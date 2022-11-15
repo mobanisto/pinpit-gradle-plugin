@@ -39,12 +39,16 @@ import org.gradle.work.ChangeType
 import org.gradle.work.InputChanges
 import java.io.File
 import java.nio.file.Files
+import java.nio.file.Files.createDirectories
 import java.nio.file.Path
 import java.nio.file.Paths
+import java.nio.file.attribute.PosixFilePermission
 import java.nio.file.attribute.PosixFilePermissions
+import java.nio.file.attribute.PosixFilePermissions.asFileAttribute
 import java.util.regex.Matcher
 import java.util.regex.Pattern
 import javax.inject.Inject
+import kotlin.io.path.createDirectories
 
 
 abstract class CustomDebTask @Inject constructor() : CustomPackageTask(TargetFormat.CustomDeb) {
@@ -264,18 +268,8 @@ abstract class CustomDebTask @Inject constructor() : CustomPackageTask(TargetFor
 
         // todo: incremental copy
         cleanDirs(packagedResourcesDir)
-        val destResourcesDir = packagedResourcesDir.ioFile
-        val appResourcesDir = appResourcesDir.ioFileOrNull
-        if (appResourcesDir != null) {
-            for (file in appResourcesDir.walk()) {
-                val relPath = file.relativeTo(appResourcesDir).path
-                val destFile = destResourcesDir.resolve(relPath)
-                if (file.isDirectory) {
-                    fileOperations.mkdir(destFile)
-                } else {
-                    file.copyTo(destFile)
-                }
-            }
+        if (appResourcesDir.isPresent) {
+            syncDir(appResourcesDir.get(), packagedResourcesDir.get())
         }
 
         cleanDirs(jpackageResources)
@@ -306,19 +300,20 @@ abstract class CustomDebTask @Inject constructor() : CustomPackageTask(TargetFor
         )
     }
 
+    private val permissionsRegular = "rw-r--r--"
+    private val permissionsExecutable = "rwxr-xr-x"
+    private val posixRegular = PosixFilePermissions.fromString(permissionsRegular)
+    private val posixExecutable = PosixFilePermissions.fromString(permissionsExecutable)
+
     private fun buildDebFileTree(appImage: Directory, debFileTree: Directory) {
         val dirOpt = debFileTree.dir("opt")
         val dirPackage = dirOpt.dir(linuxPackageName.get())
         val dirBin = dirPackage.dir("bin")
         val dirLib = dirPackage.dir("lib")
         val dirShareDoc = dirPackage.dir("share/doc/")
-        // TODO: create all directories with permissions below and check permissions in check later
-        Files.createDirectories(
-            dirShareDoc.asFile.toPath(),
-            PosixFilePermissions.asFileAttribute(PosixFilePermissions.fromString("rwxr-xr-x"))
-        )
-        linuxDebCopyright.copy(dirShareDoc.file("copyright"), "rw-r--r--")
-        linuxDebLauncher.copy(dirLib.file("${linuxPackageName.get()}-${packageName.get()}.desktop"), "rw-r--r--")
+        createDirectories(dirShareDoc.asFile.toPath(), asFileAttribute(posixExecutable))
+        linuxDebCopyright.copy(dirShareDoc.file("copyright"), posixRegular)
+        linuxDebLauncher.copy(dirLib.file("${linuxPackageName.get()}-${packageName.get()}.desktop"), posixRegular)
 
         syncDir(appImage.dir("bin"), dirBin)
         syncDir(appImage.dir("lib"), dirLib) {
@@ -336,21 +331,32 @@ abstract class CustomDebTask @Inject constructor() : CustomPackageTask(TargetFor
 
     private fun buildDebianDir(appImage: Directory, debFileTree: Directory, debArch: String) {
         val dirDebian = debFileTree.dir("DEBIAN")
-        dirDebian.asFile.mkdirs()
+        dirDebian.asPath().createDirectories(asFileAttribute(posixExecutable))
         val fileControl = dirDebian.file("control")
         createControlFile(fileControl, appImage, debArch)
-        linuxDebPreInst.copy(dirDebian.file("preinst"), "rwxr-xr-x")
-        linuxDebPostInst.copy(dirDebian.file("postinst"), "rwxr-xr-x")
-        linuxDebPreRm.copy(dirDebian.file("prerm"), "rwxr-xr-x")
-        linuxDebPostRm.copy(dirDebian.file("postrm"), "rwxr-xr-x")
+        linuxDebPreInst.copy(dirDebian.file("preinst"), posixExecutable)
+        linuxDebPostInst.copy(dirDebian.file("postinst"), posixExecutable)
+        linuxDebPreRm.copy(dirDebian.file("prerm"), posixExecutable)
+        linuxDebPostRm.copy(dirDebian.file("postrm"), posixExecutable)
     }
 
-    private fun RegularFileProperty.copy(file: RegularFile, permissions: String) {
+    private fun RegularFileProperty.asPath(): Path {
+        return get().asFile.toPath()
+    }
+
+    private fun RegularFile.asPath(): Path {
+        return asFile.toPath()
+    }
+
+    private fun Directory.asPath(): Path {
+        return asFile.toPath()
+    }
+
+    private fun RegularFileProperty.copy(target: RegularFile, permissions: Set<PosixFilePermission>) {
         if (ioFileOrNull == null) return
-        file.asFile.let { target ->
-            ioFile.copyTo(target)
-            Files.setPosixFilePermissions(target.toPath(), PosixFilePermissions.fromString(permissions))
-        }
+        target.asPath().parent.createDirectories(asFileAttribute(posixExecutable))
+        Files.copy(asPath(), target.asPath())
+        Files.setPosixFilePermissions(target.asPath(), permissions)
     }
 
     private fun createControlFile(fileControl: RegularFile, appImage: Directory, debArch: String) {
@@ -446,7 +452,7 @@ abstract class CustomDebTask @Inject constructor() : CustomPackageTask(TargetFor
         return file.canExecute() || file.toString().endsWith(".so")
     }
 
-    private fun syncDir(source: Directory, target: Directory, takeFile: (file: Path) -> Boolean = {_ -> true}) {
+    private fun syncDir(source: Directory, target: Directory, takeFile: (file: Path) -> Boolean = { _ -> true }) {
         val pathSourceDir = source.asFile.toPath()
         val pathTargetDir = target.asFile.toPath()
         for (file in source.asFileTree.files) {
@@ -456,14 +462,11 @@ abstract class CustomDebTask @Inject constructor() : CustomPackageTask(TargetFor
                 continue
             }
             val pathTarget = pathTargetDir.resolve(relative)
-            Files.createDirectories(
-                pathTarget.parent,
-                PosixFilePermissions.asFileAttribute(PosixFilePermissions.fromString("rwxr-xr-x"))
-            )
+            createDirectories(pathTarget.parent, asFileAttribute(posixExecutable))
             if (Files.isExecutable(pathSource)) {
-                Files.setPosixFilePermissions(pathSource, PosixFilePermissions.fromString("rwxr-xr-x"))
+                Files.setPosixFilePermissions(pathSource, posixExecutable)
             } else {
-                Files.setPosixFilePermissions(pathSource, PosixFilePermissions.fromString("rw-r--r--"))
+                Files.setPosixFilePermissions(pathSource, posixRegular)
             }
             Files.copy(pathSource, pathTarget)
         }

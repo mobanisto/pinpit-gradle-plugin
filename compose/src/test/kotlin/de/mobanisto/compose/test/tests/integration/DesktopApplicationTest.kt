@@ -333,7 +333,8 @@ class DesktopApplicationTest : GradlePluginTestBase() {
                 val tarComparison = entry.value
                 tarComparison.onlyIn1.forEach { println("    only in stock deb:  $it") }
                 tarComparison.onlyIn2.forEach { println("    only in custom deb: $it") }
-                tarComparison.different.forEach { println("    both but different: $it") }
+                tarComparison.different.forEach { println("    both but different (stock):  ${it.first}") }
+                tarComparison.different.forEach { println("    both but different (custom): ${it.second}") }
             }
             println("Showing files with differences:")
             DebContentUtils.printDiff(debs[0], debs[1], comparison)
