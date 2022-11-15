@@ -1,5 +1,6 @@
 package de.mobanisto.compose.validation.deb
 
+import de.mobanisto.compose.desktop.application.internal.files.isProbablyNotBinary
 import org.apache.commons.codec.digest.DigestUtils
 import org.apache.commons.compress.archivers.ar.ArArchiveEntry
 import org.apache.commons.compress.archivers.ar.ArArchiveInputStream
@@ -12,6 +13,7 @@ data class DebContent(val arEntries: Map<String, ArEntry>, val tars: Map<String,
 data class Tar(val name: String, val entries: List<TarEntry>)
 data class ArEntry(val name: String, val size: Long, val user: Long, val group: Long, val hash: String)
 data class TarEntry(val name: String, val size: Long, val user: Long, val group: Long, val hash: String)
+data class DebAddress(val tar: String, val path: String)
 
 class DebContentBuilder {
 
@@ -46,5 +48,58 @@ class DebContentBuilder {
         }
 
         return DebContent(arEntries, tars)
+    }
+
+    private fun accept(name: String, tar: TarComparisonResult): Boolean {
+        for (entry in tar.onlyIn1) {
+            if (entry.name == name) {
+                return true
+            }
+        }
+        for (entry in tar.onlyIn2) {
+            if (entry.name == name) {
+                return true
+            }
+        }
+        for (entry in tar.different) {
+            if (entry.name == name) {
+                return true
+            }
+        }
+        return false
+    }
+
+    fun buildContentForComparison(
+        fis: InputStream,
+        comparison: Map<String, TarComparisonResult>
+    ): Map<DebAddress, ByteArray> {
+        val ais = ArArchiveInputStream(fis)
+
+        val map = mutableMapOf<DebAddress, ByteArray>()
+        while (true) {
+            val entry1: ArArchiveEntry = ais.nextArEntry ?: break
+            val name1 = entry1.name
+
+            if (name1.endsWith("tar.xz")) {
+                val tar = comparison[name1] ?: continue
+                val xz = XZCompressorInputStream(ais)
+                val tis = TarArchiveInputStream(xz)
+                while (true) {
+                    val entry2 = tis.nextTarEntry ?: break
+                    if (entry2.isDirectory) continue
+                    val name2 = entry2.name
+                    if (accept(name2, tar)) {
+                        val bytes = tis.readBytes()
+                        if (bytes.isProbablyNotBinary()) {
+                            map[DebAddress(name1, name2)] = bytes
+                        } else {
+                            println("not collecting data for binary file $name2")
+                        }
+                    }
+                }
+            }
+        }
+
+        return map
     }
 }

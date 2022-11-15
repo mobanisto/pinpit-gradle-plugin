@@ -435,10 +435,6 @@ abstract class CustomDebTask @Inject constructor() : CustomPackageTask(TargetFor
         return file.canExecute() || file.toString().endsWith(".so")
     }
 
-    private fun String.lines(): List<String> {
-        return split("\r?\n".toRegex())
-    }
-
     private fun syncDir(source: Directory, target: Directory, takeFile: (file: Path) -> Boolean = {_ -> true}) {
         val pathSourceDir = source.asFile.toPath()
         val pathTargetDir = target.asFile.toPath()

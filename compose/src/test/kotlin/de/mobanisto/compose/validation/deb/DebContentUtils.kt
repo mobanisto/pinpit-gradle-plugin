@@ -1,5 +1,10 @@
 package de.mobanisto.compose.validation.deb
 
+import com.github.difflib.DiffUtils
+import com.github.difflib.UnifiedDiffUtils
+import com.github.difflib.algorithm.myers.MeyersDiff
+import java.io.File
+
 data class TarComparisonResult(val onlyIn1: List<TarEntry>, val onlyIn2: List<TarEntry>, val different: List<TarEntry>)
 
 object DebContentUtils {
@@ -39,5 +44,37 @@ object DebContentUtils {
             }
         }
         return diff
+    }
+
+    fun printDiff(deb1: File, deb2: File, comparison: Map<String, TarComparisonResult>) {
+        val content1 = DebContentBuilder().buildContentForComparison(deb1.inputStream(), comparison)
+        val content2 = DebContentBuilder().buildContentForComparison(deb2.inputStream(), comparison)
+        for (tarEntry in comparison.entries) {
+            val tarFile = tarEntry.key
+            for (entry in tarEntry.value.different) {
+                val address = DebAddress(tarFile, entry.name)
+                val bytes1 = content1[address]
+                val bytes2 = content2[address]
+                if (bytes1 != null && bytes2 != null) {
+                    printDiff(tarFile, entry, String(bytes1), String(bytes2))
+                }
+            }
+        }
+    }
+
+    private fun printDiff(tarFile: String, entry: TarEntry, text1: String, text2: String) {
+        // Print original texts
+        println("$tarFile:${entry.name}:stock:")
+        println(text1)
+        println("$tarFile:${entry.name}:custom:")
+        println(text2)
+        // Compute diff and print
+        val lines1 = text1.lines()
+        val lines2 = text2.lines()
+        val diff = DiffUtils.diff(lines1, lines2, MeyersDiff())
+        val unified = UnifiedDiffUtils.generateUnifiedDiff("stock deb", "custom deb", lines1, diff, 1)
+        for (line in unified) {
+            println(line)
+        }
     }
 }

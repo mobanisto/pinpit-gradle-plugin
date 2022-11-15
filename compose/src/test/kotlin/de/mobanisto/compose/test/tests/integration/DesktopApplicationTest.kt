@@ -321,13 +321,21 @@ class DesktopApplicationTest : GradlePluginTestBase() {
         val comparison = DebContentUtils.compare(deb1, deb2)
         var allClear = true
         for (entry in comparison.entries) {
-            println(entry.key)
             val tarComparison = entry.value
             allClear = allClear && tarComparison.onlyIn1.isEmpty() && tarComparison.onlyIn2.isEmpty()
                     && tarComparison.different.isEmpty()
-            tarComparison.onlyIn1.forEach { println("only in stock deb:  $it") }
-            tarComparison.onlyIn2.forEach { println("only in custom deb: $it") }
-            tarComparison.different.forEach { println("diff: $it") }
+        }
+        if (!allClear) {
+            println("Found differences among deb files produced")
+            for (entry in comparison.entries) {
+                println("  Differences in ${entry.key}:")
+                val tarComparison = entry.value
+                tarComparison.onlyIn1.forEach { println("    only in stock deb:  $it") }
+                tarComparison.onlyIn2.forEach { println("    only in custom deb: $it") }
+                tarComparison.different.forEach { println("    both but different: $it") }
+            }
+            println("Showing files with differences:")
+            DebContentUtils.printDiff(debs[0], debs[1], comparison)
         }
         check(allClear) { "Differences found in stock and custom deb" }
     }

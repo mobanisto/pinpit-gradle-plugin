@@ -120,3 +120,17 @@ internal fun Writer.writeLn(s: String) {
     write(s)
     write("\n")
 }
+
+internal fun ByteArray.isProbablyNotBinary() : Boolean {
+    var printable = 0
+    var nonPrintable = 0
+    for (byte in this) {
+        if (byte in 32..126) {
+            printable++
+        } else {
+            nonPrintable++
+        }
+        if (printable + nonPrintable >= 100) break
+    }
+    return printable / (printable + nonPrintable).toDouble() > 0.8
+}
