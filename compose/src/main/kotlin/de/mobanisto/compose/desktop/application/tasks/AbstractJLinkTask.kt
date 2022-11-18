@@ -11,17 +11,24 @@ import de.mobanisto.compose.desktop.application.internal.cliArg
 import de.mobanisto.compose.desktop.application.internal.ioFile
 import de.mobanisto.compose.desktop.application.internal.notNullProperty
 import de.mobanisto.compose.desktop.application.internal.nullableProperty
+import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.Input
+import org.gradle.api.tasks.InputDirectory
 import org.gradle.api.tasks.InputFile
+import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.Optional
 import java.io.File
+import java.nio.file.Path
 
 // todo: public DSL
 // todo: deduplicate if multiple runtimes are created
 abstract class AbstractJLinkTask : AbstractJvmToolOperationTask("jlink") {
+    @Internal
+    val jdk: Property<Path> = objects.notNullProperty()
+
     @get:Input
     val modules: ListProperty<String> = objects.listProperty(String::class.java)
 
@@ -55,6 +62,8 @@ abstract class AbstractJLinkTask : AbstractJvmToolOperationTask("jlink") {
         modulesToInclude.forEach { m ->
             cliArg("--add-modules", m)
         }
+
+        cliArg("--module-path", jdk.get().resolve("jmods"))
 
         cliArg("--strip-debug", stripDebug)
         cliArg("--no-header-files", noHeaderFiles)

@@ -181,7 +181,7 @@ tasks.withType<Test>().configureEach {
     dependsOn(":publishToMavenLocal")
 
     systemProperty("compose.tests.compose.gradle.plugin.version", "1.2.1")
-    systemProperty("compose.tests.mocompose.gradle.plugin.version", BuildProperties.deployVersion(project))
+    systemProperty("compose.tests.hokkaido.gradle.plugin.version", BuildProperties.deployVersion(project))
     for ((k, v) in project.properties) {
         if (k.startsWith("compose.")) {
             systemProperty(k, v.toString())

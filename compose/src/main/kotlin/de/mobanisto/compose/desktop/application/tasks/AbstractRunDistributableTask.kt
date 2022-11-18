@@ -22,7 +22,7 @@ import javax.inject.Inject
 // lazy configuration yet. Lazy configuration is needed to
 // calculate appImageDir after the evaluation of createApplicationImage
 abstract class AbstractRunDistributableTask @Inject constructor(
-    createApplicationImage: TaskProvider<AbstractJPackageTask>
+    createApplicationImage: TaskProvider<AppImageTask>
 ) : AbstractComposeDesktopTask() {
     @get:InputDirectory
     internal val appImageRootDir: Provider<Directory> = createApplicationImage.flatMap { it.destinationDir }

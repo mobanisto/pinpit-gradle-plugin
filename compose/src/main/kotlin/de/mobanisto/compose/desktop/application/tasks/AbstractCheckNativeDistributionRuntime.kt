@@ -5,7 +5,6 @@
 
 package de.mobanisto.compose.desktop.application.tasks
 
-import de.mobanisto.compose.desktop.application.internal.ExternalToolRunner
 import de.mobanisto.compose.desktop.application.internal.JvmRuntimeProperties
 import de.mobanisto.compose.desktop.application.internal.executableName
 import de.mobanisto.compose.desktop.application.internal.ioFile
@@ -17,15 +16,18 @@ import org.gradle.api.provider.Property
 import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.CacheableTask
 import org.gradle.api.tasks.InputDirectory
+import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.LocalState
 import org.gradle.api.tasks.OutputFile
 import org.gradle.api.tasks.PathSensitive
 import org.gradle.api.tasks.PathSensitivity
 import org.gradle.api.tasks.TaskAction
 import java.io.File
+import java.nio.file.Files
+import java.nio.file.Path
 
 // __COMPOSE_NATIVE_DISTRIBUTIONS_MIN_JAVA_VERSION__
-internal const val MIN_JAVA_RUNTIME_VERSION = 15
+internal const val MIN_JAVA_RUNTIME_VERSION = 11
 
 @CacheableTask
 abstract class AbstractCheckNativeDistributionRuntime : AbstractComposeDesktopTask() {
@@ -33,7 +35,13 @@ abstract class AbstractCheckNativeDistributionRuntime : AbstractComposeDesktopTa
     @get:InputDirectory
     val javaHome: Property<String> = objects.notNullProperty()
 
-    private val taskDir = project.layout.buildDirectory.dir("mocompose/tmp/$name")
+    @Internal
+    val jdk: Property<Path> = objects.notNullProperty()
+
+    @Internal
+    val targetJdkVersion: Property<String> = objects.notNullProperty()
+
+    private val taskDir = project.layout.buildDirectory.dir("hokkaido/tmp/$name")
 
     @get:OutputFile
     val javaRuntimePropertiesFile: Provider<RegularFile> = taskDir.map { it.file("properties.bin") }
@@ -57,6 +65,7 @@ abstract class AbstractCheckNativeDistributionRuntime : AbstractComposeDesktopTa
     @TaskAction
     fun run() {
         taskDir.ioFile.mkdirs()
+        val modules = arrayListOf<String>()
 
         val javaRuntimeVersion = try {
             getJavaRuntimeVersionUnsafe()?.toIntOrNull() ?: -1
@@ -73,24 +82,27 @@ abstract class AbstractCheckNativeDistributionRuntime : AbstractComposeDesktopTa
             """.trimMargin()
         }
 
-        val modules = arrayListOf<String>()
-        runExternalTool(
-            tool = javaExec,
-            args = listOf("--list-modules"),
-            logToConsole = ExternalToolRunner.LogToConsole.Never,
-            processStdout = { stdout ->
-                stdout.lineSequence().forEach { line ->
-                    val moduleName = line.trim().substringBefore("@")
-                    if (moduleName.isNotBlank()) {
-                        modules.add(moduleName)
-                    }
-                }
-            }
-        )
+        val targetJdk = Integer.parseInt(targetJdkVersion.get())
+        check(javaRuntimeVersion >= targetJdk) {
+            """|The JDK you would like to package is a JDK $targetJdk but you build JDK is only $javaRuntimeVersion
+               |Java home: ${javaHome.get()}
+               |Please use a JDK with >= $targetJdk for building.
+            """.trimMargin()
+        }
 
-        val properties = JvmRuntimeProperties(javaRuntimeVersion, modules)
+        val dirJdk = jdk.get()
+        val dirJmods = dirJdk.resolve("jmods")
+        Files.list(dirJmods).forEach { file ->
+            val moduleName = file.fileName.toString().trim().substringBefore(".jmod")
+            if (moduleName.isNotBlank()) {
+                modules.add(moduleName)
+            }
+        }
+
+        val properties = JvmRuntimeProperties(modules)
         JvmRuntimeProperties.writeToFile(properties, javaRuntimePropertiesFile.ioFile)
     }
+
 
     private fun getJavaRuntimeVersionUnsafe(): String? {
         cleanDirs(workingDir)
@@ -101,9 +113,9 @@ abstract class AbstractCheckNativeDistributionRuntime : AbstractComposeDesktopTa
         val javaVersionSuffix = "'"
         val printJavaRuntimeJava = workingDir.resolve("java/$printJavaRuntimeClassName.java").apply {
             parentFile.mkdirs()
-            writeText("""
+            writeText(
+                """
                 import java.lang.reflect.Method;
-
                 public class $printJavaRuntimeClassName {
                     public static void main(String[] args) {
                         Class<Runtime> runtimeClass = Runtime.class;
@@ -122,13 +134,13 @@ abstract class AbstractCheckNativeDistributionRuntime : AbstractComposeDesktopTa
                             printVersionAndHalt(System.getProperty("java.version"));
                         }
                     }
-
                     private static void printVersionAndHalt(String version) {
                         System.out.println("$javaVersionPrefix" + version + "$javaVersionSuffix");
                         Runtime.getRuntime().exit(0);
                     }
                 }
-            """.trimIndent())
+            """.trimIndent()
+            )
         }
         val classFilesDir = workingDir.resolve("out-classes")
         runExternalTool(

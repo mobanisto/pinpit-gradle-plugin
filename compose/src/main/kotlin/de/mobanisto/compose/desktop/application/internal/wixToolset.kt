@@ -5,13 +5,15 @@
 
 package de.mobanisto.compose.desktop.application.internal
 
-import de.mobanisto.compose.desktop.application.tasks.AbstractJPackageTask
 import de.mobanisto.compose.desktop.application.tasks.CustomMsiTask
 import de.mobanisto.compose.desktop.application.tasks.WindowsTask
 import de.undercouch.gradle.tasks.download.Download
 import org.gradle.api.Project
 import org.gradle.api.tasks.Copy
 import java.io.File
+import java.nio.file.Files
+import java.nio.file.Files.exists
+import java.nio.file.Paths
 
 internal const val DOWNLOAD_WIX_TOOLSET_TASK_NAME = "downloadWix"
 internal const val UNZIP_WIX_TOOLSET_TASK_NAME = "unzipWix"
@@ -19,7 +21,9 @@ internal const val WIX_PATH_ENV_VAR = "WIX_PATH"
 internal const val DOWNLOAD_WIX_PROPERTY = "compose.desktop.application.downloadWix"
 
 internal fun JvmApplicationContext.configureWix() {
-    check(currentOS == OS.Windows) { "Should not be called for non-Windows OS: $currentOS" }
+    val dirHome = Paths.get(System.getProperty("user.home"))
+    val dirTool = dirHome.resolve(".hokkaido")
+    val dirWix = dirTool.resolve("wixToolset")
 
     val wixPath = System.getenv()[WIX_PATH_ENV_VAR]
     if (wixPath != null) {
@@ -34,31 +38,26 @@ internal fun JvmApplicationContext.configureWix() {
     if (project.findProperty(DOWNLOAD_WIX_PROPERTY) == "false") return
 
     val root = project.rootProject
-    val wixDir = root.buildDir.resolve("wixToolset")
-    val zipFile = wixDir.resolve("wix311.zip")
-    val unzipDir = wixDir.resolve("unpacked")
+    val zipFile = dirWix.resolve("wix311.zip")
+    val unzipDir = dirWix.resolve("wix311")
     val download = root.tasks.maybeCreate(DOWNLOAD_WIX_TOOLSET_TASK_NAME, Download::class.java).apply {
-        onlyIf { !zipFile.isFile }
+        onlyIf { !exists(zipFile) }
         src("https://github.com/wixtoolset/wix3/releases/download/wix3112rtm/wix311-binaries.zip")
-        dest(zipFile)
+        dest(zipFile.toFile())
     }
     val unzip = root.tasks.maybeCreate(UNZIP_WIX_TOOLSET_TASK_NAME, Copy::class.java).apply {
+        onlyIf { !exists(unzipDir) }
         dependsOn(download)
         from(project.zipTree(zipFile))
-        destinationDir = unzipDir
+        destinationDir = unzipDir.toFile()
     }
     project.eachWindowsPackageTask {
         dependsOn(unzip)
-        wixToolsetDir.set(unzipDir)
+        wixToolsetDir.set(unzipDir.toFile())
     }
 }
 
 private fun Project.eachWindowsPackageTask(fn: WindowsTask.() -> Unit) {
-    tasks.withType(AbstractJPackageTask::class.java).configureEach { packageTask ->
-        if (packageTask.targetFormat.isCompatibleWith(OS.Windows)) {
-            packageTask.fn()
-        }
-    }
     tasks.withType(CustomMsiTask::class.java).configureEach { packageTask ->
         if (packageTask.targetFormat.isCompatibleWith(OS.Windows)) {
             packageTask.fn()

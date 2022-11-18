@@ -38,7 +38,9 @@ import java.io.File
 import java.util.*
 import javax.inject.Inject
 
-abstract class CustomMsiTask @Inject constructor() : CustomPackageTask(TargetFormat.CustomMsi), WindowsTask {
+abstract class CustomMsiTask @Inject constructor(
+    @Input val arch: String,
+) : CustomPackageTask(TargetFormat.CustomMsi), WindowsTask {
 
     /** @see internal/wixToolset.kt */
     override val wixToolsetDir: DirectoryProperty = objects.directoryProperty()
@@ -104,10 +106,10 @@ abstract class CustomMsiTask @Inject constructor() : CustomPackageTask(TargetFor
     private lateinit var jvmRuntimeInfo: JvmRuntimeProperties
 
     @get:LocalState
-    protected val jpackageResources: Provider<Directory> = project.layout.buildDirectory.dir("mocompose/tmp/resources")
+    protected val jpackageResources: Provider<Directory> = project.layout.buildDirectory.dir("hokkaido/tmp/resources")
 
     @get:LocalState
-    protected val skikoDir: Provider<Directory> = project.layout.buildDirectory.dir("mocompose/tmp/skiko")
+    protected val skikoDir: Provider<Directory> = project.layout.buildDirectory.dir("hokkaido/tmp/skiko")
 
     @get:Internal
     private val libsDir: Provider<Directory> = workingDir.map {
@@ -230,8 +232,6 @@ abstract class CustomMsiTask @Inject constructor() : CustomPackageTask(TargetFor
     }
 
     override fun createPackage() {
-        downloadJdk("windows", "x64")
-
         val environment: MutableMap<String, String> = HashMap<String, String>().apply {
             val wixDir = wixToolsetDir.ioFile
             val wixPath = wixDir.absolutePath

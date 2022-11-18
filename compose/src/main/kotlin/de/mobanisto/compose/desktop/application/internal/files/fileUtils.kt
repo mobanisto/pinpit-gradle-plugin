@@ -8,12 +8,22 @@ package de.mobanisto.compose.desktop.application.internal.files
 import de.mobanisto.compose.desktop.application.dsl.TargetFormat
 import de.mobanisto.compose.desktop.application.internal.OS
 import de.mobanisto.compose.desktop.application.internal.currentOS
+import org.gradle.api.file.Directory
+import org.gradle.api.file.DirectoryProperty
+import org.gradle.api.file.RegularFile
+import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.tasks.Internal
 import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
 import java.io.InputStream
 import java.io.Writer
+import java.nio.file.FileVisitResult
+import java.nio.file.Files
+import java.nio.file.Path
+import java.nio.file.SimpleFileVisitor
+import java.nio.file.attribute.BasicFileAttributes
+import java.nio.file.attribute.PosixFilePermissions
 import java.security.DigestInputStream
 import java.security.MessageDigest
 import java.util.zip.ZipEntry
@@ -133,4 +143,50 @@ internal fun ByteArray.isProbablyNotBinary() : Boolean {
         if (printable + nonPrintable >= 100) break
     }
     return printable / (printable + nonPrintable).toDouble() > 0.8
+}
+
+internal fun DirectoryProperty.asPath(): Path {
+    return get().asFile.toPath()
+}
+
+internal fun RegularFileProperty.asPath(): Path {
+    return get().asFile.toPath()
+}
+
+internal fun RegularFile.asPath(): Path {
+    return asFile.toPath()
+}
+
+internal fun Directory.asPath(): Path {
+    return asFile.toPath()
+}
+
+private const val permissionsRegular = "rw-r--r--"
+private const val permissionsExecutable = "rwxr-xr-x"
+internal val posixRegular = PosixFilePermissions.fromString(permissionsRegular)
+internal val posixExecutable = PosixFilePermissions.fromString(permissionsExecutable)
+
+internal fun syncDir(source: Directory, target: Directory, takeFile: (file: Path) -> Boolean = { _ -> true }) {
+    val pathSourceDir = source.asFile.toPath()
+    val pathTargetDir = target.asFile.toPath()
+}
+
+internal fun syncDir(source: Path, target: Path, takeFile: (file: Path) -> Boolean = { _ -> true }) {
+    Files.walkFileTree(source, object : SimpleFileVisitor<Path>() {
+        override fun visitFile(file: Path, attrs: BasicFileAttributes): FileVisitResult {
+            val relative = source.relativize(file)
+            if (!takeFile(relative)) {
+                return FileVisitResult.CONTINUE
+            }
+            val pathTarget = target.resolve(relative)
+            Files.createDirectories(pathTarget.parent, PosixFilePermissions.asFileAttribute(posixExecutable))
+            if (Files.isExecutable(file)) {
+                Files.setPosixFilePermissions(file, posixExecutable)
+            } else {
+                Files.setPosixFilePermissions(file, posixRegular)
+            }
+            Files.copy(file, pathTarget)
+            return FileVisitResult.CONTINUE
+        }
+    })
 }

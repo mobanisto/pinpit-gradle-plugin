@@ -11,7 +11,6 @@ import java.io.ObjectOutputStream
 import java.io.Serializable
 
 internal data class JvmRuntimeProperties(
-    val majorVersion: Int,
     val availableModules: List<String>,
 ) : Serializable {
     companion object {

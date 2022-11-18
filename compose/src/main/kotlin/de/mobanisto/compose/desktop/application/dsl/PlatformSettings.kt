@@ -92,8 +92,32 @@ abstract class LinuxPlatformSettings : AbstractPlatformSettings() {
     fun debAdditionalDependencies(vararg dependencies: String) {
         this.debAdditionalDependencies.addAll(dependencies.toList())
     }
+
     val debCopyright: RegularFileProperty = objects.fileProperty()
     val debLauncher: RegularFileProperty = objects.fileProperty()
+
+//    val debContainer = objects.domainObjectContainer(DebEnvironment::class.java) { name ->
+//        objects.newInstance(DebEnvironment::class.java, name)
+//    }
+
+    val debs: MutableList<DebianPlatformSettings> = arrayListOf()
+    open fun deb(name: String, fn: Action<DebianPlatformSettings>) {
+        val deb = objects.newInstance(DebianPlatformSettings::class.java).also {
+            debs.add(it)
+            it.distro = name
+        }
+        fn.execute(deb)
+    }
+}
+
+abstract class DebianPlatformSettings {
+    var distro: String? = null
+    var arch: String? = null
+    var qualifier: String? = null
+    var depends = arrayListOf<String>()
+    fun depends(vararg depends: String) {
+        this.depends.addAll(depends.toList())
+    }
 }
 
 abstract class WindowsPlatformSettings : AbstractPlatformSettings() {
@@ -107,4 +131,16 @@ abstract class WindowsPlatformSettings : AbstractPlatformSettings() {
     var upgradeUuid: String? = null
     var msiPackageVersion: String? = null
     var exePackageVersion: String? = null
+
+    val msis: MutableList<MsiPlatformSettings> = arrayListOf()
+    open fun msi(fn: Action<MsiPlatformSettings>) {
+        val msi = objects.newInstance(MsiPlatformSettings::class.java).also {
+            msis.add(it)
+        }
+        fn.execute(msi)
+    }
+}
+
+abstract class MsiPlatformSettings {
+    var arch: String? = null
 }

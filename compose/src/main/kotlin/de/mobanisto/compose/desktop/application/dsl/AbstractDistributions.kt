@@ -20,7 +20,7 @@ abstract class AbstractDistributions {
     internal abstract val layout: ProjectLayout
 
     val outputBaseDir: DirectoryProperty = objects.directoryProperty().apply {
-        set(layout.buildDirectory.dir("mocompose/binaries"))
+        set(layout.buildDirectory.dir("hokkaido/binaries"))
     }
 
     var jvmVendor: String? = null
@@ -34,9 +34,4 @@ abstract class AbstractDistributions {
     var vendor: String? = null
     val appResourcesRootDir: DirectoryProperty = objects.directoryProperty()
     val licenseFile: RegularFileProperty = objects.fileProperty()
-
-    var targetFormats: Set<TargetFormat> = EnumSet.noneOf(TargetFormat::class.java)
-    open fun targetFormats(vararg formats: TargetFormat) {
-        targetFormats = EnumSet.copyOf(formats.toList())
-    }
 }

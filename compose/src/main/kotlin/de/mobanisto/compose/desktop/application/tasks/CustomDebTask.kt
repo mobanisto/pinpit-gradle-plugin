@@ -10,9 +10,13 @@ import de.mobanisto.compose.desktop.application.internal.DebianUtils
 import de.mobanisto.compose.desktop.application.internal.JvmRuntimeProperties
 import de.mobanisto.compose.desktop.application.internal.dir
 import de.mobanisto.compose.desktop.application.internal.files.SimpleFileCopyingProcessor
+import de.mobanisto.compose.desktop.application.internal.files.asPath
 import de.mobanisto.compose.desktop.application.internal.files.findOutputFileOrDir
 import de.mobanisto.compose.desktop.application.internal.files.isJarFile
 import de.mobanisto.compose.desktop.application.internal.files.mangledName
+import de.mobanisto.compose.desktop.application.internal.files.posixExecutable
+import de.mobanisto.compose.desktop.application.internal.files.posixRegular
+import de.mobanisto.compose.desktop.application.internal.files.syncDir
 import de.mobanisto.compose.desktop.application.internal.files.writeLn
 import de.mobanisto.compose.desktop.application.internal.ioFile
 import de.mobanisto.compose.desktop.application.internal.ioFileOrNull
@@ -43,7 +47,6 @@ import java.nio.file.Files.createDirectories
 import java.nio.file.Path
 import java.nio.file.Paths
 import java.nio.file.attribute.PosixFilePermission
-import java.nio.file.attribute.PosixFilePermissions
 import java.nio.file.attribute.PosixFilePermissions.asFileAttribute
 import java.util.regex.Matcher
 import java.util.regex.Pattern
@@ -51,7 +54,10 @@ import javax.inject.Inject
 import kotlin.io.path.createDirectories
 
 
-abstract class CustomDebTask @Inject constructor() : CustomPackageTask(TargetFormat.CustomDeb) {
+abstract class CustomDebTask @Inject constructor(
+    @Input val arch: String,
+    @Input val qualifier: String,
+) : CustomPackageTask(TargetFormat.CustomDeb) {
 
     companion object {
         private val PACKAGE_NAME_REGEX: Pattern = Pattern.compile("^(^\\S+):")
@@ -157,10 +163,10 @@ abstract class CustomDebTask @Inject constructor() : CustomPackageTask(TargetFor
     private lateinit var jvmRuntimeInfo: JvmRuntimeProperties
 
     @get:LocalState
-    protected val jpackageResources: Provider<Directory> = project.layout.buildDirectory.dir("mocompose/tmp/resources")
+    protected val jpackageResources: Provider<Directory> = project.layout.buildDirectory.dir("hokkaido/tmp/resources")
 
     @get:LocalState
-    protected val skikoDir: Provider<Directory> = project.layout.buildDirectory.dir("mocompose/tmp/skiko")
+    protected val skikoDir: Provider<Directory> = project.layout.buildDirectory.dir("hokkaido/tmp/skiko")
 
     @get:Internal
     private val libsDir: Provider<Directory> = workingDir.map {
@@ -276,8 +282,6 @@ abstract class CustomDebTask @Inject constructor() : CustomPackageTask(TargetFor
     }
 
     override fun createPackage() {
-        downloadJdk("linux", "x64")
-
         val destination = destinationDir.get()
         logger.lifecycle("destination: $destination")
         destination.asFile.mkdirs()
@@ -289,23 +293,16 @@ abstract class CustomDebTask @Inject constructor() : CustomPackageTask(TargetFor
         logger.lifecycle("building debian file tree at: $debFileTree")
         debFileTree.asFile.mkdirs()
 
-        val debArch = getDebArch()
-
         fileOperations.delete(debFileTree)
         buildDebFileTree(appImage, debFileTree)
-        buildDebianDir(appImage, debFileTree, debArch)
+        buildDebianDir(appImage, debFileTree, arch)
 
-        val deb = destination.file("${linuxPackageName.get()}_${linuxDebPackageVersion.get()}-1_${debArch}.deb")
+        val deb = destination.file("${linuxPackageName.get()}-$qualifier-$arch-${linuxDebPackageVersion.get()}.deb")
         runExternalTool(
             tool = DebianUtils.fakeroot,
             args = listOf(DebianUtils.dpkgDeb.toString(), "-b", debFileTree.toString(), deb.toString())
         )
     }
-
-    private val permissionsRegular = "rw-r--r--"
-    private val permissionsExecutable = "rwxr-xr-x"
-    private val posixRegular = PosixFilePermissions.fromString(permissionsRegular)
-    private val posixExecutable = PosixFilePermissions.fromString(permissionsExecutable)
 
     private fun buildDebFileTree(appImage: Directory, debFileTree: Directory) {
         val dirOpt = debFileTree.dir("opt")
@@ -323,14 +320,6 @@ abstract class CustomDebTask @Inject constructor() : CustomPackageTask(TargetFor
         }
     }
 
-    private fun getDebArch(): String {
-        val result = runExternalToolAndGetOutput(
-            tool = DebianUtils.dpkg,
-            args = listOf("--print-architecture")
-        )
-        return result.stdout.lines()[0]
-    }
-
     private fun buildDebianDir(appImage: Directory, debFileTree: Directory, debArch: String) {
         val dirDebian = debFileTree.dir("DEBIAN")
         dirDebian.asPath().createDirectories(asFileAttribute(posixExecutable))
@@ -340,18 +329,6 @@ abstract class CustomDebTask @Inject constructor() : CustomPackageTask(TargetFor
         linuxDebPostInst.copy(dirDebian.file("postinst"), posixExecutable)
         linuxDebPreRm.copy(dirDebian.file("prerm"), posixExecutable)
         linuxDebPostRm.copy(dirDebian.file("postrm"), posixExecutable)
-    }
-
-    private fun RegularFileProperty.asPath(): Path {
-        return get().asFile.toPath()
-    }
-
-    private fun RegularFile.asPath(): Path {
-        return asFile.toPath()
-    }
-
-    private fun Directory.asPath(): Path {
-        return asFile.toPath()
     }
 
     private fun RegularFileProperty.copy(target: RegularFile, permissions: Set<PosixFilePermission>) {
@@ -452,26 +429,6 @@ abstract class CustomDebTask @Inject constructor() : CustomPackageTask(TargetFor
 
     private fun canDependOnLibs(file: File): Boolean {
         return file.canExecute() || file.toString().endsWith(".so")
-    }
-
-    private fun syncDir(source: Directory, target: Directory, takeFile: (file: Path) -> Boolean = { _ -> true }) {
-        val pathSourceDir = source.asFile.toPath()
-        val pathTargetDir = target.asFile.toPath()
-        for (file in source.asFileTree.files) {
-            val pathSource = file.toPath()
-            val relative = pathSourceDir.relativize(pathSource)
-            if (!takeFile(relative)) {
-                continue
-            }
-            val pathTarget = pathTargetDir.resolve(relative)
-            createDirectories(pathTarget.parent, asFileAttribute(posixExecutable))
-            if (Files.isExecutable(pathSource)) {
-                Files.setPosixFilePermissions(pathSource, posixExecutable)
-            } else {
-                Files.setPosixFilePermissions(pathSource, posixRegular)
-            }
-            Files.copy(pathSource, pathTarget)
-        }
     }
 
     override fun checkResult(result: ExecResult) {

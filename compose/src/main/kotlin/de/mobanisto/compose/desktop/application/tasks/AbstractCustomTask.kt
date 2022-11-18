@@ -6,8 +6,6 @@
 package de.mobanisto.compose.desktop.application.tasks
 
 import de.mobanisto.compose.desktop.application.internal.ComposeProperties
-import de.mobanisto.compose.desktop.application.internal.ioFile
-import de.mobanisto.compose.desktop.application.internal.jvmToolFile
 import de.mobanisto.compose.desktop.application.internal.notNullProperty
 import de.mobanisto.compose.desktop.tasks.AbstractComposeDesktopTask
 import org.gradle.api.file.Directory
@@ -21,11 +19,10 @@ import org.gradle.api.tasks.LocalState
 import org.gradle.api.tasks.Optional
 import org.gradle.api.tasks.OutputDirectory
 import org.gradle.api.tasks.TaskAction
-import org.gradle.process.ExecResult
 import org.gradle.work.InputChanges
 import java.io.File
 
-abstract class AbstractJvmToolOperationTask(private val toolName: String) : AbstractComposeDesktopTask() {
+abstract class AbstractCustomTask() : AbstractComposeDesktopTask() {
     @get:LocalState
     protected val workingDir: Provider<Directory> = project.layout.buildDirectory.dir("hokkaido/tmp/$name")
 
@@ -49,33 +46,15 @@ abstract class AbstractJvmToolOperationTask(private val toolName: String) : Abst
         freeArgs.orNull?.forEach { add(it) }
     }
 
-    protected open fun jvmToolEnvironment():  MutableMap<String, String> =
-        HashMap()
-    protected open fun checkResult(result: ExecResult) {
-        result.assertNormalExitValue()
-    }
-
     @TaskAction
     fun run(inputChanges: InputChanges) {
         initState()
 
-        val jtool = jvmToolFile(toolName, javaHome = javaHome)
-
         fileOperations.delete(destinationDir)
         prepareWorkingDir(inputChanges)
-        val argsFile = workingDir.ioFile.let { dir ->
-            val args = makeArgs(dir)
-            dir.resolveSibling("${name}.args.txt").apply {
-                writeText(args.joinToString("\n"))
-            }
-        }
 
         try {
-            runExternalTool(
-                tool = jtool,
-                args = listOf("@${argsFile.absolutePath}"),
-                environment = jvmToolEnvironment()
-            ).also { checkResult(it) }
+            runTask().also { checkResult() }
         } finally {
             if (!ComposeProperties.preserveWorkingDir(providers).get()) {
                 fileOperations.delete(workingDir)
@@ -85,5 +64,7 @@ abstract class AbstractJvmToolOperationTask(private val toolName: String) : Abst
     }
 
     protected open fun initState() {}
+    protected open fun runTask() {}
+    protected open fun checkResult() {}
     protected open fun saveStateAfterFinish() {}
 }

@@ -17,7 +17,7 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 class ComposePlugin : Plugin<Project> {
     override fun apply(project: Project) {
-        val composeExtension = project.extensions.create("mocompose", ComposeExtension::class.java)
+        val composeExtension = project.extensions.create("hokkaido", ComposeExtension::class.java)
         val desktopExtension = composeExtension.extensions.create("desktop", DesktopExtension::class.java)
 
         project.plugins.apply(de.mobanisto.compose.ComposeCompilerKotlinSupportPlugin::class.java)

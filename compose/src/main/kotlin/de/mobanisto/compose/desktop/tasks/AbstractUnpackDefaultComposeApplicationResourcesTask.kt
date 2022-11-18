@@ -27,7 +27,7 @@ abstract class AbstractUnpackDefaultComposeApplicationResourcesTask : AbstractCo
 
     @OutputDirectory
     val destinationDir: Provider<Directory> = project.layout.buildDirectory.dir(
-        "mocompose/default-resources/${ComposeBuildConfig.composeGradlePluginVersion}"
+        "hokkaido/default-resources/${ComposeBuildConfig.composeGradlePluginVersion}"
     )
 
     @get:Internal

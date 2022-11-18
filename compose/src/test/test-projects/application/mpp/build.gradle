@@ -40,7 +40,7 @@ android {
 
 ext.versionCode = "1.0.0"
 
-mocompose.desktop {
+hokkaido.desktop {
     application {
         mainClass = "MainKt"
         nativeDistributions {

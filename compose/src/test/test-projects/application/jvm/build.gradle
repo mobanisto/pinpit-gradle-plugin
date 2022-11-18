@@ -1,5 +1,3 @@
-import de.mobanisto.compose.desktop.application.dsl.TargetFormat
-
 plugins {
     id "org.jetbrains.kotlin.jvm"
     id "org.jetbrains.compose"
@@ -17,12 +15,10 @@ dependencies {
 
 ext.versionCode = "1.0.0"
 
-mocompose.desktop {
+hokkaido.desktop {
     application {
         mainClass = "MainKt"
         nativeDistributions {
-            targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb, TargetFormat.CustomDeb)
-
             jvmVendor = "adoptium"
             jvmVersion = "17.0.5+8"
 
@@ -46,6 +42,26 @@ mocompose.desktop {
                 debPostRm.set(project.file("src/main/packaging/deb/postrm"))
                 debCopyright.set(project.file("src/main/packaging/deb/copyright"))
                 debLauncher.set(project.file("src/main/packaging/deb/launcher.desktop"))
+                deb("UbuntuFocalX64") {
+                    qualifier = "ubuntu-20.04"
+                    arch = "x64"
+                    depends("libc6", "libexpat1", "libgcc-s1", "libpcre3", "libuuid1", "xdg-utils", "zlib1g", "libnotify4")
+                }
+                deb("UbuntuBionicX64") {
+                    qualifier = "ubuntu-18.04"
+                    arch = "x64"
+                    depends("libasound2", "libc6", "libexpat1", "libfontconfig1", "libfreetype6", "libgcc1",
+                            "libglib2.0-0", "libgraphite2-3", "libharfbuzz0b", "libjpeg-turbo8", "liblcms2-2",
+                            "libpcre3", "libpng16-16", "libstdc++6", "xdg-utils", "zlib1g", "libnotify4")
+                }
+                deb("DebianBullseyeX64") {
+                    qualifier = "debian-bullseye"
+                    arch = "x64"
+                    depends("libasound2", "libbrotli1", "libc6", "libexpat1", "libfontconfig1", "libfreetype6",
+                            "libgcc-s1", "libglib2.0-0", "libgraphite2-3", "libharfbuzz0b", "libjpeg62-turbo",
+                            "liblcms2-2", "libpcre3", "libpng16-16", "libstdc++6", "libuuid1", "xdg-utils", "zlib1g",
+                            "libnotify4")
+                }
             }
             windows {
                 console = true
@@ -55,6 +71,9 @@ mocompose.desktop {
                 menu = true
                 menuGroup = "compose"
                 upgradeUuid = "2d6ff464-75be-40ad-a256-56420b9cc374"
+                msi() {
+                    arch = "x64"
+                }
             }
             macOS {
                 dockName = "CustomDockName"

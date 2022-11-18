@@ -17,11 +17,4 @@ internal fun configureDesktop(project: Project, desktopExtension: DesktopExtensi
         val appData = JvmApplicationContext(project, appInternal, defaultBuildType)
         appData.configureJvmApplication()
     }
-
-    if (desktopExtension._isNativeApplicationInitialized) {
-        val unpackDefaultResources = project.registerTask<AbstractUnpackDefaultComposeApplicationResourcesTask>(
-            "mounpackDefaultComposeDesktopNativeApplicationResources"
-        ) {}
-        configureNativeApplication(project, desktopExtension.nativeApplication, unpackDefaultResources)
-    }
 }

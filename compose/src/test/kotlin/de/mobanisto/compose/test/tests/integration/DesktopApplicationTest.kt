@@ -43,35 +43,35 @@ class DesktopApplicationTest : GradlePluginTestBase() {
         file("build.gradle").modify {
             it + """
                 afterEvaluate {
-                    tasks.getByName("morun").doFirst {
+                    tasks.getByName("hokkaidoRun").doFirst {
                         throw new StopExecutionException("Skip run task")
                     }
                     
-                    tasks.getByName("morunDistributable").doFirst {
+                    tasks.getByName("hokkaidoRunDistributable").doFirst {
                         throw new StopExecutionException("Skip runDistributable task")
                     }
                 }
             """.trimIndent()
         }
-        gradle("morun").build().let { result ->
-            assertEquals(TaskOutcome.SUCCESS, result.task(":morun")?.outcome)
+        gradle("hokkaidoRun").build().let { result ->
+            assertEquals(TaskOutcome.SUCCESS, result.task(":hokkaidoRun")?.outcome)
         }
-        gradle("morunDistributable").build().let { result ->
-            assertEquals(TaskOutcome.SUCCESS, result.task(":mocreateDistributable")!!.outcome)
-            assertEquals(TaskOutcome.SUCCESS, result.task(":morunDistributable")?.outcome)
+        gradle("hokkaidoRunDistributable").build().let { result ->
+            assertEquals(TaskOutcome.SUCCESS, result.task(":hokkaidoCreateDistributable")!!.outcome)
+            assertEquals(TaskOutcome.SUCCESS, result.task(":hokkaidoRunDistributable")?.outcome)
         }
     }
 
     @Test
     fun testRunMpp() = with(testProject(TestProjects.mpp)) {
         val logLine = "Kotlin MPP app is running!"
-        gradle("morun").build().checks { check ->
-            check.taskOutcome(":morun", TaskOutcome.SUCCESS)
+        gradle("hokkaidoRun").build().checks { check ->
+            check.taskOutcome(":hokkaidoRun", TaskOutcome.SUCCESS)
             check.logContains(logLine)
         }
-        gradle("morunDistributable").build().checks { check ->
-            check.taskOutcome(":mocreateDistributable", TaskOutcome.SUCCESS)
-            check.taskOutcome(":morunDistributable", TaskOutcome.SUCCESS)
+        gradle("hokkaidoRunDistributable").build().checks { check ->
+            check.taskOutcome(":hokkaidoCreateDistributable", TaskOutcome.SUCCESS)
+            check.taskOutcome(":hokkaidoRunDistributable", TaskOutcome.SUCCESS)
             check.logContains(logLine)
         }
     }
@@ -96,7 +96,7 @@ class DesktopApplicationTest : GradlePluginTestBase() {
     @Test
     fun proguard(): Unit = with(testProject(TestProjects.proguard)) {
         val enableObfuscation = """
-                compose.desktop {
+                hokkaido.desktop {
                     application {
                         buildTypes.release.proguard {
                             obfuscate.set(true)
@@ -155,13 +155,13 @@ class DesktopApplicationTest : GradlePluginTestBase() {
             """.trimIndent()
         }
 
-        val packagingTask = ":mopackageDistributionForCurrentOS"
+        val packagingTask = ":hokkaidoPackageDistributionForCurrentOS"
         gradle(packagingTask).build().checks { check ->
             check.taskOutcome(packagingTask, TaskOutcome.SUCCESS)
         }
 
         gradle("clean", packagingTask).build().checks { check ->
-            check.taskOutcome(":mocheckRuntime", TaskOutcome.FROM_CACHE)
+            check.taskOutcome(":hokkaidoCheckRuntime", TaskOutcome.FROM_CACHE)
             check.taskOutcome(packagingTask, TaskOutcome.SUCCESS)
         }
     }
@@ -172,13 +172,13 @@ class DesktopApplicationTest : GradlePluginTestBase() {
     }
 
     private fun TestProject.testPackageJvmDistributions() {
-        val result = gradle(":mopackageDistributionForCurrentOS").build()
+        val result = gradle(":hokkaidoPackageDistributionForCurrentOS").build()
         val ext = when (currentOS) {
             OS.Linux -> "deb"
             OS.Windows -> "msi"
             OS.MacOS -> "dmg"
         }
-        val packageDir = file("build/mocompose/binaries/main/$ext")
+        val packageDir = file("build/hokkaido/binaries/main/$ext")
         val packageDirFiles = packageDir.listFiles() ?: arrayOf()
         check(packageDirFiles.size == 1) {
             "Expected single package in $packageDir, got [${packageDirFiles.joinToString(", ") { it.name }}]"
@@ -195,9 +195,9 @@ class DesktopApplicationTest : GradlePluginTestBase() {
         } else {
             Assert.assertEquals(packageFile.name, "TestPackage-1.0.0.$ext", "Unexpected package name")
         }
-        // TODO: assert outcome of mopackageCustomDeb task
-        assertEquals(TaskOutcome.SUCCESS, result.task(":mopackage${ext.uppercaseFirstChar()}")?.outcome)
-        assertEquals(TaskOutcome.SUCCESS, result.task(":mopackageDistributionForCurrentOS")?.outcome)
+        // TODO: assert outcome of hokkaidoPackageCustomDeb task
+        assertEquals(TaskOutcome.SUCCESS, result.task(":hokkaidoPackage${ext.uppercaseFirstChar()}")?.outcome)
+        assertEquals(TaskOutcome.SUCCESS, result.task(":hokkaidoPackageDistributionForCurrentOS")?.outcome)
     }
 
     @Test
@@ -224,7 +224,7 @@ class DesktopApplicationTest : GradlePluginTestBase() {
         testProject(TestProjects.jvm).apply {
             appendText("build.gradle") {
                 """
-                    compose.desktop.application {
+                    hokkaido.desktop.application {
                         javaHome = javaToolchains.launcherFor {
                             languageVersion.set(JavaLanguageVersion.of($javaVersion))
                         }.get().metadata.installationPath.asFile.absolutePath
@@ -232,6 +232,23 @@ class DesktopApplicationTest : GradlePluginTestBase() {
                 """.trimIndent()
             }
         }
+
+    @Test
+    fun tasks() = with(testProject(TestProjects.jvm)) {
+        gradle(":tasks").build().let { result ->
+            assertEquals(TaskOutcome.SUCCESS, result.task(":tasks")?.outcome)
+        }
+    }
+
+    @Test
+    fun packageDebUbuntuFocal() = with(testProject(TestProjects.jvm)) {
+        testPackageDebUbuntuFocal()
+    }
+
+    @Test
+    fun packageMsi() = with(testProject(TestProjects.jvm)) {
+        testPackageMsi()
+    }
 
     @Test
     fun packageCustomDeb() = with(testProject(TestProjects.jvm)) {
@@ -254,10 +271,10 @@ class DesktopApplicationTest : GradlePluginTestBase() {
     }
 
     private fun TestProject.testPackageUberJarForCurrentOS() {
-        gradle(":mopackageUberJarForCurrentOS").build().let { result ->
-            assertEquals(TaskOutcome.SUCCESS, result.task(":mopackageUberJarForCurrentOS")?.outcome)
+        gradle(":hokkaidoPackageUberJarForCurrentOS").build().let { result ->
+            assertEquals(TaskOutcome.SUCCESS, result.task(":hokkaidoPackageUberJarForCurrentOS")?.outcome)
 
-            val resultJarFile = file("build/mocompose/jars/TestPackage-${currentTarget.id}-1.0.0.jar")
+            val resultJarFile = file("build/hokkaido/jars/TestPackage-${currentTarget.id}-1.0.0.jar")
             resultJarFile.checkExists()
 
             JarFile(resultJarFile).use { jar ->
@@ -271,11 +288,33 @@ class DesktopApplicationTest : GradlePluginTestBase() {
         }
     }
 
-    private fun TestProject.testPackageCustomDeb() {
-        gradle(":mopackageCustomDeb").build().let { result ->
-            assertEquals(TaskOutcome.SUCCESS, result.task(":mopackageCustomDeb")?.outcome)
+    private fun TestProject.testPackageDebUbuntuFocal() {
+        gradle(":hokkaidoDebUbuntuFocalX64").build().let { result ->
+            assertEquals(TaskOutcome.SUCCESS, result.task(":hokkaidoDebUbuntuFocalX64")?.outcome)
 
-            val resultFile = file("build/mocompose/binaries/main/custom-deb/test-package_1.0.0-1_${currentOsArch}.deb")
+            val resultFile = file("build/hokkaido/binaries/main/custom-deb/test-package-ubuntu-20.04-x64-1.0.0.deb")
+            resultFile.checkExists()
+
+            resultFile.inputStream().use { fis ->
+                ValidateDeb.validate(fis)
+            }
+        }
+    }
+
+    private fun TestProject.testPackageMsi() {
+        gradle(":hokkaidoMsiX64").build().let { result ->
+            assertEquals(TaskOutcome.SUCCESS, result.task(":hokkaidoMsiX64")?.outcome)
+
+            val resultFile = file("build/hokkaido/binaries/main/custom-msi/test-package-x64-1.0.0.msi")
+            resultFile.checkExists()
+        }
+    }
+
+    private fun TestProject.testPackageCustomDeb() {
+        gradle(":hokkaidoPackageCustomDeb").build().let { result ->
+            assertEquals(TaskOutcome.SUCCESS, result.task(":hokkaidoPackageCustomDeb")?.outcome)
+
+            val resultFile = file("build/hokkaido/binaries/main/custom-deb/test-package_1.0.0-1_${currentOsArch}.deb")
             resultFile.checkExists()
 
             resultFile.inputStream().use { fis ->
@@ -285,10 +324,10 @@ class DesktopApplicationTest : GradlePluginTestBase() {
     }
 
     private fun TestProject.testPackageDebsAndCompareContent() {
-        val result = gradle(":mopackageDeb", ":mopackageCustomDeb").build()
+        val result = gradle(":hokkaidoPackageDeb", ":hokkaidoPackageCustomDeb").build()
 
-        val packageDirStock = file("build/mocompose/binaries/main/deb")
-        val packageDirCustom = file("build/mocompose/binaries/main/custom-deb")
+        val packageDirStock = file("build/hokkaido/binaries/main/deb")
+        val packageDirCustom = file("build/hokkaido/binaries/main/custom-deb")
         val packageDirs = listOf(packageDirStock, packageDirCustom)
 
         val debs = mutableListOf<File>()
@@ -308,8 +347,8 @@ class DesktopApplicationTest : GradlePluginTestBase() {
             }
             println("got package file at ${packageFile}")
         }
-        assertEquals(TaskOutcome.SUCCESS, result.task(":mopackageDeb")?.outcome)
-        assertEquals(TaskOutcome.SUCCESS, result.task(":mopackageCustomDeb")?.outcome)
+        assertEquals(TaskOutcome.SUCCESS, result.task(":hokkaidoPackageDeb")?.outcome)
+        assertEquals(TaskOutcome.SUCCESS, result.task(":hokkaidoPackageCustomDeb")?.outcome)
 
         check(debs.size == 2)
         val debContent = debs.map { file ->
@@ -502,8 +541,8 @@ class DesktopApplicationTest : GradlePluginTestBase() {
     @Test
     fun testSuggestModules() {
         with(testProject(TestProjects.jvm)) {
-            gradle(":mosuggestRuntimeModules").build().checks { check ->
-                check.taskOutcome(":mosuggestRuntimeModules", TaskOutcome.SUCCESS)
+            gradle(":hokkaidoSuggestRuntimeModules").build().checks { check ->
+                check.taskOutcome(":hokkaidoSuggestRuntimeModules", TaskOutcome.SUCCESS)
                 check.logContains("Suggested runtime modules to include:")
                 check.logContains("modules(\"java.instrument\", \"jdk.unsupported\")")
             }
@@ -551,8 +590,8 @@ class DesktopApplicationTest : GradlePluginTestBase() {
         val addPackage = addDebPackage(listOf(extraPackage))
         file("build.gradle").modify { "$it\n$addPackage" }
 
-        gradle(":mopackageCustomDeb").build().checks { check ->
-            check.taskOutcome(":mopackageCustomDeb", TaskOutcome.SUCCESS)
+        gradle(":hokkaidoPackageCustomDeb").build().checks { check ->
+            check.taskOutcome(":hokkaidoPackageCustomDeb", TaskOutcome.SUCCESS)
             checkDebContent { content ->
                 assertTrue(content.contains(extraPackage))
             }
@@ -565,8 +604,8 @@ class DesktopApplicationTest : GradlePluginTestBase() {
         val addPackage = addDebPackage(extraPackages)
         file("build.gradle").modify { "$it\n$addPackage" }
 
-        gradle(":mopackageCustomDeb").build().checks { check ->
-            check.taskOutcome(":mopackageCustomDeb", TaskOutcome.SUCCESS)
+        gradle(":hokkaidoPackageCustomDeb").build().checks { check ->
+            check.taskOutcome(":hokkaidoPackageCustomDeb", TaskOutcome.SUCCESS)
             checkDebContent { content ->
                 for (extraPackage in extraPackages) {
                     assertTrue(content.contains(extraPackage))
@@ -577,7 +616,7 @@ class DesktopApplicationTest : GradlePluginTestBase() {
 
     private fun addDebPackage(packages: List<String>): String {
         return """
-                mocompose.desktop {
+                hokkaido.desktop {
                     application {
                         nativeDistributions.linux {
                             debAdditionalDependencies("${packages.joinToString(", ")}")
@@ -588,7 +627,7 @@ class DesktopApplicationTest : GradlePluginTestBase() {
     }
 
     private fun TestProject.checkDebContent(check: (content: String) -> Unit) {
-        val packageDir = file("build/mocompose/binaries/main/custom-deb")
+        val packageDir = file("build/hokkaido/binaries/main/custom-deb")
         val packageDirFiles = packageDir.listFiles() ?: arrayOf()
         check(packageDirFiles.size == 1) {
             "Expected single package in $packageDir, got [${packageDirFiles.joinToString(", ") { it.name }}]"

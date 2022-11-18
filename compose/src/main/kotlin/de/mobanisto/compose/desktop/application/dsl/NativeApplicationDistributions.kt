@@ -11,18 +11,6 @@ import java.util.*
 abstract class NativeApplicationDistributions : AbstractDistributions() {
     private val supportedFormats = EnumSet.of(TargetFormat.Dmg)
 
-    override fun targetFormats(vararg formats: TargetFormat) {
-        val unsupportedFormats = formats.filter { it !in supportedFormats }
-        if (unsupportedFormats.isNotEmpty()) {
-            error(
-                "nativeApplication.distributions.targetFormats " +
-                    "does not support the following formats: " +
-                    unsupportedFormats.joinToString(", ")
-            )
-        }
-        super.targetFormats(*formats)
-    }
-
     val macOS: NativeApplicationMacOSPlatformSettings = objects.newInstance(NativeApplicationMacOSPlatformSettings::class.java)
     open fun macOS(fn: Action<NativeApplicationMacOSPlatformSettings>) {
         fn.execute(macOS)

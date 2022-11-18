@@ -8,54 +8,53 @@ package de.mobanisto.compose.desktop.application.internal.validation
 import de.mobanisto.compose.desktop.application.dsl.TargetFormat
 import de.mobanisto.compose.desktop.application.internal.JvmApplicationContext
 import de.mobanisto.compose.desktop.application.internal.OS
-import de.mobanisto.compose.desktop.application.internal.packageBuildVersionFor
-import de.mobanisto.compose.desktop.application.internal.packageVersionFor
 import org.gradle.api.GradleException
 
 internal fun JvmApplicationContext.validatePackageVersions() {
     val errors = ErrorsCollector()
 
-    for (targetFormat in app.nativeDistributions.targetFormats) {
-        val versionChecker: VersionChecker? = when (targetFormat) {
-            TargetFormat.AppImage -> null
-            TargetFormat.Deb, TargetFormat.CustomDeb -> DebVersionChecker
-            TargetFormat.Rpm -> RpmVersionChecker
-            TargetFormat.Msi, TargetFormat.Exe, TargetFormat.CustomMsi -> WindowsVersionChecker
-            TargetFormat.Dmg, TargetFormat.Pkg -> MacVersionChecker
-        }
-
-        val packageVersion = packageVersionFor(targetFormat).orNull
-        if (packageVersion == null) {
-            errors.addError(targetFormat, "no version was specified")
-        } else {
-            versionChecker?.apply {
-                if (!isValid(packageVersion)) {
-                    errors.addError(
-                        targetFormat,
-                        "'$packageVersion' is not a valid version",
-                        correctFormat = correctFormat
-                    )
-                }
-            }
-        }
-
-        if (targetFormat.targetOS == OS.MacOS) {
-            val packageBuildVersion = packageBuildVersionFor(targetFormat).orNull
-            if (packageBuildVersion == null) {
-                errors.addError(targetFormat, "no build version was specified")
-            } else {
-                versionChecker?.apply {
-                    if (!isValid(packageBuildVersion)) {
-                        errors.addError(
-                            targetFormat,
-                            "'$packageBuildVersion' is not a valid build version",
-                            correctFormat = correctFormat
-                        )
-                    }
-                }
-            }
-        }
-    }
+    // TODO: re-enable this somehow for each configured target
+//    for (targetFormat in app.nativeDistributions.targetFormats) {
+//        val versionChecker: VersionChecker? = when (targetFormat) {
+//            TargetFormat.AppImage -> null
+//            TargetFormat.Deb, TargetFormat.CustomDeb -> DebVersionChecker
+//            TargetFormat.Rpm -> RpmVersionChecker
+//            TargetFormat.Msi, TargetFormat.Exe, TargetFormat.CustomMsi -> WindowsVersionChecker
+//            TargetFormat.Dmg, TargetFormat.Pkg -> MacVersionChecker
+//        }
+//
+//        val packageVersion = packageVersionFor(targetFormat).orNull
+//        if (packageVersion == null) {
+//            errors.addError(targetFormat, "no version was specified")
+//        } else {
+//            versionChecker?.apply {
+//                if (!isValid(packageVersion)) {
+//                    errors.addError(
+//                        targetFormat,
+//                        "'$packageVersion' is not a valid version",
+//                        correctFormat = correctFormat
+//                    )
+//                }
+//            }
+//        }
+//
+//        if (targetFormat.targetOS == OS.MacOS) {
+//            val packageBuildVersion = packageBuildVersionFor(targetFormat).orNull
+//            if (packageBuildVersion == null) {
+//                errors.addError(targetFormat, "no build version was specified")
+//            } else {
+//                versionChecker?.apply {
+//                    if (!isValid(packageBuildVersion)) {
+//                        errors.addError(
+//                            targetFormat,
+//                            "'$packageBuildVersion' is not a valid build version",
+//                            correctFormat = correctFormat
+//                        )
+//                    }
+//                }
+//            }
+//        }
+//    }
 
     if (errors.errors.isNotEmpty()) {
         throw GradleException(errors.errors.joinToString("\n"))

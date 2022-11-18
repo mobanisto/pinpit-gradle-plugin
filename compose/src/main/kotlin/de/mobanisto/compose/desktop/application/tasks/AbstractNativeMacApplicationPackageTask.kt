@@ -34,7 +34,7 @@ abstract class AbstractNativeMacApplicationPackageTask : AbstractComposeDesktopT
     val destinationDir: DirectoryProperty = objects.directoryProperty()
 
     @get:LocalState
-    val workingDir: Provider<Directory> = project.layout.buildDirectory.dir("mocompose/tmp/$name")
+    val workingDir: Provider<Directory> = project.layout.buildDirectory.dir("hokkaido/tmp/$name")
 
     @TaskAction
     fun run() {

@@ -22,16 +22,21 @@ import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.InputFile
 import org.gradle.api.tasks.InputFiles
+import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.LocalState
 import org.gradle.api.tasks.PathSensitive
 import org.gradle.api.tasks.PathSensitivity
 import org.gradle.api.tasks.TaskAction
+import java.nio.file.Path
 
 abstract class AbstractSuggestModulesTask : AbstractComposeDesktopTask() {
     @get:Input
     val javaHome: Property<String> = objects.notNullProperty<String>().apply {
         set(providers.systemProperty("java.home"))
     }
+
+    @Internal
+    val jdk: Property<Path> = objects.notNullProperty()
 
     @get:InputFiles
     val files: ConfigurableFileCollection = objects.fileCollection()
@@ -47,7 +52,7 @@ abstract class AbstractSuggestModulesTask : AbstractComposeDesktopTask() {
     val jvmTarget: Property<String> = objects.notNullProperty(MIN_JAVA_RUNTIME_VERSION.toString())
 
     @get:LocalState
-    protected val workingDir: Provider<Directory> = project.layout.buildDirectory.dir("mocompose/tmp/$name")
+    protected val workingDir: Provider<Directory> = project.layout.buildDirectory.dir("hokkaido/tmp/$name")
 
     @TaskAction
     fun run() {

@@ -9,61 +9,19 @@ import de.mobanisto.compose.desktop.application.dsl.JvmApplicationDistributions
 import de.mobanisto.compose.desktop.application.dsl.TargetFormat
 import org.gradle.api.provider.Provider
 
-internal fun JvmApplicationContext.packageVersionFor(
-    targetFormat: TargetFormat
-): Provider<String?> =
+internal fun JvmApplicationContext.packageVersionFor(os: OS): Provider<String?> =
     project.provider {
-        app.nativeDistributions.packageVersionFor(targetFormat)
+        app.nativeDistributions.packageVersionFor(os)
             ?: project.version.toString().takeIf { it != "unspecified" }
             ?: "1.0.0"
     }
 
-private fun JvmApplicationDistributions.packageVersionFor(
-    targetFormat: TargetFormat
-): String? {
-    val formatSpecificVersion: String? = when (targetFormat) {
-        TargetFormat.AppImage -> null
-        TargetFormat.Deb -> linux.debPackageVersion
-        TargetFormat.Rpm -> linux.rpmPackageVersion
-        TargetFormat.Dmg -> macOS.dmgPackageVersion
-        TargetFormat.Pkg -> macOS.pkgPackageVersion
-        TargetFormat.Exe -> windows.exePackageVersion
-        TargetFormat.Msi -> windows.msiPackageVersion
-        TargetFormat.CustomDeb -> linux.debPackageVersion
-        TargetFormat.CustomMsi -> windows.msiPackageVersion
-    }
-    val osSpecificVersion: String? = when (targetFormat.targetOS) {
+private fun JvmApplicationDistributions.packageVersionFor(os: OS): String? {
+    val osSpecificVersion: String? = when (os) {
         OS.Linux -> linux.packageVersion
         OS.MacOS -> macOS.packageVersion
         OS.Windows -> windows.packageVersion
     }
-    return formatSpecificVersion
-        ?: osSpecificVersion
+    return osSpecificVersion
         ?: packageVersion
-}
-
-internal fun JvmApplicationContext.packageBuildVersionFor(
-    targetFormat: TargetFormat
-): Provider<String?> =
-    project.provider {
-        app.nativeDistributions.packageBuildVersionFor(targetFormat)
-            // fallback to normal version
-            ?: app.nativeDistributions.packageVersionFor(targetFormat)
-            ?: project.version.toString().takeIf { it != "unspecified" }
-            ?: "1.0.0"
-    }
-
-private fun JvmApplicationDistributions.packageBuildVersionFor(
-    targetFormat: TargetFormat
-): String? {
-    check(targetFormat.targetOS == OS.MacOS)
-    val formatSpecificVersion: String? = when (targetFormat) {
-        TargetFormat.AppImage -> null
-        TargetFormat.Dmg -> macOS.dmgPackageBuildVersion
-        TargetFormat.Pkg -> macOS.pkgPackageBuildVersion
-        else -> error("invalid target format: $targetFormat")
-    }
-    val osSpecificVersion: String? = macOS.packageBuildVersion
-    return formatSpecificVersion
-        ?: osSpecificVersion
 }

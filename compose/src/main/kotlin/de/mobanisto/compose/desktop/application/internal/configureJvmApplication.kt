@@ -5,22 +5,25 @@
 
 package de.mobanisto.compose.desktop.application.internal
 
-import de.mobanisto.compose.desktop.application.dsl.TargetFormat
+import de.mobanisto.compose.desktop.application.internal.OS.Linux
+import de.mobanisto.compose.desktop.application.internal.OS.Windows
 import de.mobanisto.compose.desktop.application.internal.validation.validatePackageVersions
 import de.mobanisto.compose.desktop.application.tasks.AbstractCheckNativeDistributionRuntime
-import de.mobanisto.compose.desktop.application.tasks.AbstractCheckNotarizationStatusTask
 import de.mobanisto.compose.desktop.application.tasks.AbstractJLinkTask
-import de.mobanisto.compose.desktop.application.tasks.AbstractJPackageTask
 import de.mobanisto.compose.desktop.application.tasks.AbstractNotarizationTask
 import de.mobanisto.compose.desktop.application.tasks.AbstractProguardTask
 import de.mobanisto.compose.desktop.application.tasks.AbstractRunDistributableTask
 import de.mobanisto.compose.desktop.application.tasks.AbstractSuggestModulesTask
-import de.mobanisto.compose.desktop.application.tasks.AbstractUploadAppForNotarizationTask
+import de.mobanisto.compose.desktop.application.tasks.AppImageTask
 import de.mobanisto.compose.desktop.application.tasks.CustomDebTask
 import de.mobanisto.compose.desktop.application.tasks.CustomMsiTask
 import de.mobanisto.compose.desktop.application.tasks.CustomPackageTask
+import de.mobanisto.compose.desktop.application.tasks.DownloadJdkTask
 import de.mobanisto.compose.desktop.tasks.AbstractUnpackDefaultComposeApplicationResourcesTask
+import de.mobanisto.compose.internal.uppercaseFirstChar
 import org.gradle.api.DefaultTask
+import org.gradle.api.GradleException
+import org.gradle.api.file.Directory
 import org.gradle.api.file.DuplicatesStrategy
 import org.gradle.api.file.FileCollection
 import org.gradle.api.provider.Provider
@@ -45,48 +48,27 @@ internal fun JvmApplicationContext.configureJvmApplication() {
     val commonTasks = configureCommonJvmDesktopTasks()
     configurePackagingTasks(commonTasks)
     copy(buildType = app.buildTypes.release).configurePackagingTasks(commonTasks)
-    if (currentOS == OS.Windows) {
-        configureWix()
-    }
+    configureWix()
 }
 
 internal class CommonJvmDesktopTasks(
     val unpackDefaultResources: TaskProvider<AbstractUnpackDefaultComposeApplicationResourcesTask>,
-    val checkRuntime: TaskProvider<AbstractCheckNativeDistributionRuntime>,
-    val suggestRuntimeModules: TaskProvider<AbstractSuggestModulesTask>,
     val prepareAppResources: TaskProvider<Sync>,
-    val createRuntimeImage: TaskProvider<AbstractJLinkTask>
+)
+
+internal class CommonJvmPackageTasks(
+    val checkRuntime: TaskProvider<AbstractCheckNativeDistributionRuntime>,
+    val createRuntimeImage: TaskProvider<AbstractJLinkTask>,
 )
 
 private fun JvmApplicationContext.configureCommonJvmDesktopTasks(): CommonJvmDesktopTasks {
     val unpackDefaultResources = tasks.register<AbstractUnpackDefaultComposeApplicationResourcesTask>(
-        taskNameAction = "mounpack",
+        taskNameAction = "hokkaidoUnpack",
         taskNameObject = "DefaultComposeDesktopJvmApplicationResources"
     ) {}
 
-    val checkRuntime = tasks.register<AbstractCheckNativeDistributionRuntime>(
-        taskNameAction = "mocheck",
-        taskNameObject = "runtime"
-    ) {
-        javaHome.set(app.javaHomeProvider)
-    }
-
-    val suggestRuntimeModules = tasks.register<AbstractSuggestModulesTask>(
-        taskNameAction = "mosuggest",
-        taskNameObject = "runtimeModules"
-    ) {
-        dependsOn(checkRuntime)
-        javaHome.set(app.javaHomeProvider)
-        modules.set(provider { app.nativeDistributions.modules })
-
-        useAppRuntimeFiles { (jarFiles, mainJar) ->
-            files.from(jarFiles)
-            launcherMainJar.set(mainJar)
-        }
-    }
-
     val prepareAppResources = tasks.register<Sync>(
-        taskNameAction = "moprepare",
+        taskNameAction = "hokkaidoPrepare",
         taskNameObject = "appResources"
     ) {
         val appResourcesRootDir = app.nativeDistributions.appResourcesRootDir
@@ -98,171 +80,204 @@ private fun JvmApplicationContext.configureCommonJvmDesktopTasks(): CommonJvmDes
         into(jvmTmpDirForTask())
     }
 
-    val createRuntimeImage = tasks.register<AbstractJLinkTask>(
-        taskNameAction = "mocreate",
-        taskNameObject = "runtimeImage"
-    ) {
-        dependsOn(checkRuntime)
-        javaHome.set(app.javaHomeProvider)
-        modules.set(provider { app.nativeDistributions.modules })
-        includeAllModules.set(provider { app.nativeDistributions.includeAllModules })
-        javaRuntimePropertiesFile.set(checkRuntime.flatMap { it.javaRuntimePropertiesFile })
-        destinationDir.set(appTmpDir.dir("runtime"))
-    }
-
     return CommonJvmDesktopTasks(
         unpackDefaultResources,
-        checkRuntime,
-        suggestRuntimeModules,
         prepareAppResources,
-        createRuntimeImage
     )
 }
+
+val downloadJdkTasks = mutableMapOf<String, TaskProvider<DownloadJdkTask>>()
+val checkRuntimeTasks = mutableMapOf<String, TaskProvider<AbstractCheckNativeDistributionRuntime>>()
+val suggestModulesTasks = mutableMapOf<String, TaskProvider<AbstractSuggestModulesTask>>()
+val runtimeTasks = mutableMapOf<String, TaskProvider<AbstractJLinkTask>>()
+val distributableTasks = mutableMapOf<String, TaskProvider<AppImageTask>>()
+val runTasks = mutableMapOf<String, TaskProvider<AbstractRunDistributableTask>>()
 
 private fun JvmApplicationContext.configurePackagingTasks(
     commonTasks: CommonJvmDesktopTasks
 ) {
     val runProguard = if (buildType.proguard.isEnabled.orNull == true) {
         tasks.register<AbstractProguardTask>(
-            taskNameAction = "moproguard",
+            taskNameAction = "hokkaidoProguard",
             taskNameObject = "Jars"
         ) {
             configureProguardTask(this, commonTasks.unpackDefaultResources)
         }
     } else null
 
-    val createDistributable = tasks.register<AbstractJPackageTask>(
-        taskNameAction = "mocreate",
-        taskNameObject = "distributable",
-        args = listOf(TargetFormat.AppImage)
-    ) {
-        configurePackageTask(
-            this,
-            createRuntimeImage = commonTasks.createRuntimeImage,
-            prepareAppResources = commonTasks.prepareAppResources,
-            checkRuntime = commonTasks.checkRuntime,
-            unpackDefaultResources = commonTasks.unpackDefaultResources,
-            runProguard = runProguard
-        )
-    }
+    val jdkInfo = jdkInfo(app.nativeDistributions.jvmVendor!!, app.nativeDistributions.jvmVersion!!)
+        ?: throw GradleException("Invalid JVM vendor or version")
 
-    val packageFormats = app.nativeDistributions.targetFormats.map { targetFormat ->
-        if (targetFormat == TargetFormat.CustomDeb) {
-            return@map tasks.register<CustomDebTask>(taskNameAction = "mopackageCustomDeb") {
-                configureCustomPackageTask(
-                    this,
-                    createAppImage = createDistributable,
-                    checkRuntime = commonTasks.checkRuntime,
-                    unpackDefaultResources = commonTasks.unpackDefaultResources
-                )
-            }
-        } else if (targetFormat == TargetFormat.CustomMsi) {
-            return@map tasks.register<CustomMsiTask>(taskNameAction = "mopackageCustomMsi") {
-                configureCustomPackageTask(
-                    this,
-                    createAppImage = createDistributable,
-                    checkRuntime = commonTasks.checkRuntime,
-                    unpackDefaultResources = commonTasks.unpackDefaultResources
-                )
-            }
-        }
+    app.nativeDistributions.windows.msis.forEach { msi ->
+        val arch = msi.arch!!
+        val os = "windows"
 
-        val packageFormat = tasks.register<AbstractJPackageTask>(
-            taskNameAction = "mopackage",
-            taskNameObject = targetFormat.name,
-            args = listOf(targetFormat)
+        val osArchKey = "$os:$arch"
+        val osArch = os.uppercaseFirstChar() + arch.uppercaseFirstChar()
+
+        val packageTasks = configureCommonPackageTasks(tasks, jdkInfo, os, arch, app, appTmpDir)
+
+        val createDistributable = distributableTasks[osArchKey] ?: tasks.register<AppImageTask>(
+            taskNameAction = "hokkaido",
+            taskNameObject = "distributable$osArch",
         ) {
-            // On Mac we want to patch bundled Info.plist file,
-            // so we create an app image, change its Info.plist,
-            // then create an installer based on the app image.
-            // We could create an installer the same way on other platforms, but
-            // in some cases there are failures with JDK 15.
-            // See [AbstractJPackageTask.patchInfoPlistIfNeeded]
-            if (currentOS == OS.MacOS) {
-                configurePackageTask(
-                    this,
-                    createAppImage = createDistributable,
-                    checkRuntime = commonTasks.checkRuntime,
-                    unpackDefaultResources = commonTasks.unpackDefaultResources
-                )
-            } else {
-                configurePackageTask(
-                    this,
-                    createRuntimeImage = commonTasks.createRuntimeImage,
-                    prepareAppResources = commonTasks.prepareAppResources,
-                    checkRuntime = commonTasks.checkRuntime,
-                    unpackDefaultResources = commonTasks.unpackDefaultResources,
-                    runProguard = runProguard
-                )
-            }
+            configureAppImageTask(
+                this,
+                os = Windows,
+                arch = arch,
+                createRuntimeImage = packageTasks.createRuntimeImage,
+                prepareAppResources = commonTasks.prepareAppResources,
+                checkRuntime = packageTasks.checkRuntime,
+                unpackDefaultResources = commonTasks.unpackDefaultResources,
+                runProguard = runProguard
+            )
+        }.also { distributableTasks[osArchKey] = it }
+
+        val runDistributable = runTasks[osArchKey] ?: tasks.register<AbstractRunDistributableTask>(
+            taskNameAction = "hokkaidoRun",
+            taskNameObject = "distributable$osArch",
+            args = listOf(createDistributable)
+        ).also { runTasks[osArchKey] = it }
+
+        tasks.register<CustomMsiTask>(
+            taskNameAction = "hokkaido",
+            taskNameObject = "msi" + arch.uppercaseFirstChar(),
+            args = listOf(arch)
+        ) {
+            configureCustomPackageTask(
+                this,
+                createAppImage = createDistributable,
+                checkRuntime = packageTasks.checkRuntime,
+                unpackDefaultResources = commonTasks.unpackDefaultResources
+            )
         }
-
-        if (targetFormat.isCompatibleWith(OS.MacOS)) {
-            check(targetFormat == TargetFormat.Dmg || targetFormat == TargetFormat.Pkg) {
-                "Unexpected target format for MacOS: $targetFormat"
-            }
-
-            val notarizationRequestsDir = project.layout.buildDirectory.dir("mocompose/notarization/$app")
-            tasks.register<AbstractUploadAppForNotarizationTask>(
-                taskNameAction = "monotarize",
-                taskNameObject = targetFormat.name,
-                args = listOf(targetFormat)
-            ) {
-                dependsOn(packageFormat)
-                inputDir.set(packageFormat.flatMap { it.destinationDir })
-                requestsDir.set(notarizationRequestsDir)
-                configureCommonNotarizationSettings(this)
-            }
-
-            tasks.register<AbstractCheckNotarizationStatusTask>(
-                taskNameAction = "mocheck",
-                taskNameObject = "notarizationStatus"
-            ) {
-                requestDir.set(notarizationRequestsDir)
-                configureCommonNotarizationSettings(this)
-            }
-        }
-
-        packageFormat
     }
 
-    val packageForCurrentOS = tasks.register<DefaultTask>(
-        taskNameAction = "mopackage",
-        taskNameObject = "distributionForCurrentOS"
-    ) {
-        dependsOn(packageFormats)
+    app.nativeDistributions.linux.debs.forEach { deb ->
+        val arch = deb.arch!!
+        val distro = deb.distro!!
+        val os = "linux"
+
+        val osArchKey = "$os:$arch"
+        val osArch = os.uppercaseFirstChar() + arch.uppercaseFirstChar()
+
+        val packageTasks = configureCommonPackageTasks(tasks, jdkInfo, os, arch, app, appTmpDir)
+
+        val createDistributable = distributableTasks[osArchKey] ?: tasks.register<AppImageTask>(
+            taskNameAction = "hokkaido",
+            taskNameObject = "distributable$osArch",
+        ) {
+            configureAppImageTask(
+                this,
+                os = Linux,
+                arch = arch,
+                createRuntimeImage = packageTasks.createRuntimeImage,
+                prepareAppResources = commonTasks.prepareAppResources,
+                checkRuntime = packageTasks.checkRuntime,
+                unpackDefaultResources = commonTasks.unpackDefaultResources,
+                runProguard = runProguard
+            )
+        }.also { distributableTasks[osArchKey] = it }
+
+        val runDistributable = runTasks[osArchKey] ?: tasks.register<AbstractRunDistributableTask>(
+            taskNameAction = "hokkaidoRun",
+            taskNameObject = "distributable$osArch",
+            args = listOf(createDistributable)
+        ).also { runTasks[osArchKey] = it }
+
+        tasks.register<CustomDebTask>(
+            taskNameAction = "hokkaido",
+            taskNameObject = "deb" + distro.uppercaseFirstChar(),
+            args = listOf(arch, deb.qualifier!!)
+        ) {
+            configureCustomPackageTask(
+                this,
+                createAppImage = createDistributable,
+                checkRuntime = packageTasks.checkRuntime,
+                unpackDefaultResources = commonTasks.unpackDefaultResources
+            )
+        }
     }
 
     if (buildType === app.buildTypes.default) {
-        // todo: remove
-        tasks.register<DefaultTask>("mopackage") {
-            dependsOn(packageForCurrentOS)
-
-            doLast {
-                it.logger.error(
-                    "'${it.name}' task is deprecated and will be removed in next releases. " +
-                            "Use '${packageForCurrentOS.get().name}' task instead"
-                )
-            }
+        tasks.register<DefaultTask>("hokkaidoPackage") {
+            // TODO: depend on all package tasks
+            // dependsOn(packageForCurrentOS)
         }
     }
 
     val packageUberJarForCurrentOS = tasks.register<Jar>(
-        taskNameAction = "mopackage",
+        taskNameAction = "hokkaidoPackage",
         taskNameObject = "uberJarForCurrentOS"
     ) {
-        configurePackageUberJarForCurrentOS(this)
+        configurePackageUberJarForCurrentOS(this, currentOS)
     }
 
-    val runDistributable = tasks.register<AbstractRunDistributableTask>(
-        taskNameAction = "morun",
-        taskNameObject = "distributable",
-        args = listOf(createDistributable)
-    )
-
-    val run = tasks.register<JavaExec>(taskNameAction = "morun") {
+    val run = tasks.register<JavaExec>(taskNameAction = "hokkaidoRun") {
         configureRunTask(this, commonTasks.prepareAppResources)
     }
+}
+
+private fun JvmApplicationContext.configureCommonPackageTasks(
+    tasks: JvmTasks,
+    jdkInfo: JdkInfo,
+    os: String,
+    arch: String,
+    app: JvmApplicationData,
+    appTmpDir: Provider<Directory>
+): CommonJvmPackageTasks {
+    val osArchKey = "$os:$arch"
+    val osArch = os.uppercaseFirstChar() + arch.uppercaseFirstChar()
+
+    val downloadJdk = downloadJdkTasks[osArchKey] ?: tasks.register<DownloadJdkTask>(
+        taskNameAction = "hokkaido",
+        taskNameObject = "download$osArch",
+    ) {
+        jvmVendor.set(app.nativeDistributions.jvmVendor)
+        jvmVersion.set(app.nativeDistributions.jvmVersion)
+        this.os.set(os)
+        this.arch.set(arch)
+    }.also { downloadJdkTasks[osArchKey] = it }
+
+    val checkRuntime = checkRuntimeTasks[osArchKey] ?: tasks.register<AbstractCheckNativeDistributionRuntime>(
+        taskNameAction = "hokkaidoCheck",
+        taskNameObject = "runtime$osArch"
+    ) {
+        dependsOn(downloadJdk)
+        targetJdkVersion.set(jdkInfo.major)
+        javaHome.set(app.javaHomeProvider)
+        jdk.set(provider { downloadJdk.get().jdkDir })
+    }.also { checkRuntimeTasks[osArchKey] = it }
+
+    val suggestRuntimeModules = suggestModulesTasks[osArchKey] ?: tasks.register<AbstractSuggestModulesTask>(
+        taskNameAction = "hokkaidoSuggest",
+        taskNameObject = "runtimeModules$osArch"
+    ) {
+        dependsOn(checkRuntime)
+        jdk.set(provider { downloadJdk.get().jdkDir })
+        modules.set(provider { app.nativeDistributions.modules })
+
+        useAppRuntimeFiles { (jarFiles, mainJar) ->
+            files.from(jarFiles)
+            launcherMainJar.set(mainJar)
+        }
+    }.also { suggestModulesTasks[osArchKey] = it }
+
+    val createRuntimeImage = runtimeTasks[osArchKey] ?: tasks.register<AbstractJLinkTask>(
+        taskNameAction = "hokkaido",
+        taskNameObject = "runtimeImage$osArch"
+    ) {
+        dependsOn(checkRuntime)
+        dependsOn(downloadJdk)
+        jdk.set(provider { downloadJdk.get().jdkDir })
+        javaHome.set(app.javaHomeProvider)
+        modules.set(provider { app.nativeDistributions.modules })
+        includeAllModules.set(provider { app.nativeDistributions.includeAllModules })
+        javaRuntimePropertiesFile.set(checkRuntime.flatMap { it.javaRuntimePropertiesFile })
+        destinationDir.set(appTmpDir.dir("$os/$arch/runtime"))
+    }.also { runtimeTasks[osArchKey] = it }
+
+    return CommonJvmPackageTasks(checkRuntime, createRuntimeImage)
 }
 
 private fun JvmApplicationContext.configureProguardTask(
@@ -298,13 +313,11 @@ private fun JvmApplicationContext.configureProguardTask(
 
 private fun JvmApplicationContext.configureCustomPackageTask(
     packageTask: CustomPackageTask,
-    createAppImage: TaskProvider<AbstractJPackageTask>,
+    createAppImage: TaskProvider<AppImageTask>,
     checkRuntime: TaskProvider<AbstractCheckNativeDistributionRuntime>,
     unpackDefaultResources: TaskProvider<AbstractUnpackDefaultComposeApplicationResourcesTask>,
     runProguard: Provider<AbstractProguardTask>? = null
 ) {
-    packageTask.enabled = packageTask.targetFormat.isCompatibleWithCurrentOS
-
     createAppImage.let { createAppImage ->
         packageTask.dependsOn(createAppImage)
         packageTask.appImage.set(createAppImage.flatMap { it.destinationDir })
@@ -350,21 +363,17 @@ private fun JvmApplicationContext.configureCustomPackageTask(
 //    packageTask.launcherArgs.set(provider { app.args })
 }
 
-private fun JvmApplicationContext.configurePackageTask(
-    packageTask: AbstractJPackageTask,
-    createAppImage: TaskProvider<AbstractJPackageTask>? = null,
+private fun JvmApplicationContext.configureAppImageTask(
+    packageTask: AppImageTask,
+    os: OS,
+    arch: String,
     createRuntimeImage: TaskProvider<AbstractJLinkTask>? = null,
     prepareAppResources: TaskProvider<Sync>? = null,
     checkRuntime: TaskProvider<AbstractCheckNativeDistributionRuntime>? = null,
     unpackDefaultResources: TaskProvider<AbstractUnpackDefaultComposeApplicationResourcesTask>,
     runProguard: Provider<AbstractProguardTask>? = null
 ) {
-    packageTask.enabled = packageTask.targetFormat.isCompatibleWithCurrentOS
-
-    createAppImage?.let { createAppImage ->
-        packageTask.dependsOn(createAppImage)
-        packageTask.appImage.set(createAppImage.flatMap { it.destinationDir })
-    }
+    packageTask.enabled = true
 
     createRuntimeImage?.let { createRuntimeImage ->
         packageTask.dependsOn(createRuntimeImage)
@@ -389,12 +398,12 @@ private fun JvmApplicationContext.configurePackageTask(
         packageTask.packageDescription.set(packageTask.provider { executables.description })
         packageTask.packageCopyright.set(packageTask.provider { executables.copyright })
         packageTask.packageVendor.set(packageTask.provider { executables.vendor })
-        packageTask.packageVersion.set(packageVersionFor(packageTask.targetFormat))
+        packageTask.packageVersion.set(packageVersionFor(os))
         packageTask.licenseFile.set(executables.licenseFile)
     }
 
     packageTask.destinationDir.set(app.nativeDistributions.outputBaseDir.map {
-        it.dir("$appDirName/${packageTask.targetFormat.outputDirName}")
+        it.dir("$appDirName/${os.id}/$arch/appimage")
     })
     packageTask.javaHome.set(app.javaHomeProvider)
 
@@ -439,7 +448,7 @@ internal fun JvmApplicationContext.configurePlatformSettings(
     unpackDefaultResources: TaskProvider<AbstractUnpackDefaultComposeApplicationResourcesTask>
 ) {
     packageTask.dependsOn(unpackDefaultResources)
-    if (currentOS == OS.Linux) {
+    if (currentOS == Linux) {
         app.nativeDistributions.linux.also { linux ->
             packageTask.linuxShortcut.set(provider { linux.shortcut })
             packageTask.linuxAppCategory.set(provider { linux.appCategory })
@@ -467,7 +476,7 @@ internal fun JvmApplicationContext.configurePlatformSettings(
     unpackDefaultResources: TaskProvider<AbstractUnpackDefaultComposeApplicationResourcesTask>
 ) {
     packageTask.dependsOn(unpackDefaultResources)
-    if (currentOS == OS.Windows) {
+    if (currentOS == Windows) {
         app.nativeDistributions.windows.also { win ->
             packageTask.winConsole.set(provider { win.console })
             packageTask.winDirChooser.set(provider { win.dirChooser })
@@ -483,12 +492,12 @@ internal fun JvmApplicationContext.configurePlatformSettings(
 }
 
 internal fun JvmApplicationContext.configurePlatformSettings(
-    packageTask: AbstractJPackageTask,
+    packageTask: AppImageTask,
     unpackDefaultResources: TaskProvider<AbstractUnpackDefaultComposeApplicationResourcesTask>
 ) {
     packageTask.dependsOn(unpackDefaultResources)
     when (currentOS) {
-        OS.Linux -> {
+        Linux -> {
             app.nativeDistributions.linux.also { linux ->
                 packageTask.linuxShortcut.set(provider { linux.shortcut })
                 packageTask.linuxAppCategory.set(provider { linux.appCategory })
@@ -502,7 +511,7 @@ internal fun JvmApplicationContext.configurePlatformSettings(
             }
         }
 
-        OS.Windows -> {
+        Windows -> {
             app.nativeDistributions.windows.also { win ->
                 packageTask.winConsole.set(provider { win.console })
                 packageTask.winDirChooser.set(provider { win.dirChooser })
@@ -530,7 +539,7 @@ internal fun JvmApplicationContext.configurePlatformSettings(
                 packageTask.macAppCategory.set(mac.appCategory)
                 packageTask.macEntitlementsFile.set(mac.entitlementsFile)
                 packageTask.macRuntimeEntitlementsFile.set(mac.runtimeEntitlementsFile)
-                packageTask.packageBuildVersion.set(packageBuildVersionFor(packageTask.targetFormat))
+                packageTask.packageBuildVersion.set(packageVersionFor(currentOS))
                 packageTask.nonValidatedMacBundleID.set(provider { mac.bundleID })
                 packageTask.macProvisioningProfile.set(mac.provisioningProfile)
                 packageTask.macRuntimeProvisioningProfile.set(mac.runtimeProvisioningProfile)
@@ -569,7 +578,7 @@ private fun JvmApplicationContext.configureRunTask(
     }
 }
 
-private fun JvmApplicationContext.configurePackageUberJarForCurrentOS(jar: Jar) {
+private fun JvmApplicationContext.configurePackageUberJarForCurrentOS(jar: Jar, os: OS) {
     fun flattenJars(files: FileCollection): FileCollection =
         jar.project.files({
             files.map { if (it.isZipOrJar()) jar.project.zipTree(it) else it }
@@ -584,8 +593,8 @@ private fun JvmApplicationContext.configurePackageUberJarForCurrentOS(jar: Jar) 
     jar.duplicatesStrategy = DuplicatesStrategy.EXCLUDE
     jar.archiveAppendix.set(currentTarget.id)
     jar.archiveBaseName.set(packageNameProvider)
-    jar.archiveVersion.set(packageVersionFor(TargetFormat.AppImage))
-    jar.destinationDirectory.set(jar.project.layout.buildDirectory.dir("mocompose/jars"))
+    jar.archiveVersion.set(packageVersionFor(os))
+    jar.destinationDirectory.set(jar.project.layout.buildDirectory.dir("hokkaido/jars"))
 
     jar.doLast {
         jar.logger.lifecycle("The jar is written to ${jar.archiveFile.ioFile.canonicalPath}")
