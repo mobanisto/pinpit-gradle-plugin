@@ -23,6 +23,9 @@ mocompose.desktop {
         nativeDistributions {
             targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb, TargetFormat.CustomDeb)
 
+            jvmVendor = "adoptium"
+            jvmVersion = "17.0.5+8"
+
             packageVersion = versionCode
             packageName = "TestPackage"
             description = "Test description"

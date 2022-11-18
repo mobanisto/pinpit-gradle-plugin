@@ -64,7 +64,6 @@ dependencies {
     testImplementation(platform("org.junit:junit-bom:5.7.0"))
     testImplementation("org.junit.jupiter:junit-jupiter")
     testImplementation(kotlin("gradle-plugin-api"))
-    testImplementation("org.apache.commons:commons-compress:1.22")
     testImplementation("org.tukaani:xz:1.9")
     testImplementation("commons-codec:commons-codec:1.15")
     testImplementation("io.github.java-diff-utils:java-diff-utils:4.12")
@@ -76,6 +75,7 @@ dependencies {
     embedded("org.jetbrains.kotlinx:kotlinx-serialization-json:${BuildProperties.serializationVersion}")
     embedded("org.jetbrains.kotlinx:kotlinx-serialization-core:${BuildProperties.serializationVersion}")
     embedded("org.jetbrains.kotlinx:kotlinx-serialization-core-jvm:${BuildProperties.serializationVersion}")
+    embedded("org.apache.commons:commons-compress:1.22")
 }
 
 val shadow = tasks.named<ShadowJar>("shadowJar") {

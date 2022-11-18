@@ -23,6 +23,9 @@ abstract class AbstractDistributions {
         set(layout.buildDirectory.dir("mocompose/binaries"))
     }
 
+    var jvmVendor: String? = null
+    var jvmVersion: String? = null
+
     var packageName: String? = null
     var packageVersion: String? = null
     var copyright: String? = null

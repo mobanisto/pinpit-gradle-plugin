@@ -276,6 +276,8 @@ abstract class CustomDebTask @Inject constructor() : CustomPackageTask(TargetFor
     }
 
     override fun createPackage() {
+        downloadJdk("linux", "x64")
+
         val destination = destinationDir.get()
         logger.lifecycle("destination: $destination")
         destination.asFile.mkdirs()

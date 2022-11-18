@@ -230,6 +230,8 @@ abstract class CustomMsiTask @Inject constructor() : CustomPackageTask(TargetFor
     }
 
     override fun createPackage() {
+        downloadJdk("windows", "x64")
+
         val environment: MutableMap<String, String> = HashMap<String, String>().apply {
             val wixDir = wixToolsetDir.ioFile
             val wixPath = wixDir.absolutePath
