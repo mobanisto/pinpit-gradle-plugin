@@ -388,6 +388,7 @@ private fun JvmApplicationContext.configureAppImageTask(
     checkRuntime?.let { checkRuntime ->
         packageTask.dependsOn(checkRuntime)
         packageTask.javaRuntimePropertiesFile.set(checkRuntime.flatMap { it.javaRuntimePropertiesFile })
+        packageTask.jdkDir.set(checkRuntime.flatMap { it.jdk })
     }
 
     this.configurePlatformSettings(packageTask, unpackDefaultResources)

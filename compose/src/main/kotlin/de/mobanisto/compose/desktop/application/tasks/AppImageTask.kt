@@ -21,6 +21,7 @@ import de.mobanisto.compose.desktop.application.internal.files.asPath
 import de.mobanisto.compose.desktop.application.internal.files.findRelative
 import de.mobanisto.compose.desktop.application.internal.files.isJarFile
 import de.mobanisto.compose.desktop.application.internal.files.mangledName
+import de.mobanisto.compose.desktop.application.internal.files.posixExecutable
 import de.mobanisto.compose.desktop.application.internal.files.syncDir
 import de.mobanisto.compose.desktop.application.internal.files.writeLn
 import de.mobanisto.compose.desktop.application.internal.ioFile
@@ -57,6 +58,7 @@ import java.nio.file.Path
 import java.nio.file.StandardOpenOption.CREATE
 import java.nio.file.StandardOpenOption.TRUNCATE_EXISTING
 import java.nio.file.StandardOpenOption.WRITE
+import java.util.zip.ZipFile
 import javax.inject.Inject
 import kotlin.io.path.isRegularFile
 
@@ -262,6 +264,9 @@ abstract class AppImageTask @Inject constructor(
     @get:Nested
     internal var nonValidatedMacSigningSettings: MacOSSigningSettings? = null
 
+    @get:Internal
+    val jdkDir: Property<Path> = objects.notNullProperty()
+
     private val macSigner: MacSigner? by lazy {
         val nonValidatedSettings = nonValidatedMacSigningSettings
         if (currentOS == OS.MacOS && nonValidatedSettings?.sign?.get() == true) {
@@ -447,17 +452,25 @@ abstract class AppImageTask @Inject constructor(
         val dirBin = appImage.resolve("bin")
         createDirectories(dirBin)
 
+        val dirLib = appImage.resolve("lib")
+        createDirectories(dirLib)
+
+        val jpackageJMods = jdkDir.get().resolve("jmods/jdk.jpackage.jmod")
         if (os == Linux) {
-            // TODO: create binary by copying from JDK archive
-            // TODO: create libapplauncher.so by copying from JDK archive
+            val resAppLauncher = "classes/jdk/jpackage/internal/resources/jpackageapplauncher"
+            val resAppLauncherAux = "classes/jdk/jpackage/internal/resources/libjpackageapplauncheraux.so"
+            val launcher = dirBin.resolve("${packageName.get()}")
+            val launcherLib = dirLib.resolve("libapplauncher.so")
+            extractZip(jpackageJMods, resAppLauncher, launcher)
+            extractZip(jpackageJMods, resAppLauncherAux, launcherLib)
+            Files.setPosixFilePermissions(launcher, posixExecutable)
+            Files.setPosixFilePermissions(launcherLib, posixExecutable)
+            // TODO: icon
         } else if (os == Windows) {
             // TODO: create binary by copying from JDK archive
         } else if (os == MacOS) {
             // TODO: create binary by copying from JDK archive
         }
-
-        val dirLib = appImage.resolve("lib")
-        createDirectories(dirLib)
 
         val dirRuntime = dirLib.resolve("runtime")
         syncDir(runtimeImage.asPath(), dirRuntime)
@@ -467,6 +480,13 @@ abstract class AppImageTask @Inject constructor(
 
         val fileConfig = dirApp.resolve("${packageName.get()}.cfg")
         createConfig(fileConfig)
+    }
+
+    private fun extractZip(zipFile: Path, zipResource: String, targetFile: Path) {
+        ZipFile(zipFile.toFile()).use {
+            val entry = it.getEntry(zipResource) ?: error("Unable to find '$zipResource' in '$zipFile'")
+            Files.copy(it.getInputStream(entry), targetFile)
+        }
     }
 
     private fun createConfig(fileConfig: Path) {
