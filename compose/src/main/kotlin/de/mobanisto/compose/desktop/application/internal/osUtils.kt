@@ -10,7 +10,7 @@ import de.mobanisto.compose.desktop.application.tasks.MIN_JAVA_RUNTIME_VERSION
 import org.gradle.api.provider.Provider
 import java.io.File
 
-internal enum class OS(val id: String) {
+enum class OS(val id: String) {
     Linux("linux"),
     Windows("windows"),
     MacOS("macos")

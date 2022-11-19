@@ -120,10 +120,10 @@ private fun JvmApplicationContext.configurePackagingTasks(
         val createDistributable = distributableTasks[osArchKey] ?: tasks.register<AppImageTask>(
             taskNameAction = "hokkaido",
             taskNameObject = "distributable$osArch",
+            args = listOf(Windows)
         ) {
             configureAppImageTask(
                 this,
-                os = Windows,
                 arch = arch,
                 createRuntimeImage = packageTasks.createRuntimeImage,
                 prepareAppResources = commonTasks.prepareAppResources,
@@ -166,10 +166,10 @@ private fun JvmApplicationContext.configurePackagingTasks(
         val createDistributable = distributableTasks[osArchKey] ?: tasks.register<AppImageTask>(
             taskNameAction = "hokkaido",
             taskNameObject = "distributable$osArch",
+            args = listOf(Linux)
         ) {
             configureAppImageTask(
                 this,
-                os = Linux,
                 arch = arch,
                 createRuntimeImage = packageTasks.createRuntimeImage,
                 prepareAppResources = commonTasks.prepareAppResources,
@@ -365,7 +365,6 @@ private fun JvmApplicationContext.configureCustomPackageTask(
 
 private fun JvmApplicationContext.configureAppImageTask(
     packageTask: AppImageTask,
-    os: OS,
     arch: String,
     createRuntimeImage: TaskProvider<AbstractJLinkTask>? = null,
     prepareAppResources: TaskProvider<Sync>? = null,
@@ -398,12 +397,12 @@ private fun JvmApplicationContext.configureAppImageTask(
         packageTask.packageDescription.set(packageTask.provider { executables.description })
         packageTask.packageCopyright.set(packageTask.provider { executables.copyright })
         packageTask.packageVendor.set(packageTask.provider { executables.vendor })
-        packageTask.packageVersion.set(packageVersionFor(os))
+        packageTask.packageVersion.set(packageVersionFor(packageTask.os))
         packageTask.licenseFile.set(executables.licenseFile)
     }
 
     packageTask.destinationDir.set(app.nativeDistributions.outputBaseDir.map {
-        it.dir("$appDirName/${os.id}/$arch/appimage")
+        it.dir("$appDirName/${packageTask.os.id}/$arch/appimage")
     })
     packageTask.javaHome.set(app.javaHomeProvider)
 

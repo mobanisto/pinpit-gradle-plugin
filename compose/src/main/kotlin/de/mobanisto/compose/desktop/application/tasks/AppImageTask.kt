@@ -6,23 +6,63 @@
 package de.mobanisto.compose.desktop.application.tasks
 
 import de.mobanisto.compose.desktop.application.dsl.MacOSSigningSettings
-import de.mobanisto.compose.desktop.application.internal.*
-import de.mobanisto.compose.desktop.application.internal.files.*
+import de.mobanisto.compose.desktop.application.internal.APP_RESOURCES_DIR
+import de.mobanisto.compose.desktop.application.internal.JvmRuntimeProperties
+import de.mobanisto.compose.desktop.application.internal.MacSigner
+import de.mobanisto.compose.desktop.application.internal.OS
+import de.mobanisto.compose.desktop.application.internal.OS.Linux
+import de.mobanisto.compose.desktop.application.internal.OS.MacOS
+import de.mobanisto.compose.desktop.application.internal.OS.Windows
+import de.mobanisto.compose.desktop.application.internal.SKIKO_LIBRARY_PATH
+import de.mobanisto.compose.desktop.application.internal.currentOS
+import de.mobanisto.compose.desktop.application.internal.files.MacJarSignFileCopyingProcessor
+import de.mobanisto.compose.desktop.application.internal.files.SimpleFileCopyingProcessor
+import de.mobanisto.compose.desktop.application.internal.files.asPath
+import de.mobanisto.compose.desktop.application.internal.files.findRelative
+import de.mobanisto.compose.desktop.application.internal.files.isJarFile
+import de.mobanisto.compose.desktop.application.internal.files.mangledName
+import de.mobanisto.compose.desktop.application.internal.files.syncDir
+import de.mobanisto.compose.desktop.application.internal.files.writeLn
+import de.mobanisto.compose.desktop.application.internal.ioFile
+import de.mobanisto.compose.desktop.application.internal.ioFileOrNull
+import de.mobanisto.compose.desktop.application.internal.notNullProperty
+import de.mobanisto.compose.desktop.application.internal.nullableProperty
+import de.mobanisto.compose.desktop.application.internal.provider
+import de.mobanisto.compose.desktop.application.internal.stacktraceToString
 import de.mobanisto.compose.desktop.application.internal.validation.validate
-import org.gradle.api.file.*
+import org.gradle.api.file.ConfigurableFileCollection
+import org.gradle.api.file.Directory
+import org.gradle.api.file.DirectoryProperty
+import org.gradle.api.file.RegularFile
+import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.provider.Provider
-import org.gradle.api.tasks.*
+import org.gradle.api.tasks.Input
+import org.gradle.api.tasks.InputDirectory
+import org.gradle.api.tasks.InputFile
+import org.gradle.api.tasks.InputFiles
+import org.gradle.api.tasks.Internal
+import org.gradle.api.tasks.LocalState
+import org.gradle.api.tasks.Nested
 import org.gradle.api.tasks.Optional
+import org.gradle.api.tasks.PathSensitive
+import org.gradle.api.tasks.PathSensitivity
 import org.gradle.work.ChangeType
 import org.gradle.work.InputChanges
-import java.io.*
+import java.io.File
+import java.nio.file.Files
 import java.nio.file.Files.createDirectories
-import java.util.*
+import java.nio.file.Path
+import java.nio.file.StandardOpenOption.CREATE
+import java.nio.file.StandardOpenOption.TRUNCATE_EXISTING
+import java.nio.file.StandardOpenOption.WRITE
 import javax.inject.Inject
+import kotlin.io.path.isRegularFile
 
-abstract class AppImageTask @Inject constructor() : AbstractCustomTask(), WindowsTask {
+abstract class AppImageTask @Inject constructor(
+    @Input val os: OS
+) : AbstractCustomTask(), WindowsTask {
     @get:InputFiles
     val files: ConfigurableFileCollection = objects.fileCollection()
 
@@ -404,10 +444,17 @@ abstract class AppImageTask @Inject constructor() : AbstractCustomTask(), Window
         createDirectories(appImage)
         logger.lifecycle("app image: $appImage")
 
-        // TODO: create actual app image content
-
         val dirBin = appImage.resolve("bin")
         createDirectories(dirBin)
+
+        if (os == Linux) {
+            // TODO: create binary by copying from JDK archive
+            // TODO: create libapplauncher.so by copying from JDK archive
+        } else if (os == Windows) {
+            // TODO: create binary by copying from JDK archive
+        } else if (os == MacOS) {
+            // TODO: create binary by copying from JDK archive
+        }
 
         val dirLib = appImage.resolve("lib")
         createDirectories(dirLib)
@@ -417,5 +464,60 @@ abstract class AppImageTask @Inject constructor() : AbstractCustomTask(), Window
 
         val dirApp = dirLib.resolve("app")
         syncDir(libsDir.get().asPath(), dirApp)
+
+        val fileConfig = dirApp.resolve("${packageName.get()}.cfg")
+        createConfig(fileConfig)
+    }
+
+    private fun createConfig(fileConfig: Path) {
+        val jars = findRelative(libsDir.get().asPath()) { file ->
+            file.isRegularFile() && file.fileName.toString().endsWith(".jar")
+        }
+        jars.sort()
+
+        val mainJarAbsolute = libsMapping[launcherMainJar.ioFile]?.singleOrNull()
+            ?: error("Main jar was not processed correctly: ${launcherMainJar.ioFile}")
+        val mainJar = libsDir.asPath().relativize(mainJarAbsolute.toPath())
+        jars.remove(mainJar)
+
+        fun appDir(vararg pathParts: String): String {
+            /** For windows we need to pass '\\' to jpackage file, each '\' need to be escaped.
+             * Otherwise '$APPDIR\resources' is passed to jpackage,
+             * and '\r' is treated as a special character at run time.
+             */
+            val separator = if (os == Windows) "\\\\" else "/"
+            return listOf("\$APPDIR", *pathParts).joinToString(separator) { it }
+        }
+
+        Files.newBufferedWriter(fileConfig, CREATE, WRITE, TRUNCATE_EXISTING).use { it ->
+            it.apply {
+                writeLn("[Application]")
+                // We intentionally write the main jar before the 'app.mainclass' property and the others afterwards,
+                // as this is what JPackage seems to be doing.
+                writeLn("app.classpath=${appDir(mainJar.toString())}")
+                writeLn("app.mainclass=${launcherMainClass.get()}")
+                // Attention: this assumes that jars are found only on the first level as we do not replace the
+                // separator character for files further down in the hierarchy or make sure not to have \\-problems
+                // on Windows. I think the way the libs are gathered, they will end up flat in the libs directory
+                // though - Seb
+                for (jar in jars) {
+                    writeLn("app.classpath=${appDir(jar.toString())}")
+                }
+                writeLn()
+                writeLn("[JavaOptions]")
+                writeLn("java-options=-Djpackage.app-version=${packageVersion.get()}")
+                writeLn("java-options=-D$APP_RESOURCES_DIR=${appDir(packagedResourcesDir.ioFile.name)}")
+                launcherJvmArgs.get().forEach { arg ->
+                    writeLn("java-options=$arg")
+                }
+                writeLn("java-options=-D$SKIKO_LIBRARY_PATH=${appDir()}")
+            }
+        }
+
+        // TODO use launcherArgs, i.e add an [ArgOptions] section if present.
+        //  Before implementing this, check out how this looks in practice.
+
+        println("launcher jvm args: ${launcherJvmArgs.get()}")
+        println("launcher args: ${launcherArgs.get()}")
     }
 }

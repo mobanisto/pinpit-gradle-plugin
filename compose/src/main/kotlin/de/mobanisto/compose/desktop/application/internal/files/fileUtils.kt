@@ -12,6 +12,7 @@ import org.gradle.api.file.Directory
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.file.RegularFile
 import org.gradle.api.file.RegularFileProperty
+import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.Internal
 import java.io.File
 import java.io.FileInputStream
@@ -62,7 +63,8 @@ internal fun File.contentHash(): String {
 private fun MessageDigest.digestContent(file: File) {
     file.inputStream().buffered().use { fis ->
         DigestInputStream(fis, this).use { ds ->
-            while (ds.read() != -1) {}
+            while (ds.read() != -1) {
+            }
         }
     }
 }
@@ -126,12 +128,12 @@ internal val File.isJarFile: Boolean
 internal fun File.normalizedPath() =
     if (currentOS == OS.Windows) absolutePath.replace("\\", "\\\\") else absolutePath
 
-internal fun Writer.writeLn(s: String) {
-    write(s)
+internal fun Writer.writeLn(s: String? = null) {
+    s?.let { write(it) }
     write("\n")
 }
 
-internal fun ByteArray.isProbablyNotBinary() : Boolean {
+internal fun ByteArray.isProbablyNotBinary(): Boolean {
     var printable = 0
     var nonPrintable = 0
     for (byte in this) {
@@ -145,21 +147,15 @@ internal fun ByteArray.isProbablyNotBinary() : Boolean {
     return printable / (printable + nonPrintable).toDouble() > 0.8
 }
 
-internal fun DirectoryProperty.asPath(): Path {
-    return get().asFile.toPath()
-}
+internal fun DirectoryProperty.asPath(): Path = get().asPath()
 
-internal fun RegularFileProperty.asPath(): Path {
-    return get().asFile.toPath()
-}
+internal fun Provider<Directory>.asPath(): Path = get().asPath()
 
-internal fun RegularFile.asPath(): Path {
-    return asFile.toPath()
-}
+internal fun RegularFileProperty.asPath(): Path = get().asPath()
 
-internal fun Directory.asPath(): Path {
-    return asFile.toPath()
-}
+internal fun RegularFile.asPath(): Path = asFile.toPath()
+
+internal fun Directory.asPath(): Path = asFile.toPath()
 
 private const val permissionsRegular = "rw-r--r--"
 private const val permissionsExecutable = "rwxr-xr-x"
@@ -169,6 +165,7 @@ internal val posixExecutable = PosixFilePermissions.fromString(permissionsExecut
 internal fun syncDir(source: Directory, target: Directory, takeFile: (file: Path) -> Boolean = { _ -> true }) {
     val pathSourceDir = source.asFile.toPath()
     val pathTargetDir = target.asFile.toPath()
+    syncDir(pathSourceDir, pathTargetDir, takeFile)
 }
 
 internal fun syncDir(source: Path, target: Path, takeFile: (file: Path) -> Boolean = { _ -> true }) {
@@ -189,4 +186,19 @@ internal fun syncDir(source: Path, target: Path, takeFile: (file: Path) -> Boole
             return FileVisitResult.CONTINUE
         }
     })
+}
+
+internal fun findRelative(source: Path, takeFile: (file: Path) -> Boolean = { _ -> true }): MutableList<Path> {
+    val results = mutableListOf<Path>()
+    Files.walkFileTree(source, object : SimpleFileVisitor<Path>() {
+        override fun visitFile(file: Path, attrs: BasicFileAttributes): FileVisitResult {
+            val relative = source.relativize(file)
+            if (!takeFile(file)) {
+                return FileVisitResult.CONTINUE
+            }
+            results.add(relative)
+            return FileVisitResult.CONTINUE
+        }
+    })
+    return results
 }
