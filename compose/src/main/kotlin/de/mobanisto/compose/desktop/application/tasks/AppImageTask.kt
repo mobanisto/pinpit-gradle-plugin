@@ -445,47 +445,72 @@ abstract class AppImageTask @Inject constructor(
 
     override fun runTask() {
         val dir = destinationDir.asPath()
-        val appImage = dir.resolve(packageName.get())
-        createDirectories(appImage)
-        logger.lifecycle("app image: $appImage")
 
-        val dirBin = appImage.resolve("bin")
-        createDirectories(dirBin)
-
-        val dirLib = appImage.resolve("lib")
-        createDirectories(dirLib)
+        val dirAppImage = dir.resolve(packageName.get())
+        createDirectories(dirAppImage)
+        logger.lifecycle("app image: $dirAppImage")
 
         val jpackageJMods = jdkDir.get().resolve("jmods/jdk.jpackage.jmod")
-        if (os == Linux) {
-            val resAppLauncher = "classes/jdk/jpackage/internal/resources/jpackageapplauncher"
-            val resAppLauncherAux = "classes/jdk/jpackage/internal/resources/libjpackageapplauncheraux.so"
-            val launcher = dirBin.resolve("${packageName.get()}")
-            val launcherLib = dirLib.resolve("libapplauncher.so")
-            extractZip(jpackageJMods, resAppLauncher, launcher)
-            extractZip(jpackageJMods, resAppLauncherAux, launcherLib)
-            Files.setPosixFilePermissions(launcher, posixExecutable)
-            Files.setPosixFilePermissions(launcherLib, posixExecutable)
-            // TODO: icon
-        } else if (os == Windows) {
-            // when equivalent of JPackage's --win-console option should be added, we need to use this file instead:
-            // "classes/jdk/jpackage/internal/resources/jpackageapplauncherw.exe" // not the "w" suffix at the end
-            val resAppLauncher = "classes/jdk/jpackage/internal/resources/jpackageapplauncher.exe"
-            val launcher = dirBin.resolve("${packageName.get()}.exe")
-            extractZip(jpackageJMods, resAppLauncher, launcher)
-            Files.setPosixFilePermissions(launcher, posixExecutable)
-            // TODO: icon
-        } else if (os == MacOS) {
-            // TODO: create binary by copying from JDK archive
+
+        when (os) {
+            Linux -> {
+                packageLinux(dirAppImage, jpackageJMods)
+            }
+
+            Windows -> {
+                packageWindows(dirAppImage, jpackageJMods)
+            }
+
+            MacOS -> {
+                packageMacOs()
+            }
         }
+    }
+
+    private fun packageLinux(dirAppImage: Path, jpackageJMods: Path) {
+        val dirBin = dirAppImage.resolve("bin")
+        val dirLib = dirAppImage.resolve("lib")
+        createDirectories(dirBin)
+        createDirectories(dirLib)
 
         val dirRuntime = dirLib.resolve("runtime")
-        syncDir(runtimeImage.asPath(), dirRuntime)
-
         val dirApp = dirLib.resolve("app")
+
+        val resAppLauncher = "classes/jdk/jpackage/internal/resources/jpackageapplauncher"
+        val resAppLauncherAux = "classes/jdk/jpackage/internal/resources/libjpackageapplauncheraux.so"
+        val launcher = dirBin.resolve("${packageName.get()}")
+        val launcherLib = dirLib.resolve("libapplauncher.so")
+        extractZip(jpackageJMods, resAppLauncher, launcher)
+        extractZip(jpackageJMods, resAppLauncherAux, launcherLib)
+        Files.setPosixFilePermissions(launcher, posixExecutable)
+        Files.setPosixFilePermissions(launcherLib, posixExecutable)
+        // TODO: icon
+        syncDir(runtimeImage.asPath(), dirRuntime)
         syncDir(libsDir.get().asPath(), dirApp)
 
         val fileConfig = dirApp.resolve("${packageName.get()}.cfg")
         createConfig(fileConfig)
+    }
+
+    private fun packageWindows(dirAppImage: Path, jpackageJMods: Path) {
+        val dirRuntime = dirAppImage.resolve("runtime")
+        val dirApp = dirAppImage.resolve("app")
+        // when equivalent of JPackage's --win-console option should be added, we need to use this file instead:
+        // "classes/jdk/jpackage/internal/resources/jpackageapplauncherw.exe" // not the "w" suffix at the end
+        val resAppLauncher = "classes/jdk/jpackage/internal/resources/jpackageapplauncher.exe"
+        val launcher = dirAppImage.resolve("${packageName.get()}.exe")
+        extractZip(jpackageJMods, resAppLauncher, launcher)
+        Files.setPosixFilePermissions(launcher, posixExecutable)
+        // TODO: icon
+        syncDir(runtimeImage.asPath(), dirRuntime)
+        syncDir(libsDir.get().asPath(), dirApp)
+
+        val fileConfig = dirApp.resolve("${packageName.get()}.cfg")
+        createConfig(fileConfig)
+    }
+
+    private fun packageMacOs() {
+        // TODO: create binary by copying from JDK archive
     }
 
     private fun extractZip(zipFile: Path, zipResource: String, targetFile: Path) {
