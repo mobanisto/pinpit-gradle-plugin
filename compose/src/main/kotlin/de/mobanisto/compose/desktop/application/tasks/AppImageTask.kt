@@ -467,7 +467,13 @@ abstract class AppImageTask @Inject constructor(
             Files.setPosixFilePermissions(launcherLib, posixExecutable)
             // TODO: icon
         } else if (os == Windows) {
-            // TODO: create binary by copying from JDK archive
+            // when equivalent of JPackage's --win-console option should be added, we need to use this file instead:
+            // "classes/jdk/jpackage/internal/resources/jpackageapplauncherw.exe" // not the "w" suffix at the end
+            val resAppLauncher = "classes/jdk/jpackage/internal/resources/jpackageapplauncher.exe"
+            val launcher = dirBin.resolve("${packageName.get()}.exe")
+            extractZip(jpackageJMods, resAppLauncher, launcher)
+            Files.setPosixFilePermissions(launcher, posixExecutable)
+            // TODO: icon
         } else if (os == MacOS) {
             // TODO: create binary by copying from JDK archive
         }
