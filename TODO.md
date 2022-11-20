@@ -6,3 +6,7 @@
 * [ ] Simulate jpackage for macOS
 * [x] Use correct skiko library for each platform
 * [ ] Configure runDistributable to depend on current platform and execute that
+* [ ] Package MSI using Wix
+* [ ] Package RPM files
+* [ ] Package DMG or PKG files
+* [ ] Notarization etc
