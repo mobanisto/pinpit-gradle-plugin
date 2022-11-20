@@ -8,53 +8,36 @@ package de.mobanisto.compose.desktop.application.internal.validation
 import de.mobanisto.compose.desktop.application.dsl.TargetFormat
 import de.mobanisto.compose.desktop.application.internal.JvmApplicationContext
 import de.mobanisto.compose.desktop.application.internal.OS
+import de.mobanisto.compose.desktop.application.internal.Target
+import de.mobanisto.compose.desktop.application.internal.packageVersionFor
 import org.gradle.api.GradleException
 
-internal fun JvmApplicationContext.validatePackageVersions() {
+internal fun JvmApplicationContext.validatePackageVersions(targets: List<Target>) {
     val errors = ErrorsCollector()
 
-    // TODO: re-enable this somehow for each configured target
-//    for (targetFormat in app.nativeDistributions.targetFormats) {
-//        val versionChecker: VersionChecker? = when (targetFormat) {
-//            TargetFormat.AppImage -> null
-//            TargetFormat.Deb, TargetFormat.CustomDeb -> DebVersionChecker
-//            TargetFormat.Rpm -> RpmVersionChecker
-//            TargetFormat.Msi, TargetFormat.Exe, TargetFormat.CustomMsi -> WindowsVersionChecker
-//            TargetFormat.Dmg, TargetFormat.Pkg -> MacVersionChecker
-//        }
-//
-//        val packageVersion = packageVersionFor(targetFormat).orNull
-//        if (packageVersion == null) {
-//            errors.addError(targetFormat, "no version was specified")
-//        } else {
-//            versionChecker?.apply {
-//                if (!isValid(packageVersion)) {
-//                    errors.addError(
-//                        targetFormat,
-//                        "'$packageVersion' is not a valid version",
-//                        correctFormat = correctFormat
-//                    )
-//                }
-//            }
-//        }
-//
-//        if (targetFormat.targetOS == OS.MacOS) {
-//            val packageBuildVersion = packageBuildVersionFor(targetFormat).orNull
-//            if (packageBuildVersion == null) {
-//                errors.addError(targetFormat, "no build version was specified")
-//            } else {
-//                versionChecker?.apply {
-//                    if (!isValid(packageBuildVersion)) {
-//                        errors.addError(
-//                            targetFormat,
-//                            "'$packageBuildVersion' is not a valid build version",
-//                            correctFormat = correctFormat
-//                        )
-//                    }
-//                }
-//            }
-//        }
-//    }
+    // TODO: re-enable for specific formats (RPM, DEB, PKG, DMG, etc)
+    for (target in targets) {
+        val versionChecker: VersionChecker = when (target.os) {
+            OS.Linux -> DebVersionChecker // TODO: RpmVersionChecker
+            OS.Windows -> WindowsVersionChecker
+            OS.MacOS -> MacVersionChecker
+        }
+
+        val packageVersion = packageVersionFor(target.os).orNull
+        if (packageVersion == null) {
+            errors.addError(target, "no version was specified")
+        } else {
+            versionChecker.apply {
+                if (!isValid(packageVersion)) {
+                    errors.addError(
+                        target,
+                        "'$packageVersion' is not a valid version",
+                        correctFormat = correctFormat
+                    )
+                }
+            }
+        }
+    }
 
     if (errors.errors.isNotEmpty()) {
         throw GradleException(errors.errors.joinToString("\n"))
@@ -68,26 +51,43 @@ private class ErrorsCollector {
         get() = myErrors
 
     fun addError(
-        targetFormat: TargetFormat,
+        target: Target,
         error: String,
         correctFormat: String? = null
     ) {
         val msg = buildString {
-            appendLine("* Illegal version for '$targetFormat': $error.")
+            appendLine("* Illegal version for '$target': $error.")
             if (correctFormat != null) {
                 appendLine("  * Correct format: $correctFormat")
             }
             appendLine("  * You can specify the correct version using DSL properties: " +
-                    dslPropertiesFor(targetFormat).joinToString(", ")
+                    dslPropertiesFor(target).joinToString(", ")
             )
         }
         myErrors.add(msg)
     }
 }
 
-private fun dslPropertiesFor(
-    targetFormat: TargetFormat
-): List<String> {
+private fun dslPropertiesFor(target: Target): List<String> {
+    val nativeDistributions = "nativeDistributions"
+    val linux = "$nativeDistributions.linux"
+    val macOS = "$nativeDistributions.macOS"
+    val windows = "$nativeDistributions.windows"
+    val packageVersion = "packageVersion"
+
+    val osSettingsProperty: String = when (target.os) {
+        OS.Linux -> "$linux.$packageVersion"
+        OS.MacOS -> "$macOS.$packageVersion"
+        OS.Windows -> "$windows.$packageVersion"
+    }
+    val appSpecificProperty = "$nativeDistributions.$packageVersion"
+    return listOfNotNull(
+        osSettingsProperty,
+        appSpecificProperty,
+    )
+}
+
+private fun dslPropertiesFor(targetFormat: TargetFormat): List<String> {
     val nativeDistributions = "nativeDistributions"
     val linux = "$nativeDistributions.linux"
     val macOS = "$nativeDistributions.macOS"

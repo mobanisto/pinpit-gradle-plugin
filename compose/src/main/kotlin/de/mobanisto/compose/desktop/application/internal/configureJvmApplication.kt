@@ -52,7 +52,7 @@ internal fun JvmApplicationContext.configureJvmApplication() {
         configureDefaultApp()
     }
 
-    validatePackageVersions()
+    validatePackageVersions(targets)
     val commonTasks = configureCommonJvmDesktopTasks()
     configurePackagingTasks(commonTasks)
     copy(buildType = app.buildTypes.release).configurePackagingTasks(commonTasks)
