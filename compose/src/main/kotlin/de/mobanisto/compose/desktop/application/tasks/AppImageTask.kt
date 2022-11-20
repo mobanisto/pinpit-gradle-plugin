@@ -14,6 +14,7 @@ import de.mobanisto.compose.desktop.application.internal.OS.Linux
 import de.mobanisto.compose.desktop.application.internal.OS.MacOS
 import de.mobanisto.compose.desktop.application.internal.OS.Windows
 import de.mobanisto.compose.desktop.application.internal.SKIKO_LIBRARY_PATH
+import de.mobanisto.compose.desktop.application.internal.Target
 import de.mobanisto.compose.desktop.application.internal.currentOS
 import de.mobanisto.compose.desktop.application.internal.files.MacJarSignFileCopyingProcessor
 import de.mobanisto.compose.desktop.application.internal.files.SimpleFileCopyingProcessor
@@ -63,7 +64,7 @@ import javax.inject.Inject
 import kotlin.io.path.isRegularFile
 
 abstract class AppImageTask @Inject constructor(
-    @Input val os: OS
+    @Input val target: Target,
 ) : AbstractCustomTask(), WindowsTask {
     @get:InputFiles
     val files: ConfigurableFileCollection = objects.fileCollection()
@@ -389,8 +390,8 @@ abstract class AppImageTask @Inject constructor(
         for (sourceFile in outdatedLibs) {
             assert(sourceFile.exists()) { "Lib file does not exist: $sourceFile" }
 
-            libsMapping[sourceFile] = if (isSkikoForCurrentOS(sourceFile)) {
-                val unpackedFiles = unpackSkikoForCurrentOS(sourceFile, skikoDir.ioFile, fileOperations)
+            libsMapping[sourceFile] = if (isSkikoFor(target, sourceFile)) {
+                val unpackedFiles = unpackSkikoFor(target, sourceFile, skikoDir.ioFile, fileOperations)
                 unpackedFiles.map { copyFileToLibsDir(it) }
             } else {
                 listOf(copyFileToLibsDir(sourceFile))
@@ -452,7 +453,7 @@ abstract class AppImageTask @Inject constructor(
 
         val jpackageJMods = jdkDir.get().resolve("jmods/jdk.jpackage.jmod")
 
-        when (os) {
+        when (target.os) {
             Linux -> {
                 packageLinux(dirAppImage, jpackageJMods)
             }
@@ -536,7 +537,7 @@ abstract class AppImageTask @Inject constructor(
              * Otherwise '$APPDIR\resources' is passed to jpackage,
              * and '\r' is treated as a special character at run time.
              */
-            val separator = if (os == Windows) "\\\\" else "/"
+            val separator = if (target.os == Windows) "\\\\" else "/"
             return listOf("\$APPDIR", *pathParts).joinToString(separator) { it }
         }
 

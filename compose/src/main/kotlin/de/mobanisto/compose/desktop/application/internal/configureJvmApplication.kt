@@ -20,6 +20,7 @@ import de.mobanisto.compose.desktop.application.tasks.CustomMsiTask
 import de.mobanisto.compose.desktop.application.tasks.CustomPackageTask
 import de.mobanisto.compose.desktop.application.tasks.DownloadJdkTask
 import de.mobanisto.compose.desktop.tasks.AbstractUnpackDefaultComposeApplicationResourcesTask
+import de.mobanisto.compose.internal.addUnique
 import de.mobanisto.compose.internal.uppercaseFirstChar
 import org.gradle.api.DefaultTask
 import org.gradle.api.GradleException
@@ -40,6 +41,13 @@ internal const val composeDesktopTaskGroup = "compose desktop"
 // todo: file associations
 // todo: use workers
 internal fun JvmApplicationContext.configureJvmApplication() {
+    // Derive list of targets by configured package formats
+    val targets = mutableListOf<Target>()
+    app.nativeDistributions.apply {
+        linux.debs.forEach { targets.addUnique(Target(Linux, arch(it.arch))) }
+        windows.msis.forEach { targets.addUnique(Target(Windows, arch(it.arch))) }
+    }
+
     if (app.isDefaultConfigurationEnabled) {
         configureDefaultApp()
     }
@@ -58,6 +66,7 @@ internal class CommonJvmDesktopTasks(
 
 internal class CommonJvmPackageTasks(
     val checkRuntime: TaskProvider<AbstractCheckNativeDistributionRuntime>,
+    val runProguard: TaskProvider<AbstractProguardTask>?,
     val createRuntimeImage: TaskProvider<AbstractJLinkTask>,
 )
 
@@ -86,63 +95,51 @@ private fun JvmApplicationContext.configureCommonJvmDesktopTasks(): CommonJvmDes
     )
 }
 
-val downloadJdkTasks = mutableMapOf<String, TaskProvider<DownloadJdkTask>>()
-val checkRuntimeTasks = mutableMapOf<String, TaskProvider<AbstractCheckNativeDistributionRuntime>>()
-val suggestModulesTasks = mutableMapOf<String, TaskProvider<AbstractSuggestModulesTask>>()
-val runtimeTasks = mutableMapOf<String, TaskProvider<AbstractJLinkTask>>()
-val distributableTasks = mutableMapOf<String, TaskProvider<AppImageTask>>()
-val runTasks = mutableMapOf<String, TaskProvider<AbstractRunDistributableTask>>()
+val downloadJdkTasks = mutableMapOf<Target, TaskProvider<DownloadJdkTask>>()
+val checkRuntimeTasks = mutableMapOf<Target, TaskProvider<AbstractCheckNativeDistributionRuntime>>()
+val suggestModulesTasks = mutableMapOf<Target, TaskProvider<AbstractSuggestModulesTask>>()
+val proguardTasks = mutableMapOf<Target, TaskProvider<AbstractProguardTask>>()
+val runtimeTasks = mutableMapOf<Target, TaskProvider<AbstractJLinkTask>>()
+val distributableTasks = mutableMapOf<Target, TaskProvider<AppImageTask>>()
+val runTasks = mutableMapOf<Target, TaskProvider<AbstractRunDistributableTask>>()
 
 private fun JvmApplicationContext.configurePackagingTasks(
     commonTasks: CommonJvmDesktopTasks
 ) {
-    val runProguard = if (buildType.proguard.isEnabled.orNull == true) {
-        tasks.register<AbstractProguardTask>(
-            taskNameAction = "hokkaidoProguard",
-            taskNameObject = "Jars"
-        ) {
-            configureProguardTask(this, commonTasks.unpackDefaultResources)
-        }
-    } else null
 
     val jdkInfo = jdkInfo(app.nativeDistributions.jvmVendor!!, app.nativeDistributions.jvmVersion!!)
         ?: throw GradleException("Invalid JVM vendor or version")
 
     app.nativeDistributions.windows.msis.forEach { msi ->
-        val arch = msi.arch!!
-        val os = "windows"
+        val target = Target(Windows, arch(msi.arch))
 
-        val osArchKey = "$os:$arch"
-        val osArch = os.uppercaseFirstChar() + arch.uppercaseFirstChar()
+        val packageTasks = configureCommonPackageTasks(tasks, jdkInfo, target, app, appTmpDir, commonTasks)
 
-        val packageTasks = configureCommonPackageTasks(tasks, jdkInfo, os, arch, app, appTmpDir)
-
-        val createDistributable = distributableTasks[osArchKey] ?: tasks.register<AppImageTask>(
+        val createDistributable = distributableTasks[target] ?: tasks.register<AppImageTask>(
             taskNameAction = "hokkaido",
-            taskNameObject = "distributable$osArch",
-            args = listOf(Windows)
+            taskNameObject = "distributable${target.name}",
+            args = listOf(target)
         ) {
             configureAppImageTask(
                 this,
-                arch = arch,
                 createRuntimeImage = packageTasks.createRuntimeImage,
                 prepareAppResources = commonTasks.prepareAppResources,
                 checkRuntime = packageTasks.checkRuntime,
                 unpackDefaultResources = commonTasks.unpackDefaultResources,
-                runProguard = runProguard
+                runProguard = packageTasks.runProguard
             )
-        }.also { distributableTasks[osArchKey] = it }
+        }.also { distributableTasks[target] = it }
 
-        val runDistributable = runTasks[osArchKey] ?: tasks.register<AbstractRunDistributableTask>(
+        val runDistributable = runTasks[target] ?: tasks.register<AbstractRunDistributableTask>(
             taskNameAction = "hokkaidoRun",
-            taskNameObject = "distributable$osArch",
+            taskNameObject = "distributable${target.name}",
             args = listOf(createDistributable)
-        ).also { runTasks[osArchKey] = it }
+        ).also { runTasks[target] = it }
 
         tasks.register<CustomMsiTask>(
             taskNameAction = "hokkaido",
-            taskNameObject = "msi" + arch.uppercaseFirstChar(),
-            args = listOf(arch)
+            taskNameObject = "msi" + target.arch.id.uppercaseFirstChar(),
+            args = listOf(target)
         ) {
             configureCustomPackageTask(
                 this,
@@ -154,41 +151,36 @@ private fun JvmApplicationContext.configurePackagingTasks(
     }
 
     app.nativeDistributions.linux.debs.forEach { deb ->
-        val arch = deb.arch!!
+        val target = Target(Linux, arch(deb.arch))
         val distro = deb.distro!!
-        val os = "linux"
 
-        val osArchKey = "$os:$arch"
-        val osArch = os.uppercaseFirstChar() + arch.uppercaseFirstChar()
+        val packageTasks = configureCommonPackageTasks(tasks, jdkInfo, target, app, appTmpDir, commonTasks)
 
-        val packageTasks = configureCommonPackageTasks(tasks, jdkInfo, os, arch, app, appTmpDir)
-
-        val createDistributable = distributableTasks[osArchKey] ?: tasks.register<AppImageTask>(
+        val createDistributable = distributableTasks[target] ?: tasks.register<AppImageTask>(
             taskNameAction = "hokkaido",
-            taskNameObject = "distributable$osArch",
-            args = listOf(Linux)
+            taskNameObject = "distributable${target.name}",
+            args = listOf(target)
         ) {
             configureAppImageTask(
                 this,
-                arch = arch,
                 createRuntimeImage = packageTasks.createRuntimeImage,
                 prepareAppResources = commonTasks.prepareAppResources,
                 checkRuntime = packageTasks.checkRuntime,
                 unpackDefaultResources = commonTasks.unpackDefaultResources,
-                runProguard = runProguard
+                runProguard = packageTasks.runProguard
             )
-        }.also { distributableTasks[osArchKey] = it }
+        }.also { distributableTasks[target] = it }
 
-        val runDistributable = runTasks[osArchKey] ?: tasks.register<AbstractRunDistributableTask>(
+        val runDistributable = runTasks[target] ?: tasks.register<AbstractRunDistributableTask>(
             taskNameAction = "hokkaidoRun",
-            taskNameObject = "distributable$osArch",
+            taskNameObject = "distributable${target.name}",
             args = listOf(createDistributable)
-        ).also { runTasks[osArchKey] = it }
+        ).also { runTasks[target] = it }
 
         tasks.register<CustomDebTask>(
             taskNameAction = "hokkaido",
             taskNameObject = "deb" + distro.uppercaseFirstChar(),
-            args = listOf(arch, deb.qualifier!!)
+            args = listOf(target, deb.qualifier!!)
         ) {
             configureCustomPackageTask(
                 this,
@@ -221,51 +213,57 @@ private fun JvmApplicationContext.configurePackagingTasks(
 private fun JvmApplicationContext.configureCommonPackageTasks(
     tasks: JvmTasks,
     jdkInfo: JdkInfo,
-    os: String,
-    arch: String,
+    target: Target,
     app: JvmApplicationData,
-    appTmpDir: Provider<Directory>
+    appTmpDir: Provider<Directory>,
+    commonTasks: CommonJvmDesktopTasks,
 ): CommonJvmPackageTasks {
-    val osArchKey = "$os:$arch"
-    val osArch = os.uppercaseFirstChar() + arch.uppercaseFirstChar()
-
-    val downloadJdk = downloadJdkTasks[osArchKey] ?: tasks.register<DownloadJdkTask>(
+    val downloadJdk = downloadJdkTasks[target] ?: tasks.register<DownloadJdkTask>(
         taskNameAction = "hokkaido",
-        taskNameObject = "download$osArch",
+        taskNameObject = "download${target.name}",
     ) {
         jvmVendor.set(app.nativeDistributions.jvmVendor)
         jvmVersion.set(app.nativeDistributions.jvmVersion)
-        this.os.set(os)
-        this.arch.set(arch)
-    }.also { downloadJdkTasks[osArchKey] = it }
+        this.os.set(target.os.id)
+        this.arch.set(target.arch.id)
+    }.also { downloadJdkTasks[target] = it }
 
-    val checkRuntime = checkRuntimeTasks[osArchKey] ?: tasks.register<AbstractCheckNativeDistributionRuntime>(
+    val checkRuntime = checkRuntimeTasks[target] ?: tasks.register<AbstractCheckNativeDistributionRuntime>(
         taskNameAction = "hokkaidoCheck",
-        taskNameObject = "runtime$osArch"
+        taskNameObject = "runtime${target.name}"
     ) {
         dependsOn(downloadJdk)
         targetJdkVersion.set(jdkInfo.major)
         javaHome.set(app.javaHomeProvider)
         jdk.set(provider { downloadJdk.get().jdkDir })
-    }.also { checkRuntimeTasks[osArchKey] = it }
+    }.also { checkRuntimeTasks[target] = it }
 
-    val suggestRuntimeModules = suggestModulesTasks[osArchKey] ?: tasks.register<AbstractSuggestModulesTask>(
+    val suggestRuntimeModules = suggestModulesTasks[target] ?: tasks.register<AbstractSuggestModulesTask>(
         taskNameAction = "hokkaidoSuggest",
-        taskNameObject = "runtimeModules$osArch"
+        taskNameObject = "runtimeModules${target.name}"
     ) {
         dependsOn(checkRuntime)
         jdk.set(provider { downloadJdk.get().jdkDir })
         modules.set(provider { app.nativeDistributions.modules })
 
-        useAppRuntimeFiles { (jarFiles, mainJar) ->
+        useAppRuntimeFiles(target) { (jarFiles, mainJar) ->
             files.from(jarFiles)
             launcherMainJar.set(mainJar)
         }
-    }.also { suggestModulesTasks[osArchKey] = it }
+    }.also { suggestModulesTasks[target] = it }
 
-    val createRuntimeImage = runtimeTasks[osArchKey] ?: tasks.register<AbstractJLinkTask>(
+    val runProguard = proguardTasks[target] ?: if (buildType.proguard.isEnabled.orNull == true) {
+        tasks.register<AbstractProguardTask>(
+            taskNameAction = "hokkaidoProguard",
+            taskNameObject = "jars${target.name}"
+        ) {
+            configureProguardTask(this, target, /*targetData,*/ commonTasks.unpackDefaultResources)
+        }.also { proguardTasks[target] = it }
+    } else null
+
+    val createRuntimeImage = runtimeTasks[target] ?: tasks.register<AbstractJLinkTask>(
         taskNameAction = "hokkaido",
-        taskNameObject = "runtimeImage$osArch"
+        taskNameObject = "runtimeImage${target.name}"
     ) {
         dependsOn(checkRuntime)
         dependsOn(downloadJdk)
@@ -274,14 +272,15 @@ private fun JvmApplicationContext.configureCommonPackageTasks(
         modules.set(provider { app.nativeDistributions.modules })
         includeAllModules.set(provider { app.nativeDistributions.includeAllModules })
         javaRuntimePropertiesFile.set(checkRuntime.flatMap { it.javaRuntimePropertiesFile })
-        destinationDir.set(appTmpDir.dir("$os/$arch/runtime"))
-    }.also { runtimeTasks[osArchKey] = it }
+        destinationDir.set(appTmpDir.dir("${target.os.id}/${target.arch.id}/runtime"))
+    }.also { runtimeTasks[target] = it }
 
-    return CommonJvmPackageTasks(checkRuntime, createRuntimeImage)
+    return CommonJvmPackageTasks(checkRuntime, runProguard, createRuntimeImage)
 }
 
 private fun JvmApplicationContext.configureProguardTask(
     proguard: AbstractProguardTask,
+    target: Target,
     unpackDefaultResources: TaskProvider<AbstractUnpackDefaultComposeApplicationResourcesTask>
 ): AbstractProguardTask = proguard.apply {
     val settings = buildType.proguard
@@ -305,7 +304,7 @@ private fun JvmApplicationContext.configureProguardTask(
     destinationDir.set(appTmpDir.dir("proguard"))
     javaHome.set(app.javaHomeProvider)
 
-    useAppRuntimeFiles { files ->
+    useAppRuntimeFiles(target) { files ->
         inputFiles.from(files.allRuntimeJars)
         mainJar.set(files.mainJar)
     }
@@ -352,7 +351,7 @@ private fun JvmApplicationContext.configureCustomPackageTask(
         packageTask.launcherMainJar.set(runProguard.flatMap { it.mainJarInDestinationDir })
         packageTask.mangleJarFilesNames.set(false)
     } else {
-        packageTask.useAppRuntimeFiles { (runtimeJars, mainJar) ->
+        packageTask.useAppRuntimeFiles(packageTask.target) { (runtimeJars, mainJar) ->
             files.from(runtimeJars)
             launcherMainJar.set(mainJar)
         }
@@ -365,7 +364,6 @@ private fun JvmApplicationContext.configureCustomPackageTask(
 
 private fun JvmApplicationContext.configureAppImageTask(
     packageTask: AppImageTask,
-    arch: String,
     createRuntimeImage: TaskProvider<AbstractJLinkTask>? = null,
     prepareAppResources: TaskProvider<Sync>? = null,
     checkRuntime: TaskProvider<AbstractCheckNativeDistributionRuntime>? = null,
@@ -391,19 +389,19 @@ private fun JvmApplicationContext.configureAppImageTask(
         packageTask.jdkDir.set(checkRuntime.flatMap { it.jdk })
     }
 
-    this.configurePlatformSettings(packageTask, unpackDefaultResources)
+    configurePlatformSettings(packageTask, unpackDefaultResources)
 
     app.nativeDistributions.let { executables ->
         packageTask.packageName.set(packageNameProvider)
         packageTask.packageDescription.set(packageTask.provider { executables.description })
         packageTask.packageCopyright.set(packageTask.provider { executables.copyright })
         packageTask.packageVendor.set(packageTask.provider { executables.vendor })
-        packageTask.packageVersion.set(packageVersionFor(packageTask.os))
+        packageTask.packageVersion.set(packageVersionFor(packageTask.target.os))
         packageTask.licenseFile.set(executables.licenseFile)
     }
 
     packageTask.destinationDir.set(app.nativeDistributions.outputBaseDir.map {
-        it.dir("$appDirName/${packageTask.os.id}/$arch/appimage")
+        it.dir("$appDirName/${packageTask.target.os.id}/${packageTask.target.arch.id}/appimage")
     })
     packageTask.javaHome.set(app.javaHomeProvider)
 
@@ -413,7 +411,7 @@ private fun JvmApplicationContext.configureAppImageTask(
         packageTask.launcherMainJar.set(runProguard.flatMap { it.mainJarInDestinationDir })
         packageTask.mangleJarFilesNames.set(false)
     } else {
-        packageTask.useAppRuntimeFiles { (runtimeJars, mainJar) ->
+        packageTask.useAppRuntimeFiles(packageTask.target) { (runtimeJars, mainJar) ->
             files.from(runtimeJars)
             launcherMainJar.set(mainJar)
         }
@@ -573,7 +571,7 @@ private fun JvmApplicationContext.configureRunTask(
         add("-D$APP_RESOURCES_DIR=${appResourcesDir.absolutePath}")
     }
     exec.args = app.args
-    exec.useAppRuntimeFiles { (runtimeJars, _) ->
+    exec.useAppRuntimeFiles(currentTarget) { (runtimeJars, _) ->
         classpath = runtimeJars
     }
 }
@@ -584,8 +582,7 @@ private fun JvmApplicationContext.configurePackageUberJarForCurrentOS(jar: Jar, 
             files.map { if (it.isZipOrJar()) jar.project.zipTree(it) else it }
         })
 
-
-    jar.useAppRuntimeFiles { (runtimeJars, _) ->
+    jar.useAppRuntimeFiles(currentTarget) { (runtimeJars, _) ->
         from(flattenJars(runtimeJars))
     }
 

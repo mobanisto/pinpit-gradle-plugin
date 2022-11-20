@@ -10,6 +10,7 @@ import de.mobanisto.compose.desktop.application.dsl.JvmApplicationBuildTypes
 import de.mobanisto.compose.desktop.application.dsl.JvmApplicationDistributions
 import org.gradle.api.Action
 import org.gradle.api.Task
+import org.gradle.api.file.FileCollection
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.model.ObjectFactory
 import org.gradle.api.tasks.SourceSet
@@ -23,8 +24,8 @@ internal open class JvmApplicationInternal @Inject constructor(
 ) : JvmApplication() {
     internal val data: JvmApplicationData = objects.new()
 
-    final override fun from(from: SourceSet) {
-        data.jvmApplicationRuntimeFilesProvider = JvmApplicationRuntimeFilesProvider.FromGradleSourceSet(from)
+    final override fun from(from: SourceSet, files: FileCollection) {
+        data.jvmApplicationRuntimeFilesProvider = JvmApplicationRuntimeFilesProvider.FromGradleSourceSet(from, files)
     }
     final override fun from(from: KotlinTarget) {
         check(from is KotlinJvmTarget) { "Non JVM Kotlin MPP targets are not supported: ${from.javaClass.canonicalName} " +

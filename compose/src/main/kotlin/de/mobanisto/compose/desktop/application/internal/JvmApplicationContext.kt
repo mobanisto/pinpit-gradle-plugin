@@ -6,7 +6,6 @@
 package de.mobanisto.compose.desktop.application.internal
 
 import de.mobanisto.compose.desktop.application.dsl.JvmApplicationBuildType
-import de.mobanisto.compose.internal.KOTLIN_JVM_PLUGIN_ID
 import de.mobanisto.compose.internal.KOTLIN_MPP_PLUGIN_ID
 import de.mobanisto.compose.internal.javaSourceSets
 import de.mobanisto.compose.internal.joinDashLowercaseNonEmpty
@@ -34,13 +33,18 @@ internal data class JvmApplicationContext(
             "hokkaido/tmp/$appDirName"
         )
 
-    fun <T : Task> T.useAppRuntimeFiles(fn: T.(JvmApplicationRuntimeFiles) -> Unit) {
-        val runtimeFiles = app.jvmApplicationRuntimeFilesProvider?.jvmApplicationRuntimeFiles(project)
+    fun <T : Task> T.useAppRuntimeFiles(target: Target, fn: T.(JvmApplicationRuntimeFiles) -> Unit) {
+        /*val runtimeFiles = app.jvmApplicationRuntimeFilesProvider?.jvmApplicationRuntimeFiles(project)
             ?: JvmApplicationRuntimeFiles(
                 allRuntimeJars = app.fromFiles,
                 mainJar = app.mainJar,
                 taskDependencies = app.dependenciesTaskNames.toTypedArray()
-            )
+            )*/
+        val provider = JvmApplicationRuntimeFilesProvider.FromGradleSourceSet(
+            project.javaSourceSets.getByName("main"),
+            project.configurations.getByName(target.configuration)
+        )
+        val runtimeFiles = provider.jvmApplicationRuntimeFiles(project)
         runtimeFiles.configureUsageBy(this, fn)
     }
 
@@ -53,6 +57,7 @@ internal data class JvmApplicationContext(
         project.provider(fn)
 
     fun configureDefaultApp() {
+        // TODO: support for org.jetbrains.kotlin.multiplatform is probably broken now
         if (project.plugins.hasPlugin(KOTLIN_MPP_PLUGIN_ID)) {
             var isJvmTargetConfigured = false
             project.mppExt.targets.all { target ->
@@ -61,16 +66,15 @@ internal data class JvmApplicationContext(
                         appInternal.from(target)
                         isJvmTargetConfigured = true
                     } else {
-                        project.logger.error("w: Default configuration for Compose Desktop Application is disabled: " +
-                                "multiple Kotlin JVM targets definitions are detected. " +
-                                "Specify, which target to use by using `compose.desktop.application.from(kotlinMppTarget)`")
+                        project.logger.error(
+                            "w: Default configuration for Compose Desktop Application is disabled: " +
+                                    "multiple Kotlin JVM targets definitions are detected. " +
+                                    "Specify, which target to use by using `compose.desktop.application.from(kotlinMppTarget)`"
+                        )
                         appInternal.disableDefaultConfiguration()
                     }
                 }
             }
-        } else if (project.plugins.hasPlugin(KOTLIN_JVM_PLUGIN_ID)) {
-            val mainSourceSet = project.javaSourceSets.getByName("main")
-            appInternal.from(mainSourceSet)
         }
     }
 }

@@ -4,5 +4,5 @@
 * [x] Simulate jpackage for Linux
 * [x] Simulate jpackage for Windows
 * [ ] Simulate jpackage for macOS
-* [ ] Use correct skiko library for each platform
+* [x] Use correct skiko library for each platform
 * [ ] Configure runDistributable to depend on current platform and execute that

@@ -7,12 +7,13 @@ package de.mobanisto.compose.desktop.application.dsl
 
 import org.gradle.api.Action
 import org.gradle.api.Task
+import org.gradle.api.file.FileCollection
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.tasks.SourceSet
 import org.jetbrains.kotlin.gradle.plugin.KotlinTarget
 
 abstract class JvmApplication {
-    abstract fun from(from: SourceSet)
+    abstract fun from(from: SourceSet, files: FileCollection)
     abstract fun from(from: KotlinTarget)
     abstract fun disableDefaultConfiguration()
     abstract fun dependsOn(vararg tasks: Task)

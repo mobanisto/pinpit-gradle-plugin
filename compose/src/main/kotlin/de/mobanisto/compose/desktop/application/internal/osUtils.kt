@@ -7,8 +7,10 @@ package de.mobanisto.compose.desktop.application.internal
 
 import de.mobanisto.compose.desktop.application.internal.files.checkExistingFile
 import de.mobanisto.compose.desktop.application.tasks.MIN_JAVA_RUNTIME_VERSION
+import de.mobanisto.compose.internal.uppercaseFirstChar
 import org.gradle.api.provider.Provider
 import java.io.File
+import java.io.Serializable
 
 enum class OS(val id: String) {
     Linux("linux"),
@@ -16,14 +18,27 @@ enum class OS(val id: String) {
     MacOS("macos")
 }
 
-internal enum class Arch(val id: String) {
+enum class Arch(val id: String) {
     X64("x64"),
     Arm64("arm64")
 }
 
-internal data class Target(val os: OS, val arch: Arch) {
+internal fun arch(arch: String?): Arch {
+    for (candidate in Arch.values()) {
+        if (candidate.id == arch) {
+            return candidate
+        }
+    }
+    error("Invalid architecture '$arch'")
+}
+
+data class Target(val os: OS, val arch: Arch) : Serializable {
     val id: String
         get() = "${os.id}-${arch.id}"
+    val configuration: String
+        get() = "${os.id}${arch.id.uppercaseFirstChar()}"
+    val name: String
+        get() = "${os.id.uppercaseFirstChar()}${arch.id.uppercaseFirstChar()}"
 }
 
 internal val currentTarget by lazy {
@@ -35,8 +50,7 @@ internal val currentOsArch by lazy {
 }
 
 internal val currentArch by lazy {
-    val osArch = System.getProperty("os.arch")
-    when (osArch) {
+    when (val osArch = System.getProperty("os.arch")) {
         "x86_64", "amd64" -> Arch.X64
         "aarch64" -> Arch.Arm64
         else -> error("Unsupported OS arch: $osArch")

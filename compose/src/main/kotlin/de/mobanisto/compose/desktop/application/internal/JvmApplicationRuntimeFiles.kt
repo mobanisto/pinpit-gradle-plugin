@@ -47,12 +47,13 @@ internal sealed class JvmApplicationRuntimeFilesProvider {
         }
     }
 
-    class FromGradleSourceSet(private val sourceSet: SourceSet) : GradleJvmApplicationRuntimeFilesProvider() {
+    class FromGradleSourceSet(private val sourceSet: SourceSet, private val files: FileCollection) :
+        GradleJvmApplicationRuntimeFilesProvider() {
         override val jarTaskName: String
             get() = sourceSet.jarTaskName
 
         override val runtimeFiles: FileCollection
-            get() = sourceSet.runtimeClasspath
+            get() = files
     }
 
     class FromKotlinMppTarget(private val target: KotlinJvmTarget) : GradleJvmApplicationRuntimeFilesProvider() {
@@ -61,14 +62,5 @@ internal sealed class JvmApplicationRuntimeFilesProvider {
 
         override val runtimeFiles: FileCollection
             get() = target.compilations.getByName("main").runtimeDependencyFiles
-    }
-
-    class Custom(
-        private val runtimeJarFiles: FileCollection,
-        private val mainJar: Provider<RegularFile>,
-        private val taskDependencies: Array<Any>
-    ) : JvmApplicationRuntimeFilesProvider() {
-        override fun jvmApplicationRuntimeFiles(project: Project): JvmApplicationRuntimeFiles =
-            JvmApplicationRuntimeFiles(runtimeJarFiles, mainJar, taskDependencies)
     }
 }

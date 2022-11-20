@@ -8,9 +8,38 @@ repositories {
     jetbrainsCompose()
 }
 
+def attributeUsage = Attribute.of("org.gradle.usage", String)
+
+configurations {
+    currentOs {
+        extendsFrom implementation
+        attributes { attribute(attributeUsage, "java-runtime") }
+    }
+    windowsX64 {
+        extendsFrom implementation
+        attributes { attribute(attributeUsage, "java-runtime") }
+    }
+    linuxX64 {
+        extendsFrom implementation
+        attributes { attribute(attributeUsage, "java-runtime") }
+    }
+}
+
+sourceSets {
+    main {
+        java {
+            compileClasspath = configurations.currentOs
+            runtimeClasspath = configurations.currentOs
+        }
+    }
+}
+
 dependencies {
+    implementation "com.google.guava:guava:19.0"
     implementation "org.jetbrains.kotlin:kotlin-stdlib"
-    implementation compose.desktop.currentOs
+    currentOs compose.desktop.currentOs
+    windowsX64 compose.desktop.windows_x64
+    linuxX64 compose.desktop.linux_x64
 }
 
 ext.versionCode = "1.0.0"

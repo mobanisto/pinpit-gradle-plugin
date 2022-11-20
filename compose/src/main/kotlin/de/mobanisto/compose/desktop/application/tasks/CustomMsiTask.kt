@@ -7,6 +7,7 @@ package de.mobanisto.compose.desktop.application.tasks
 
 import de.mobanisto.compose.desktop.application.dsl.TargetFormat
 import de.mobanisto.compose.desktop.application.internal.JvmRuntimeProperties
+import de.mobanisto.compose.desktop.application.internal.Target
 import de.mobanisto.compose.desktop.application.internal.files.SimpleFileCopyingProcessor
 import de.mobanisto.compose.desktop.application.internal.files.findOutputFileOrDir
 import de.mobanisto.compose.desktop.application.internal.files.isJarFile
@@ -39,8 +40,8 @@ import java.util.*
 import javax.inject.Inject
 
 abstract class CustomMsiTask @Inject constructor(
-    @Input val arch: String,
-) : CustomPackageTask(TargetFormat.CustomMsi), WindowsTask {
+    target: Target
+) : CustomPackageTask(target, TargetFormat.CustomMsi), WindowsTask {
 
     /** @see internal/wixToolset.kt */
     override val wixToolsetDir: DirectoryProperty = objects.directoryProperty()
@@ -204,8 +205,8 @@ abstract class CustomMsiTask @Inject constructor(
         for (sourceFile in outdatedLibs) {
             assert(sourceFile.exists()) { "Lib file does not exist: $sourceFile" }
 
-            libsMapping[sourceFile] = if (isSkikoForCurrentOS(sourceFile)) {
-                val unpackedFiles = unpackSkikoForCurrentOS(sourceFile, skikoDir.ioFile, fileOperations)
+            libsMapping[sourceFile] = if (isSkikoFor(target, sourceFile)) {
+                val unpackedFiles = unpackSkikoFor(target, sourceFile, skikoDir.ioFile, fileOperations)
                 unpackedFiles.map { copyFileToLibsDir(it) }
             } else {
                 listOf(copyFileToLibsDir(sourceFile))

@@ -8,6 +8,7 @@ package de.mobanisto.compose.desktop.application.tasks
 import de.mobanisto.compose.desktop.application.dsl.TargetFormat
 import de.mobanisto.compose.desktop.application.internal.DebianUtils
 import de.mobanisto.compose.desktop.application.internal.JvmRuntimeProperties
+import de.mobanisto.compose.desktop.application.internal.Target
 import de.mobanisto.compose.desktop.application.internal.dir
 import de.mobanisto.compose.desktop.application.internal.files.SimpleFileCopyingProcessor
 import de.mobanisto.compose.desktop.application.internal.files.asPath
@@ -55,9 +56,9 @@ import kotlin.io.path.createDirectories
 
 
 abstract class CustomDebTask @Inject constructor(
-    @Input val arch: String,
+    target: Target,
     @Input val qualifier: String,
-) : CustomPackageTask(TargetFormat.CustomDeb) {
+) : CustomPackageTask(target, TargetFormat.CustomDeb) {
 
     companion object {
         private val PACKAGE_NAME_REGEX: Pattern = Pattern.compile("^(^\\S+):")
@@ -264,8 +265,8 @@ abstract class CustomDebTask @Inject constructor(
         for (sourceFile in outdatedLibs) {
             assert(sourceFile.exists()) { "Lib file does not exist: $sourceFile" }
 
-            libsMapping[sourceFile] = if (isSkikoForCurrentOS(sourceFile)) {
-                val unpackedFiles = unpackSkikoForCurrentOS(sourceFile, skikoDir.ioFile, fileOperations)
+            libsMapping[sourceFile] = if (isSkikoFor(target, sourceFile)) {
+                val unpackedFiles = unpackSkikoFor(target, sourceFile, skikoDir.ioFile, fileOperations)
                 unpackedFiles.map { copyFileToLibsDir(it) }
             } else {
                 listOf(copyFileToLibsDir(sourceFile))
@@ -295,9 +296,9 @@ abstract class CustomDebTask @Inject constructor(
 
         fileOperations.delete(debFileTree)
         buildDebFileTree(appImage, debFileTree)
-        buildDebianDir(appImage, debFileTree, arch)
+        buildDebianDir(appImage, debFileTree, target.arch.id)
 
-        val deb = destination.file("${linuxPackageName.get()}-$qualifier-$arch-${linuxDebPackageVersion.get()}.deb")
+        val deb = destination.file("${linuxPackageName.get()}-$qualifier-${target.arch.id}-${linuxDebPackageVersion.get()}.deb")
         runExternalTool(
             tool = DebianUtils.fakeroot,
             args = listOf(DebianUtils.dpkgDeb.toString(), "-b", debFileTree.toString(), deb.toString())

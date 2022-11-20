@@ -2,6 +2,7 @@ package de.mobanisto.compose.desktop.application.tasks
 
 import de.mobanisto.compose.desktop.application.dsl.TargetFormat
 import de.mobanisto.compose.desktop.application.internal.ComposeProperties
+import de.mobanisto.compose.desktop.application.internal.Target
 import de.mobanisto.compose.desktop.application.internal.notNullProperty
 import de.mobanisto.compose.desktop.application.internal.nullableProperty
 import de.mobanisto.compose.desktop.tasks.AbstractComposeDesktopTask
@@ -39,6 +40,7 @@ import kotlin.io.path.exists
 import kotlin.io.path.inputStream
 
 abstract class CustomPackageTask @Inject constructor(
+    @get:Input val target: Target,
     @get:Input val targetFormat: TargetFormat,
 ) : AbstractComposeDesktopTask() {
     @get:LocalState
