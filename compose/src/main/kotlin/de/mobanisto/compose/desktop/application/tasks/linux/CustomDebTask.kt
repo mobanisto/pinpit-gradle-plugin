@@ -3,7 +3,7 @@
  * Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE.txt file.
  */
 
-package de.mobanisto.compose.desktop.application.tasks
+package de.mobanisto.compose.desktop.application.tasks.linux
 
 import de.mobanisto.compose.desktop.application.dsl.TargetFormat
 import de.mobanisto.compose.desktop.application.internal.DebianUtils
@@ -24,6 +24,10 @@ import de.mobanisto.compose.desktop.application.internal.ioFileOrNull
 import de.mobanisto.compose.desktop.application.internal.nullableProperty
 import de.mobanisto.compose.desktop.application.internal.provider
 import de.mobanisto.compose.desktop.application.internal.stacktraceToString
+import de.mobanisto.compose.desktop.application.tasks.CustomPackageTask
+import de.mobanisto.compose.desktop.application.tasks.FilesMapping
+import de.mobanisto.compose.desktop.application.tasks.isSkikoFor
+import de.mobanisto.compose.desktop.application.tasks.unpackSkikoFor
 import org.gradle.api.file.Directory
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.file.RegularFile

@@ -32,6 +32,7 @@ import de.mobanisto.compose.desktop.application.internal.nullableProperty
 import de.mobanisto.compose.desktop.application.internal.provider
 import de.mobanisto.compose.desktop.application.internal.stacktraceToString
 import de.mobanisto.compose.desktop.application.internal.validation.validate
+import de.mobanisto.compose.desktop.application.tasks.windows.WindowsTask
 import org.gradle.api.file.ConfigurableFileCollection
 import org.gradle.api.file.Directory
 import org.gradle.api.file.DirectoryProperty

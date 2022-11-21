@@ -15,8 +15,8 @@ import de.mobanisto.compose.desktop.application.tasks.AbstractProguardTask
 import de.mobanisto.compose.desktop.application.tasks.AbstractRunDistributableTask
 import de.mobanisto.compose.desktop.application.tasks.AbstractSuggestModulesTask
 import de.mobanisto.compose.desktop.application.tasks.AppImageTask
-import de.mobanisto.compose.desktop.application.tasks.CustomDebTask
-import de.mobanisto.compose.desktop.application.tasks.CustomMsiTask
+import de.mobanisto.compose.desktop.application.tasks.linux.CustomDebTask
+import de.mobanisto.compose.desktop.application.tasks.windows.CustomMsiTask
 import de.mobanisto.compose.desktop.application.tasks.CustomPackageTask
 import de.mobanisto.compose.desktop.application.tasks.DownloadJdkTask
 import de.mobanisto.compose.desktop.tasks.AbstractUnpackDefaultComposeApplicationResourcesTask

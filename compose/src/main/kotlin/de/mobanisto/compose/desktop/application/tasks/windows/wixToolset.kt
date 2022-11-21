@@ -5,13 +5,12 @@
 
 package de.mobanisto.compose.desktop.application.internal
 
-import de.mobanisto.compose.desktop.application.tasks.CustomMsiTask
-import de.mobanisto.compose.desktop.application.tasks.WindowsTask
+import de.mobanisto.compose.desktop.application.tasks.windows.CustomMsiTask
+import de.mobanisto.compose.desktop.application.tasks.windows.WindowsTask
 import de.undercouch.gradle.tasks.download.Download
 import org.gradle.api.Project
 import org.gradle.api.tasks.Copy
 import java.io.File
-import java.nio.file.Files
 import java.nio.file.Files.exists
 import java.nio.file.Paths
 

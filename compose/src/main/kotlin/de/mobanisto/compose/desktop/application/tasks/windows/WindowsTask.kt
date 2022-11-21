@@ -1,4 +1,4 @@
-package de.mobanisto.compose.desktop.application.tasks
+package de.mobanisto.compose.desktop.application.tasks.windows
 
 import org.gradle.api.Task
 import org.gradle.api.file.DirectoryProperty
