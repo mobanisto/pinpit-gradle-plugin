@@ -270,6 +270,11 @@ abstract class CustomMsiTask @Inject constructor(
         GenerateProductWxs(
             outputProduct, upgradeCode!!, vendor!!, productName, version!!, description, mainExecutable
         ).execute()
+
+        val outputInstallDir = destinationWix.resolve("InstallDir.wxs")
+        Thread.currentThread().contextClassLoader.getResourceAsStream("wix/InstallDir.wxs")?.use {
+            Files.copy(it, outputInstallDir)
+        }
     }
 
     override fun checkResult(result: ExecResult) {
