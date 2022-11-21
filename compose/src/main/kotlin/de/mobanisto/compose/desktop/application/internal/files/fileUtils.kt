@@ -6,6 +6,8 @@
 package de.mobanisto.compose.desktop.application.internal.files
 
 import de.mobanisto.compose.desktop.application.dsl.TargetFormat
+import de.mobanisto.compose.desktop.application.internal.FileVisitorBuilder
+import de.mobanisto.compose.desktop.application.internal.FileVisitorBuilderImpl
 import de.mobanisto.compose.desktop.application.internal.OS
 import de.mobanisto.compose.desktop.application.internal.currentOS
 import org.gradle.api.file.Directory
@@ -19,7 +21,9 @@ import java.io.FileInputStream
 import java.io.FileOutputStream
 import java.io.InputStream
 import java.io.Writer
+import java.nio.file.FileVisitOption
 import java.nio.file.FileVisitResult
+import java.nio.file.FileVisitor
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.SimpleFileVisitor
@@ -30,6 +34,9 @@ import java.security.MessageDigest
 import java.util.zip.ZipEntry
 import java.util.zip.ZipInputStream
 import java.util.zip.ZipOutputStream
+import kotlin.contracts.ExperimentalContracts
+import kotlin.contracts.InvocationKind
+import kotlin.contracts.contract
 
 internal fun File.mangledName(): String =
     buildString {
@@ -201,4 +208,32 @@ internal fun findRelative(source: Path, takeFile: (file: Path) -> Boolean = { _ 
         }
     })
     return results
+}
+
+// TODO: remove once upgraded to kotlin 1.7.X
+@OptIn(ExperimentalContracts::class)
+public fun Path.visitFileTree(
+    maxDepth: Int = Int.MAX_VALUE,
+    followLinks: Boolean = false,
+    builderAction: FileVisitorBuilder.() -> Unit
+): Unit {
+    contract { callsInPlace(builderAction, InvocationKind.EXACTLY_ONCE) }
+    visitFileTree(fileVisitor(builderAction), maxDepth, followLinks)
+}
+
+// TODO: remove once upgraded to kotlin 1.7.X
+internal fun Path.visitFileTree(
+    visitor: FileVisitor<Path>,
+    maxDepth: Int = Int.MAX_VALUE,
+    followLinks: Boolean = false
+): Unit {
+    val options = if (followLinks) setOf(FileVisitOption.FOLLOW_LINKS) else setOf()
+    Files.walkFileTree(this, options, maxDepth, visitor)
+}
+
+// TODO: remove once upgraded to kotlin 1.7.X
+@OptIn(ExperimentalContracts::class)
+public fun fileVisitor(builderAction: FileVisitorBuilder.() -> Unit): FileVisitor<Path> {
+    contract { callsInPlace(builderAction, InvocationKind.EXACTLY_ONCE) }
+    return FileVisitorBuilderImpl().apply(builderAction).build()
 }

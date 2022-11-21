@@ -15,10 +15,10 @@ import de.mobanisto.compose.desktop.application.tasks.AbstractProguardTask
 import de.mobanisto.compose.desktop.application.tasks.AbstractRunDistributableTask
 import de.mobanisto.compose.desktop.application.tasks.AbstractSuggestModulesTask
 import de.mobanisto.compose.desktop.application.tasks.AppImageTask
-import de.mobanisto.compose.desktop.application.tasks.linux.CustomDebTask
-import de.mobanisto.compose.desktop.application.tasks.windows.CustomMsiTask
 import de.mobanisto.compose.desktop.application.tasks.CustomPackageTask
 import de.mobanisto.compose.desktop.application.tasks.DownloadJdkTask
+import de.mobanisto.compose.desktop.application.tasks.linux.CustomDebTask
+import de.mobanisto.compose.desktop.application.tasks.windows.CustomMsiTask
 import de.mobanisto.compose.desktop.tasks.AbstractUnpackDefaultComposeApplicationResourcesTask
 import de.mobanisto.compose.internal.addUnique
 import de.mobanisto.compose.internal.uppercaseFirstChar
@@ -340,9 +340,6 @@ private fun JvmApplicationContext.configureCustomPackageTask(
 //        packageTask.licenseFile.set(executables.licenseFile)
     }
 
-    packageTask.destinationDir.set(app.nativeDistributions.outputBaseDir.map {
-        it.dir("$appDirName/${packageTask.targetFormat.outputDirName}")
-    })
 //    packageTask.javaHome.set(app.javaHomeProvider)
 
     if (runProguard != null) {
@@ -445,27 +442,28 @@ internal fun JvmApplicationContext.configurePlatformSettings(
     packageTask: CustomDebTask,
     unpackDefaultResources: TaskProvider<AbstractUnpackDefaultComposeApplicationResourcesTask>
 ) {
+    packageTask.destinationDir.set(app.nativeDistributions.outputBaseDir.map {
+        it.dir("$appDirName/${packageTask.target.os.id}/${packageTask.target.arch.id}/deb")
+    })
     packageTask.dependsOn(unpackDefaultResources)
-    if (currentOS == Linux) {
-        app.nativeDistributions.linux.also { linux ->
-            packageTask.linuxShortcut.set(provider { linux.shortcut })
-            packageTask.linuxAppCategory.set(provider { linux.appCategory })
-            packageTask.linuxAppRelease.set(provider { linux.appRelease })
-            packageTask.linuxDebPackageVersion.set(provider { linux.debPackageVersion })
-            packageTask.linuxDebMaintainer.set(provider { linux.debMaintainer })
-            packageTask.linuxMenuGroup.set(provider { linux.menuGroup })
-            packageTask.linuxPackageName.set(provider { linux.packageName })
-            packageTask.linuxRpmLicenseType.set(provider { linux.rpmLicenseType })
-            packageTask.iconFile.set(linux.iconFile.orElse(unpackDefaultResources.flatMap { it.resources.linuxIcon }))
-            packageTask.installationPath.set(linux.installationPath)
-            packageTask.linuxDebPreInst.set(linux.debPreInst)
-            packageTask.linuxDebPostInst.set(linux.debPostInst)
-            packageTask.linuxDebPreRm.set(linux.debPreRm)
-            packageTask.linuxDebPostRm.set(linux.debPostRm)
-            packageTask.linuxDebAdditionalDependencies.set(provider { linux.debAdditionalDependencies })
-            packageTask.linuxDebCopyright.set(linux.debCopyright)
-            packageTask.linuxDebLauncher.set(linux.debLauncher)
-        }
+    app.nativeDistributions.linux.also { linux ->
+        packageTask.linuxShortcut.set(provider { linux.shortcut })
+        packageTask.linuxAppCategory.set(provider { linux.appCategory })
+        packageTask.linuxAppRelease.set(provider { linux.appRelease })
+        packageTask.linuxDebPackageVersion.set(provider { linux.debPackageVersion })
+        packageTask.linuxDebMaintainer.set(provider { linux.debMaintainer })
+        packageTask.linuxMenuGroup.set(provider { linux.menuGroup })
+        packageTask.linuxPackageName.set(provider { linux.packageName })
+        packageTask.linuxRpmLicenseType.set(provider { linux.rpmLicenseType })
+        packageTask.iconFile.set(linux.iconFile.orElse(unpackDefaultResources.flatMap { it.resources.linuxIcon }))
+        packageTask.installationPath.set(linux.installationPath)
+        packageTask.linuxDebPreInst.set(linux.debPreInst)
+        packageTask.linuxDebPostInst.set(linux.debPostInst)
+        packageTask.linuxDebPreRm.set(linux.debPreRm)
+        packageTask.linuxDebPostRm.set(linux.debPostRm)
+        packageTask.linuxDebAdditionalDependencies.set(provider { linux.debAdditionalDependencies })
+        packageTask.linuxDebCopyright.set(linux.debCopyright)
+        packageTask.linuxDebLauncher.set(linux.debLauncher)
     }
 }
 
@@ -473,19 +471,21 @@ internal fun JvmApplicationContext.configurePlatformSettings(
     packageTask: CustomMsiTask,
     unpackDefaultResources: TaskProvider<AbstractUnpackDefaultComposeApplicationResourcesTask>
 ) {
+    packageTask.destinationDir.set(app.nativeDistributions.outputBaseDir.map {
+        it.dir("$appDirName/${packageTask.target.os.id}/${packageTask.target.arch.id}/msi")
+    })
     packageTask.dependsOn(unpackDefaultResources)
-    if (currentOS == Windows) {
-        app.nativeDistributions.windows.also { win ->
-            packageTask.winConsole.set(provider { win.console })
-            packageTask.winDirChooser.set(provider { win.dirChooser })
-            packageTask.winPerUserInstall.set(provider { win.perUserInstall })
-            packageTask.winShortcut.set(provider { win.shortcut })
-            packageTask.winMenu.set(provider { win.menu })
-            packageTask.winMenuGroup.set(provider { win.menuGroup })
-            packageTask.winUpgradeUuid.set(provider { win.upgradeUuid })
-            packageTask.iconFile.set(win.iconFile.orElse(unpackDefaultResources.flatMap { it.resources.windowsIcon }))
-            packageTask.installationPath.set(win.installationPath)
-        }
+    app.nativeDistributions.windows.also { win ->
+        packageTask.winConsole.set(provider { win.console })
+        packageTask.winDirChooser.set(provider { win.dirChooser })
+        packageTask.winPerUserInstall.set(provider { win.perUserInstall })
+        packageTask.winShortcut.set(provider { win.shortcut })
+        packageTask.winMenu.set(provider { win.menu })
+        packageTask.winMenuGroup.set(provider { win.menuGroup })
+        packageTask.winUpgradeUuid.set(provider { win.upgradeUuid })
+        packageTask.winPackageVersion.set(provider { win.packageVersion })
+        packageTask.iconFile.set(win.iconFile.orElse(unpackDefaultResources.flatMap { it.resources.windowsIcon }))
+        packageTask.installationPath.set(win.installationPath)
     }
 }
 
@@ -494,7 +494,7 @@ internal fun JvmApplicationContext.configurePlatformSettings(
     unpackDefaultResources: TaskProvider<AbstractUnpackDefaultComposeApplicationResourcesTask>
 ) {
     packageTask.dependsOn(unpackDefaultResources)
-    when (currentOS) {
+    when (packageTask.target.os) {
         Linux -> {
             app.nativeDistributions.linux.also { linux ->
                 packageTask.linuxShortcut.set(provider { linux.shortcut })

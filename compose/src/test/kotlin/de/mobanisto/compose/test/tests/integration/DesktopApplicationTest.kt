@@ -292,7 +292,7 @@ class DesktopApplicationTest : GradlePluginTestBase() {
         gradle(":hokkaidoDebUbuntuFocalX64").build().let { result ->
             assertEquals(TaskOutcome.SUCCESS, result.task(":hokkaidoDebUbuntuFocalX64")?.outcome)
 
-            val resultFile = file("build/hokkaido/binaries/main/custom-deb/test-package-ubuntu-20.04-x64-1.0.0.deb")
+            val resultFile = file("build/hokkaido/binaries/main/linux/x64/deb/test-package-ubuntu-20.04-x64-1.0.0.deb")
             resultFile.checkExists()
 
             resultFile.inputStream().use { fis ->
@@ -305,7 +305,7 @@ class DesktopApplicationTest : GradlePluginTestBase() {
         gradle(":hokkaidoMsiX64").build().let { result ->
             assertEquals(TaskOutcome.SUCCESS, result.task(":hokkaidoMsiX64")?.outcome)
 
-            val resultFile = file("build/hokkaido/binaries/main/custom-msi/test-package-x64-1.0.0.msi")
+            val resultFile = file("build/hokkaido/binaries/main/windows/x64/msi/test-package-x64-1.0.0.msi")
             resultFile.checkExists()
         }
     }
@@ -314,7 +314,7 @@ class DesktopApplicationTest : GradlePluginTestBase() {
         gradle(":hokkaidoPackageCustomDeb").build().let { result ->
             assertEquals(TaskOutcome.SUCCESS, result.task(":hokkaidoPackageCustomDeb")?.outcome)
 
-            val resultFile = file("build/hokkaido/binaries/main/custom-deb/test-package_1.0.0-1_${currentOsArch}.deb")
+            val resultFile = file("build/hokkaido/binaries/main/linux/x64/deb/test-package_1.0.0-1_${currentOsArch}.deb")
             resultFile.checkExists()
 
             resultFile.inputStream().use { fis ->

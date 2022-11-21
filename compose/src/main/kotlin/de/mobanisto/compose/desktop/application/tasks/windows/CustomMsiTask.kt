@@ -9,6 +9,7 @@ import de.mobanisto.compose.desktop.application.dsl.TargetFormat
 import de.mobanisto.compose.desktop.application.internal.JvmRuntimeProperties
 import de.mobanisto.compose.desktop.application.internal.Target
 import de.mobanisto.compose.desktop.application.internal.files.SimpleFileCopyingProcessor
+import de.mobanisto.compose.desktop.application.internal.files.asPath
 import de.mobanisto.compose.desktop.application.internal.files.findOutputFileOrDir
 import de.mobanisto.compose.desktop.application.internal.files.isJarFile
 import de.mobanisto.compose.desktop.application.internal.files.mangledName
@@ -40,6 +41,7 @@ import org.gradle.process.ExecResult
 import org.gradle.work.ChangeType
 import org.gradle.work.InputChanges
 import java.io.File
+import java.nio.file.Files
 import java.util.*
 import javax.inject.Inject
 
@@ -74,7 +76,7 @@ abstract class CustomMsiTask @Inject constructor(
 
     @get:Input
     @get:Optional
-    val packageVersion: Property<String?> = objects.nullableProperty()
+    val winPackageVersion: Property<String?> = objects.nullableProperty()
 
     @get:Input
     @get:Optional
@@ -144,7 +146,7 @@ abstract class CustomMsiTask @Inject constructor(
     @get:InputDirectory
     @get:Optional
     internal val appResourcesDirInputDirHackForVerification: Provider<Directory?>
-        get() = provider { appResourcesDir.orNull?.let { if (it.asFile.exists()) it else null} }
+        get() = provider { appResourcesDir.orNull?.let { if (it.asFile.exists()) it else null } }
 
     @get:Internal
     private val libsMappingFile: Provider<RegularFile> = workingDir.map {
@@ -250,6 +252,24 @@ abstract class CustomMsiTask @Inject constructor(
         for (file in appImage.asFileTree.files) {
             println("  $file")
         }
+
+        val upgradeCode = winUpgradeUuid.get()
+        val vendor = packageVendor.get()
+        val productName = packageName.get()
+        val version = winPackageVersion.get()
+        val description = packageDescription.get()
+
+        val destinationMsi = destinationDir.get().asPath()
+        val destinationWix = destinationMsi.resolve("wix")
+        Files.createDirectories(destinationWix)
+
+        val outputFiles = destinationWix.resolve("Files.wxs")
+        val outputProduct = destinationWix.resolve("Product.wxs")
+        val executables = GenerateFilesWxs(outputFiles, appImage.asPath(), productName).execute()
+        val mainExecutable = executables[0]
+        GenerateProductWxs(
+            outputProduct, upgradeCode!!, vendor!!, productName, version!!, description, mainExecutable
+        ).execute()
     }
 
     override fun checkResult(result: ExecResult) {
