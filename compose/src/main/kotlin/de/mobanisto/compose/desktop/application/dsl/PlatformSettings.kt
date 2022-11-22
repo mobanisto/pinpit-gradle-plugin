@@ -13,13 +13,15 @@ import javax.inject.Inject
 abstract class AbstractPlatformSettings {
     @get:Inject
     internal abstract val objects: ObjectFactory
+}
 
+abstract class AbstractBasePlatformSettings : AbstractPlatformSettings() {
     val iconFile: RegularFileProperty = objects.fileProperty()
     var packageVersion: String? = null
     var installationPath: String? = null
 }
 
-abstract class AbstractMacOSPlatformSettings : AbstractPlatformSettings() {
+abstract class AbstractMacOSPlatformSettings : AbstractBasePlatformSettings() {
     var packageName: String? = null
 
     var packageBuildVersion: String? = null
@@ -74,7 +76,7 @@ open class InfoPlistSettings {
     var extraKeysRawXml: String? = null
 }
 
-abstract class LinuxPlatformSettings : AbstractPlatformSettings() {
+abstract class LinuxPlatformSettings : AbstractBasePlatformSettings() {
     var shortcut: Boolean = false
     var packageName: String? = null
     var appRelease: String? = null
@@ -110,7 +112,7 @@ abstract class LinuxPlatformSettings : AbstractPlatformSettings() {
     }
 }
 
-abstract class DebianPlatformSettings {
+abstract class DebianPlatformSettings : AbstractPlatformSettings() {
     var distro: String? = null
     var arch: String? = null
     var qualifier: String? = null
@@ -120,7 +122,7 @@ abstract class DebianPlatformSettings {
     }
 }
 
-abstract class WindowsPlatformSettings : AbstractPlatformSettings() {
+abstract class WindowsPlatformSettings : AbstractBasePlatformSettings() {
     var console: Boolean = false
     var dirChooser: Boolean = true
     var perUserInstall: Boolean = false
@@ -141,6 +143,9 @@ abstract class WindowsPlatformSettings : AbstractPlatformSettings() {
     }
 }
 
-abstract class MsiPlatformSettings {
+abstract class MsiPlatformSettings : AbstractPlatformSettings() {
     var arch: String? = null
+    val bitmapBanner: RegularFileProperty = objects.fileProperty()
+    val bitmapDialog: RegularFileProperty = objects.fileProperty()
+    val icon: RegularFileProperty = objects.fileProperty()
 }

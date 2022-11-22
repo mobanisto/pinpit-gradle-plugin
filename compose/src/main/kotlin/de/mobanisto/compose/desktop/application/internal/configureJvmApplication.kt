@@ -5,6 +5,8 @@
 
 package de.mobanisto.compose.desktop.application.internal
 
+import de.mobanisto.compose.desktop.application.dsl.DebianPlatformSettings
+import de.mobanisto.compose.desktop.application.dsl.MsiPlatformSettings
 import de.mobanisto.compose.desktop.application.internal.OS.Linux
 import de.mobanisto.compose.desktop.application.internal.OS.Windows
 import de.mobanisto.compose.desktop.application.internal.validation.validatePackageVersions
@@ -147,6 +149,11 @@ private fun JvmApplicationContext.configurePackagingTasks(
                 checkRuntime = packageTasks.checkRuntime,
                 unpackDefaultResources = commonTasks.unpackDefaultResources
             )
+            configurePlatformSettings(
+                this,
+                msi = msi,
+                unpackDefaultResources = commonTasks.unpackDefaultResources
+            )
         }
     }
 
@@ -186,6 +193,11 @@ private fun JvmApplicationContext.configurePackagingTasks(
                 this,
                 createAppImage = createDistributable,
                 checkRuntime = packageTasks.checkRuntime,
+                unpackDefaultResources = commonTasks.unpackDefaultResources
+            )
+            configurePlatformSettings(
+                this,
+                deb = deb,
                 unpackDefaultResources = commonTasks.unpackDefaultResources
             )
         }
@@ -327,7 +339,7 @@ private fun JvmApplicationContext.configureCustomPackageTask(
         packageTask.javaRuntimePropertiesFile.set(checkRuntime.flatMap { it.javaRuntimePropertiesFile })
     }
 
-    configurePlatformSettings(packageTask, unpackDefaultResources)
+    packageTask.dependsOn(unpackDefaultResources)
 
     app.nativeDistributions.let { executables ->
         packageTask.jvmVendor.set(provider { executables.jvmVendor })
@@ -426,20 +438,9 @@ internal fun JvmApplicationContext.configureCommonNotarizationSettings(
     notarizationTask.nonValidatedNotarizationSettings = app.nativeDistributions.macOS.notarization
 }
 
-
-internal fun JvmApplicationContext.configurePlatformSettings(
-    packageTask: CustomPackageTask,
-    unpackDefaultResources: TaskProvider<AbstractUnpackDefaultComposeApplicationResourcesTask>
-) {
-    if (packageTask is CustomDebTask) {
-        configurePlatformSettings(packageTask, unpackDefaultResources)
-    } else if (packageTask is CustomMsiTask) {
-        configurePlatformSettings(packageTask, unpackDefaultResources)
-    }
-}
-
 internal fun JvmApplicationContext.configurePlatformSettings(
     packageTask: CustomDebTask,
+    deb: DebianPlatformSettings,
     unpackDefaultResources: TaskProvider<AbstractUnpackDefaultComposeApplicationResourcesTask>
 ) {
     packageTask.destinationDir.set(app.nativeDistributions.outputBaseDir.map {
@@ -469,6 +470,7 @@ internal fun JvmApplicationContext.configurePlatformSettings(
 
 internal fun JvmApplicationContext.configurePlatformSettings(
     packageTask: CustomMsiTask,
+    msi: MsiPlatformSettings,
     unpackDefaultResources: TaskProvider<AbstractUnpackDefaultComposeApplicationResourcesTask>
 ) {
     packageTask.destinationDir.set(app.nativeDistributions.outputBaseDir.map {
@@ -486,6 +488,9 @@ internal fun JvmApplicationContext.configurePlatformSettings(
         packageTask.winPackageVersion.set(provider { win.packageVersion })
         packageTask.iconFile.set(win.iconFile.orElse(unpackDefaultResources.flatMap { it.resources.windowsIcon }))
         packageTask.installationPath.set(win.installationPath)
+        packageTask.bitmapBanner.set(msi.bitmapBanner)
+        packageTask.bitmapDialog.set(msi.bitmapDialog)
+        packageTask.icon.set(msi.icon)
     }
 }
 

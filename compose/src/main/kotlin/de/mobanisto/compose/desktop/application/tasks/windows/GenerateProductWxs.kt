@@ -24,6 +24,9 @@ class GenerateProductWxs(
     private val version: String,
     private val description: String,
     private val mainExecutable: FileEntry,
+    private val bitmapBanner: Path,
+    private val bitmapDialog: Path,
+    private val icon: Path,
 ) {
 
     fun execute() {
@@ -44,8 +47,7 @@ class GenerateProductWxs(
     }
 
     private fun createDocument(doc: Document) {
-        val iconId = "hello_ico"
-        val iconSource = "hello.ico"
+        val iconId = "app_icon"
 
         val productId = UUID.nameUUIDFromBytes("$vendor/$name/$version".toByteArray(Charsets.UTF_8))
         val wix = doc.createElement("Wix").apply {
@@ -69,10 +71,10 @@ class GenerateProductWxs(
             // setAttribute("Platform", "x64") // Use of this switch is discouraged in favor of the -arch switch
         }
         product.createChild("WixVariable", "WixUIBannerBmp") {
-            setAttribute("Value", "banner.bmp")
+            setAttribute("Value", bitmapBanner.toString())
         }
         product.createChild("WixVariable", "WixUIDialogBmp") {
-            setAttribute("Value", "dialog.bmp")
+            setAttribute("Value", bitmapDialog.toString())
         }
         product.createChild("MediaTemplate") {
             setAttribute("EmbedCab", "yes")
@@ -126,7 +128,7 @@ class GenerateProductWxs(
         product.createChild("UIRef", "InstallUI")
 
         product.createChild("Icon", iconId) {
-            setAttribute("SourceFile", iconSource)
+            setAttribute("SourceFile", icon.toString())
         }
         product.createChild("Property", "ARPPRODUCTICON") {
             setAttribute("Value", iconId)

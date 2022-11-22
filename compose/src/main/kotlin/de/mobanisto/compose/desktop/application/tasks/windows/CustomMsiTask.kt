@@ -110,6 +110,21 @@ abstract class CustomMsiTask @Inject constructor(
     @get:Optional
     val runtimeImage: DirectoryProperty = objects.directoryProperty()
 
+    @get:InputFile
+    @get:Optional
+    @get:PathSensitive(PathSensitivity.ABSOLUTE)
+    val bitmapBanner: RegularFileProperty = objects.fileProperty()
+
+    @get:InputFile
+    @get:Optional
+    @get:PathSensitive(PathSensitivity.ABSOLUTE)
+    val bitmapDialog: RegularFileProperty = objects.fileProperty()
+
+    @get:InputFile
+    @get:Optional
+    @get:PathSensitive(PathSensitivity.ABSOLUTE)
+    val icon: RegularFileProperty = objects.fileProperty()
+
     private lateinit var jvmRuntimeInfo: JvmRuntimeProperties
 
     @get:LocalState
@@ -258,6 +273,9 @@ abstract class CustomMsiTask @Inject constructor(
         val productName = packageName.get()
         val version = winPackageVersion.get()
         val description = packageDescription.get()
+        val bitmapBanner = this.bitmapBanner.get()
+        val bitmapDialog = this.bitmapDialog.get()
+        val icon = this.icon.get()
 
         val destinationMsi = destinationDir.get().asPath()
         val destinationWix = destinationMsi.resolve("wix")
@@ -268,7 +286,16 @@ abstract class CustomMsiTask @Inject constructor(
         val executables = GenerateFilesWxs(outputFiles, appImage.asPath(), productName).execute()
         val mainExecutable = executables[0]
         GenerateProductWxs(
-            outputProduct, upgradeCode!!, vendor!!, productName, version!!, description, mainExecutable
+            outputProduct,
+            upgradeCode!!,
+            vendor!!,
+            productName,
+            version!!,
+            description,
+            mainExecutable,
+            bitmapBanner.asPath(),
+            bitmapDialog.asPath(),
+            icon.asPath(),
         ).execute()
 
         val outputInstallDir = destinationWix.resolve("InstallDir.wxs")
