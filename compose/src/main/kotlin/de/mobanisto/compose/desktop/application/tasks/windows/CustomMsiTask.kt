@@ -8,6 +8,7 @@ package de.mobanisto.compose.desktop.application.tasks.windows
 import de.mobanisto.compose.desktop.application.dsl.TargetFormat
 import de.mobanisto.compose.desktop.application.internal.JvmRuntimeProperties
 import de.mobanisto.compose.desktop.application.internal.Target
+import de.mobanisto.compose.desktop.application.internal.UnixUtils
 import de.mobanisto.compose.desktop.application.internal.files.SimpleFileCopyingProcessor
 import de.mobanisto.compose.desktop.application.internal.files.asPath
 import de.mobanisto.compose.desktop.application.internal.files.findOutputFileOrDir
@@ -42,6 +43,7 @@ import org.gradle.work.ChangeType
 import org.gradle.work.InputChanges
 import java.io.File
 import java.nio.file.Files
+import java.nio.file.Path
 import java.util.*
 import javax.inject.Inject
 
@@ -253,6 +255,7 @@ abstract class CustomMsiTask @Inject constructor(
         cleanDirs(jpackageResources)
     }
 
+    @OptIn(ExperimentalStdlibApi::class)
     override fun createPackage() {
         val environment: MutableMap<String, String> = HashMap<String, String>().apply {
             val wixDir = wixToolsetDir.ioFile
@@ -261,7 +264,6 @@ abstract class CustomMsiTask @Inject constructor(
             put("PATH", "$wixPath;$path")
         }
         println("Using environment: $environment")
-        // TODO: prepare wix files and execute wix toolchain
         val appImage = appImage.get().dir(packageName).get()
         println("app image: $appImage")
         for (file in appImage.asFileTree.files) {
@@ -277,8 +279,11 @@ abstract class CustomMsiTask @Inject constructor(
         val bitmapDialog = this.bitmapDialog.get()
         val icon = this.icon.get()
 
-        val destinationMsi = destinationDir.get().asPath()
-        val destinationWix = destinationMsi.resolve("wix")
+        val destination = destinationDir.get()
+        logger.lifecycle("destination: $destination")
+        destination.asFile.mkdirs()
+
+        val destinationWix = destination.asPath().resolve("wix")
         Files.createDirectories(destinationWix)
 
         val outputFiles = destinationWix.resolve("Files.wxs")
@@ -302,6 +307,52 @@ abstract class CustomMsiTask @Inject constructor(
         Thread.currentThread().contextClassLoader.getResourceAsStream("wix/InstallDir.wxs")?.use {
             Files.copy(it, outputInstallDir)
         }
+
+        val wxsFiles = listOf(outputFiles, outputProduct, outputInstallDir)
+        val wixobjFiles = wxsFiles.map {
+            it.resolveSibling(it.fileName.toString().substringBeforeLast(".") + ".wixobj")
+        }
+
+        val wxsFilesWine = wxsFiles.map { winePaths(it) }
+        val wixobjFilesWine = wixobjFiles.map { winePaths(it) }
+
+        val msi = destination.asPath().resolve("${packageName.get()}-${target.arch.id}-${winPackageVersion.get()}.msi")
+        val msiWine = winePaths(msi)
+
+        val wixWine = winePaths(destinationWix)
+
+        val candle = wixToolsetDir.file("candle.exe").get().toString()
+        val light = wixToolsetDir.file("light.exe").get().toString()
+
+        runExternalTool(
+            tool = UnixUtils.wine,
+            args = buildList {
+                add(candle)
+                addAll(wxsFilesWine)
+                addAll(listOf("-dPlatform=x64", "-arch", "x64"))
+                addAll(listOf("-out", wixWine))
+            }
+        )
+        runExternalTool(
+            tool = UnixUtils.wine,
+            args = buildList {
+                add(light)
+                add("-sval")
+                addAll(wixobjFilesWine)
+                addAll(listOf("-ext", "WixUIExtension"))
+                addAll(listOf("-out", msiWine))
+            }
+        )
+    }
+
+    private fun winePaths(path: Path): String {
+        val output = runExternalToolAndGetOutput(
+            tool = UnixUtils.winepath,
+            // Make sure to pass directories with trailing slash so that resulting Windows paths returned by winepath
+            // also carry a trailing backslash. Important as candle won't treat them as directories otherwise.
+            args = listOf("-w", path.toString() + if (Files.isDirectory(path)) "/" else "")
+        )
+        return output.stdout.trim()
     }
 
     override fun checkResult(result: ExecResult) {

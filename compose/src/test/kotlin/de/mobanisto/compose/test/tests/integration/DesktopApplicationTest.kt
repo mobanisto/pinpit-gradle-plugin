@@ -305,7 +305,7 @@ class DesktopApplicationTest : GradlePluginTestBase() {
         gradle(":hokkaidoMsiX64").build().let { result ->
             assertEquals(TaskOutcome.SUCCESS, result.task(":hokkaidoMsiX64")?.outcome)
 
-            val resultFile = file("build/hokkaido/binaries/main/windows/x64/msi/test-package-x64-1.0.0.msi")
+            val resultFile = file("build/hokkaido/binaries/main/windows/x64/msi/TestPackage-x64-1.0.0.msi")
             resultFile.checkExists()
         }
     }

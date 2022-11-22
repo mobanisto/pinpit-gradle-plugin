@@ -119,6 +119,12 @@ internal object UnixUtils {
     val git: File by lazy {
         File("/usr/bin/git").checkExistingFile()
     }
+    val wine: File by lazy {
+        File("/opt/wine-stable/bin/wine").checkExistingFile()
+    }
+    val winepath: File by lazy {
+        File("/opt/wine-stable/bin/winepath").checkExistingFile()
+    }
 }
 
 internal fun jvmToolFile(toolName: String, javaHome: Provider<String>): File =
