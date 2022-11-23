@@ -43,35 +43,35 @@ class DesktopApplicationTest : GradlePluginTestBase() {
         file("build.gradle").modify {
             it + """
                 afterEvaluate {
-                    tasks.getByName("hokkaidoRun").doFirst {
+                    tasks.getByName("pinpitRun").doFirst {
                         throw new StopExecutionException("Skip run task")
                     }
                     
-                    tasks.getByName("hokkaidoRunDistributable").doFirst {
+                    tasks.getByName("pinpitRunDistributable").doFirst {
                         throw new StopExecutionException("Skip runDistributable task")
                     }
                 }
             """.trimIndent()
         }
-        gradle("hokkaidoRun").build().let { result ->
-            assertEquals(TaskOutcome.SUCCESS, result.task(":hokkaidoRun")?.outcome)
+        gradle("pinpitRun").build().let { result ->
+            assertEquals(TaskOutcome.SUCCESS, result.task(":pinpitRun")?.outcome)
         }
-        gradle("hokkaidoRunDistributable").build().let { result ->
-            assertEquals(TaskOutcome.SUCCESS, result.task(":hokkaidoCreateDistributable")!!.outcome)
-            assertEquals(TaskOutcome.SUCCESS, result.task(":hokkaidoRunDistributable")?.outcome)
+        gradle("pinpitRunDistributable").build().let { result ->
+            assertEquals(TaskOutcome.SUCCESS, result.task(":pinpitCreateDistributable")!!.outcome)
+            assertEquals(TaskOutcome.SUCCESS, result.task(":pinpitRunDistributable")?.outcome)
         }
     }
 
     @Test
     fun testRunMpp() = with(testProject(TestProjects.mpp)) {
         val logLine = "Kotlin MPP app is running!"
-        gradle("hokkaidoRun").build().checks { check ->
-            check.taskOutcome(":hokkaidoRun", TaskOutcome.SUCCESS)
+        gradle("pinpitRun").build().checks { check ->
+            check.taskOutcome(":pinpitRun", TaskOutcome.SUCCESS)
             check.logContains(logLine)
         }
-        gradle("hokkaidoRunDistributable").build().checks { check ->
-            check.taskOutcome(":hokkaidoCreateDistributable", TaskOutcome.SUCCESS)
-            check.taskOutcome(":hokkaidoRunDistributable", TaskOutcome.SUCCESS)
+        gradle("pinpitRunDistributable").build().checks { check ->
+            check.taskOutcome(":pinpitCreateDistributable", TaskOutcome.SUCCESS)
+            check.taskOutcome(":pinpitRunDistributable", TaskOutcome.SUCCESS)
             check.logContains(logLine)
         }
     }
@@ -96,7 +96,7 @@ class DesktopApplicationTest : GradlePluginTestBase() {
     @Test
     fun proguard(): Unit = with(testProject(TestProjects.proguard)) {
         val enableObfuscation = """
-                hokkaido.desktop {
+                pinpit.desktop {
                     application {
                         buildTypes.release.proguard {
                             obfuscate.set(true)
@@ -155,13 +155,13 @@ class DesktopApplicationTest : GradlePluginTestBase() {
             """.trimIndent()
         }
 
-        val packagingTask = ":hokkaidoPackageDistributionForCurrentOS"
+        val packagingTask = ":pinpitPackageDistributionForCurrentOS"
         gradle(packagingTask).build().checks { check ->
             check.taskOutcome(packagingTask, TaskOutcome.SUCCESS)
         }
 
         gradle("clean", packagingTask).build().checks { check ->
-            check.taskOutcome(":hokkaidoCheckRuntime", TaskOutcome.FROM_CACHE)
+            check.taskOutcome(":pinpitCheckRuntime", TaskOutcome.FROM_CACHE)
             check.taskOutcome(packagingTask, TaskOutcome.SUCCESS)
         }
     }
@@ -172,13 +172,13 @@ class DesktopApplicationTest : GradlePluginTestBase() {
     }
 
     private fun TestProject.testPackageJvmDistributions() {
-        val result = gradle(":hokkaidoPackageDistributionForCurrentOS").build()
+        val result = gradle(":pinpitPackageDistributionForCurrentOS").build()
         val ext = when (currentOS) {
             OS.Linux -> "deb"
             OS.Windows -> "msi"
             OS.MacOS -> "dmg"
         }
-        val packageDir = file("build/hokkaido/binaries/main/$ext")
+        val packageDir = file("build/pinpit/binaries/main/$ext")
         val packageDirFiles = packageDir.listFiles() ?: arrayOf()
         check(packageDirFiles.size == 1) {
             "Expected single package in $packageDir, got [${packageDirFiles.joinToString(", ") { it.name }}]"
@@ -195,9 +195,9 @@ class DesktopApplicationTest : GradlePluginTestBase() {
         } else {
             Assert.assertEquals(packageFile.name, "TestPackage-1.0.0.$ext", "Unexpected package name")
         }
-        // TODO: assert outcome of hokkaidoPackageCustomDeb task
-        assertEquals(TaskOutcome.SUCCESS, result.task(":hokkaidoPackage${ext.uppercaseFirstChar()}")?.outcome)
-        assertEquals(TaskOutcome.SUCCESS, result.task(":hokkaidoPackageDistributionForCurrentOS")?.outcome)
+        // TODO: assert outcome of pinpitPackageCustomDeb task
+        assertEquals(TaskOutcome.SUCCESS, result.task(":pinpitPackage${ext.uppercaseFirstChar()}")?.outcome)
+        assertEquals(TaskOutcome.SUCCESS, result.task(":pinpitPackageDistributionForCurrentOS")?.outcome)
     }
 
     @Test
@@ -224,7 +224,7 @@ class DesktopApplicationTest : GradlePluginTestBase() {
         testProject(TestProjects.jvm).apply {
             appendText("build.gradle") {
                 """
-                    hokkaido.desktop.application {
+                    pinpit.desktop.application {
                         javaHome = javaToolchains.launcherFor {
                             languageVersion.set(JavaLanguageVersion.of($javaVersion))
                         }.get().metadata.installationPath.asFile.absolutePath
@@ -271,10 +271,10 @@ class DesktopApplicationTest : GradlePluginTestBase() {
     }
 
     private fun TestProject.testPackageUberJarForCurrentOS() {
-        gradle(":hokkaidoPackageUberJarForCurrentOS").build().let { result ->
-            assertEquals(TaskOutcome.SUCCESS, result.task(":hokkaidoPackageUberJarForCurrentOS")?.outcome)
+        gradle(":pinpitPackageUberJarForCurrentOS").build().let { result ->
+            assertEquals(TaskOutcome.SUCCESS, result.task(":pinpitPackageUberJarForCurrentOS")?.outcome)
 
-            val resultJarFile = file("build/hokkaido/jars/TestPackage-${currentTarget.id}-1.0.0.jar")
+            val resultJarFile = file("build/pinpit/jars/TestPackage-${currentTarget.id}-1.0.0.jar")
             resultJarFile.checkExists()
 
             JarFile(resultJarFile).use { jar ->
@@ -289,10 +289,10 @@ class DesktopApplicationTest : GradlePluginTestBase() {
     }
 
     private fun TestProject.testPackageDebUbuntuFocal() {
-        gradle(":hokkaidoDebUbuntuFocalX64").build().let { result ->
-            assertEquals(TaskOutcome.SUCCESS, result.task(":hokkaidoDebUbuntuFocalX64")?.outcome)
+        gradle(":pinpitDebUbuntuFocalX64").build().let { result ->
+            assertEquals(TaskOutcome.SUCCESS, result.task(":pinpitDebUbuntuFocalX64")?.outcome)
 
-            val resultFile = file("build/hokkaido/binaries/main/linux/x64/deb/test-package-ubuntu-20.04-x64-1.0.0.deb")
+            val resultFile = file("build/pinpit/binaries/main/linux/x64/deb/test-package-ubuntu-20.04-x64-1.0.0.deb")
             resultFile.checkExists()
 
             resultFile.inputStream().use { fis ->
@@ -302,19 +302,19 @@ class DesktopApplicationTest : GradlePluginTestBase() {
     }
 
     private fun TestProject.testPackageMsi() {
-        gradle(":hokkaidoMsiX64").build().let { result ->
-            assertEquals(TaskOutcome.SUCCESS, result.task(":hokkaidoMsiX64")?.outcome)
+        gradle(":pinpitMsiX64").build().let { result ->
+            assertEquals(TaskOutcome.SUCCESS, result.task(":pinpitMsiX64")?.outcome)
 
-            val resultFile = file("build/hokkaido/binaries/main/windows/x64/msi/TestPackage-x64-1.0.0.msi")
+            val resultFile = file("build/pinpit/binaries/main/windows/x64/msi/TestPackage-x64-1.0.0.msi")
             resultFile.checkExists()
         }
     }
 
     private fun TestProject.testPackageCustomDeb() {
-        gradle(":hokkaidoPackageCustomDeb").build().let { result ->
-            assertEquals(TaskOutcome.SUCCESS, result.task(":hokkaidoPackageCustomDeb")?.outcome)
+        gradle(":pinpitPackageCustomDeb").build().let { result ->
+            assertEquals(TaskOutcome.SUCCESS, result.task(":pinpitPackageCustomDeb")?.outcome)
 
-            val resultFile = file("build/hokkaido/binaries/main/linux/x64/deb/test-package_1.0.0-1_${currentOsArch}.deb")
+            val resultFile = file("build/pinpit/binaries/main/linux/x64/deb/test-package_1.0.0-1_${currentOsArch}.deb")
             resultFile.checkExists()
 
             resultFile.inputStream().use { fis ->
@@ -324,10 +324,10 @@ class DesktopApplicationTest : GradlePluginTestBase() {
     }
 
     private fun TestProject.testPackageDebsAndCompareContent() {
-        val result = gradle(":hokkaidoPackageDeb", ":hokkaidoPackageCustomDeb").build()
+        val result = gradle(":pinpitPackageDeb", ":pinpitPackageCustomDeb").build()
 
-        val packageDirStock = file("build/hokkaido/binaries/main/deb")
-        val packageDirCustom = file("build/hokkaido/binaries/main/custom-deb")
+        val packageDirStock = file("build/pinpit/binaries/main/deb")
+        val packageDirCustom = file("build/pinpit/binaries/main/custom-deb")
         val packageDirs = listOf(packageDirStock, packageDirCustom)
 
         val debs = mutableListOf<File>()
@@ -347,8 +347,8 @@ class DesktopApplicationTest : GradlePluginTestBase() {
             }
             println("got package file at ${packageFile}")
         }
-        assertEquals(TaskOutcome.SUCCESS, result.task(":hokkaidoPackageDeb")?.outcome)
-        assertEquals(TaskOutcome.SUCCESS, result.task(":hokkaidoPackageCustomDeb")?.outcome)
+        assertEquals(TaskOutcome.SUCCESS, result.task(":pinpitPackageDeb")?.outcome)
+        assertEquals(TaskOutcome.SUCCESS, result.task(":pinpitPackageCustomDeb")?.outcome)
 
         check(debs.size == 2)
         val debContent = debs.map { file ->
@@ -541,8 +541,8 @@ class DesktopApplicationTest : GradlePluginTestBase() {
     @Test
     fun testSuggestModules() {
         with(testProject(TestProjects.jvm)) {
-            gradle(":hokkaidoSuggestRuntimeModules").build().checks { check ->
-                check.taskOutcome(":hokkaidoSuggestRuntimeModules", TaskOutcome.SUCCESS)
+            gradle(":pinpitSuggestRuntimeModules").build().checks { check ->
+                check.taskOutcome(":pinpitSuggestRuntimeModules", TaskOutcome.SUCCESS)
                 check.logContains("Suggested runtime modules to include:")
                 check.logContains("modules(\"java.instrument\", \"jdk.unsupported\")")
             }
@@ -590,8 +590,8 @@ class DesktopApplicationTest : GradlePluginTestBase() {
         val addPackage = addDebPackage(listOf(extraPackage))
         file("build.gradle").modify { "$it\n$addPackage" }
 
-        gradle(":hokkaidoPackageCustomDeb").build().checks { check ->
-            check.taskOutcome(":hokkaidoPackageCustomDeb", TaskOutcome.SUCCESS)
+        gradle(":pinpitPackageCustomDeb").build().checks { check ->
+            check.taskOutcome(":pinpitPackageCustomDeb", TaskOutcome.SUCCESS)
             checkDebContent { content ->
                 assertTrue(content.contains(extraPackage))
             }
@@ -604,8 +604,8 @@ class DesktopApplicationTest : GradlePluginTestBase() {
         val addPackage = addDebPackage(extraPackages)
         file("build.gradle").modify { "$it\n$addPackage" }
 
-        gradle(":hokkaidoPackageCustomDeb").build().checks { check ->
-            check.taskOutcome(":hokkaidoPackageCustomDeb", TaskOutcome.SUCCESS)
+        gradle(":pinpitPackageCustomDeb").build().checks { check ->
+            check.taskOutcome(":pinpitPackageCustomDeb", TaskOutcome.SUCCESS)
             checkDebContent { content ->
                 for (extraPackage in extraPackages) {
                     assertTrue(content.contains(extraPackage))
@@ -616,7 +616,7 @@ class DesktopApplicationTest : GradlePluginTestBase() {
 
     private fun addDebPackage(packages: List<String>): String {
         return """
-                hokkaido.desktop {
+                pinpit.desktop {
                     application {
                         nativeDistributions.linux {
                             debAdditionalDependencies("${packages.joinToString(", ")}")
@@ -627,7 +627,7 @@ class DesktopApplicationTest : GradlePluginTestBase() {
     }
 
     private fun TestProject.checkDebContent(check: (content: String) -> Unit) {
-        val packageDir = file("build/hokkaido/binaries/main/custom-deb")
+        val packageDir = file("build/pinpit/binaries/main/custom-deb")
         val packageDirFiles = packageDir.listFiles() ?: arrayOf()
         check(packageDirFiles.size == 1) {
             "Expected single package in $packageDir, got [${packageDirFiles.joinToString(", ") { it.name }}]"

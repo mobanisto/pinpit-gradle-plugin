@@ -12,21 +12,21 @@ plugins {
 }
 
 gradlePluginConfig {
-    pluginId = "de.mobanisto.compose"
-    implementationClass = "de.mobanisto.compose.ComposePlugin"
+    pluginId = "de.mobanisto.pinpit"
+    implementationClass = "de.mobanisto.pinpit.PinpitPlugin"
     pluginPortalTags = listOf("ui-framework")
 }
 
 mavenPublicationConfig {
-    displayName = "JetBrains Compose Gradle Plugin"
-    description = "JetBrains Compose Gradle plugin for easy configuration"
-    artifactId = "compose-gradle-plugin"
+    displayName = "Mobanisto Pinpit Gradle Plugin"
+    description = "Mobanisto Pinpit Gradle plugin for platform independent distribution"
+    artifactId = "pinpit-gradle-plugin"
 }
 
 val buildConfigDir
     get() = project.layout.buildDirectory.dir("generated/buildconfig")
 val buildConfig = tasks.register("buildConfig", GenerateBuildConfig::class.java) {
-    classFqName.set("de.mobanisto.compose.ComposeBuildConfig")
+    classFqName.set("de.mobanisto.pinpit.PinpitBuildConfig")
     generatedOutputDir.set(buildConfigDir)
     fieldsToGenerate.put("composeVersion", BuildProperties.composeVersion(project))
     fieldsToGenerate.put("composeGradlePluginVersion", BuildProperties.deployVersion(project))
@@ -181,7 +181,7 @@ tasks.withType<Test>().configureEach {
     dependsOn(":publishToMavenLocal")
 
     systemProperty("compose.tests.compose.gradle.plugin.version", "1.2.1")
-    systemProperty("compose.tests.hokkaido.gradle.plugin.version", BuildProperties.deployVersion(project))
+    systemProperty("compose.tests.pinpit.gradle.plugin.version", BuildProperties.deployVersion(project))
     for ((k, v) in project.properties) {
         if (k.startsWith("compose.")) {
             systemProperty(k, v.toString())

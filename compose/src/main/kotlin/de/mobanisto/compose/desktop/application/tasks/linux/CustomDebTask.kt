@@ -168,10 +168,10 @@ abstract class CustomDebTask @Inject constructor(
     private lateinit var jvmRuntimeInfo: JvmRuntimeProperties
 
     @get:LocalState
-    protected val jpackageResources: Provider<Directory> = project.layout.buildDirectory.dir("hokkaido/tmp/resources")
+    protected val jpackageResources: Provider<Directory> = project.layout.buildDirectory.dir("pinpit/tmp/resources")
 
     @get:LocalState
-    protected val skikoDir: Provider<Directory> = project.layout.buildDirectory.dir("hokkaido/tmp/skiko")
+    protected val skikoDir: Provider<Directory> = project.layout.buildDirectory.dir("pinpit/tmp/skiko")
 
     @get:Internal
     private val libsDir: Provider<Directory> = workingDir.map {

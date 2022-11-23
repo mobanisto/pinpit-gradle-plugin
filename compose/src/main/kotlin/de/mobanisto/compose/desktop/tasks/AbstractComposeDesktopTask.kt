@@ -36,7 +36,7 @@ abstract class AbstractComposeDesktopTask : DefaultTask() {
     protected abstract val fileOperations: FileOperations
 
     @get:LocalState
-    protected val logsDir: Provider<Directory> = project.layout.buildDirectory.dir("hokkaido/logs/$name")
+    protected val logsDir: Provider<Directory> = project.layout.buildDirectory.dir("pinpit/logs/$name")
 
     @get:Internal
     val verbose: Property<Boolean> = objects.notNullProperty<Boolean>().apply {

@@ -6,6 +6,8 @@
 package de.mobanisto.compose
 
 import de.mobanisto.compose.internal.ComposeCompilerArtifactProvider
+import de.mobanisto.pinpit.PinpitExtension
+import de.mobanisto.pinpit.PinpitPlugin
 import org.gradle.api.Project
 import org.gradle.api.provider.Provider
 import org.jetbrains.kotlin.gradle.plugin.KotlinCompilation
@@ -20,8 +22,8 @@ class ComposeCompilerKotlinSupportPlugin : KotlinCompilerPluginSupportPlugin {
 
     override fun apply(target: Project) {
         super.apply(target)
-        target.plugins.withType(de.mobanisto.compose.ComposePlugin::class.java) {
-            val composeExt = target.extensions.getByType(de.mobanisto.compose.ComposeExtension::class.java)
+        target.plugins.withType(PinpitPlugin::class.java) {
+            val composeExt = target.extensions.getByType(PinpitExtension::class.java)
 
             composeCompilerArtifactProvider = ComposeCompilerArtifactProvider(
                 kotlinVersion = target.getKotlinPluginVersion()

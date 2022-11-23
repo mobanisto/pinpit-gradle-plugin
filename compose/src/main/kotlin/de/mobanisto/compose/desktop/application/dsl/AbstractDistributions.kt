@@ -20,7 +20,7 @@ abstract class AbstractDistributions {
     internal abstract val layout: ProjectLayout
 
     val outputBaseDir: DirectoryProperty = objects.directoryProperty().apply {
-        set(layout.buildDirectory.dir("hokkaido/binaries"))
+        set(layout.buildDirectory.dir("pinpit/binaries"))
     }
 
     var jvmVendor: String? = null

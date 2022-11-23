@@ -5,8 +5,8 @@
 
 package de.mobanisto.compose.desktop.tasks
 
-import de.mobanisto.compose.ComposeBuildConfig
 import de.mobanisto.compose.desktop.application.internal.ioFile
+import de.mobanisto.pinpit.PinpitBuildConfig
 import org.gradle.api.file.Directory
 import org.gradle.api.file.FileSystemLocation
 import org.gradle.api.file.RegularFile
@@ -27,7 +27,7 @@ abstract class AbstractUnpackDefaultComposeApplicationResourcesTask : AbstractCo
 
     @OutputDirectory
     val destinationDir: Provider<Directory> = project.layout.buildDirectory.dir(
-        "hokkaido/default-resources/${ComposeBuildConfig.composeGradlePluginVersion}"
+        "pinpit/default-resources/${PinpitBuildConfig.composeGradlePluginVersion}"
     )
 
     @get:Internal

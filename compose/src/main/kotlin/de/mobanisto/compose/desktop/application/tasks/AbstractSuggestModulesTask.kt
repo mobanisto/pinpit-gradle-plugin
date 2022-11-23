@@ -52,7 +52,7 @@ abstract class AbstractSuggestModulesTask : AbstractComposeDesktopTask() {
     val jvmTarget: Property<String> = objects.notNullProperty(MIN_JAVA_RUNTIME_VERSION.toString())
 
     @get:LocalState
-    protected val workingDir: Provider<Directory> = project.layout.buildDirectory.dir("hokkaido/tmp/$name")
+    protected val workingDir: Provider<Directory> = project.layout.buildDirectory.dir("pinpit/tmp/$name")
 
     @TaskAction
     fun run() {

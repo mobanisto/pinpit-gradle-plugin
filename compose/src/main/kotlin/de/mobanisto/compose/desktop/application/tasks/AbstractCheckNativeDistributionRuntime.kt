@@ -41,7 +41,7 @@ abstract class AbstractCheckNativeDistributionRuntime : AbstractComposeDesktopTa
     @Internal
     val targetJdkVersion: Property<String> = objects.notNullProperty()
 
-    private val taskDir = project.layout.buildDirectory.dir("hokkaido/tmp/$name")
+    private val taskDir = project.layout.buildDirectory.dir("pinpit/tmp/$name")
 
     @get:OutputFile
     val javaRuntimePropertiesFile: Provider<RegularFile> = taskDir.map { it.file("properties.bin") }

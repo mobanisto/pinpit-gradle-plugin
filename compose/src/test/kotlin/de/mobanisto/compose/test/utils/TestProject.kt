@@ -14,11 +14,11 @@ data class TestEnvironment(
     val workingDir: File,
     val kotlinVersion: String = TestKotlinVersions.Default,
     val composeGradlePluginVersion: String = TestProperties.composeGradlePluginVersion,
-    val hokkaidoGradlePluginVersion: String = TestProperties.hokkaidoGradlePluginVersion,
+    val pinpitGradlePluginVersion: String = TestProperties.pinpitGradlePluginVersion,
     val composeCompilerArtifact: String? = null,
 ) {
     private val placeholders = linkedMapOf(
-        "HOKKAIDO_GRADLE_PLUGIN_VERSION_PLACEHOLDER" to hokkaidoGradlePluginVersion,
+        "PINPIT_GRADLE_PLUGIN_VERSION_PLACEHOLDER" to pinpitGradlePluginVersion,
         "COMPOSE_GRADLE_PLUGIN_VERSION_PLACEHOLDER" to composeGradlePluginVersion,
         "KOTLIN_VERSION_PLACEHOLDER" to kotlinVersion,
         "COMPOSE_COMPILER_ARTIFACT_PLACEHOLDER" to composeCompilerArtifact,

@@ -30,7 +30,7 @@ internal data class JvmApplicationContext(
 
     val appTmpDir: Provider<Directory>
         get() = project.layout.buildDirectory.dir(
-            "hokkaido/tmp/$appDirName"
+            "pinpit/tmp/$appDirName"
         )
 
     fun <T : Task> T.useAppRuntimeFiles(target: Target, fn: T.(JvmApplicationRuntimeFiles) -> Unit) {

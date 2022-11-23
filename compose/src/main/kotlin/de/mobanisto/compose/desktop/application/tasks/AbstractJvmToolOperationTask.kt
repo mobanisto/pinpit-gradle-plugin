@@ -27,7 +27,7 @@ import java.io.File
 
 abstract class AbstractJvmToolOperationTask(private val toolName: String) : AbstractComposeDesktopTask() {
     @get:LocalState
-    protected val workingDir: Provider<Directory> = project.layout.buildDirectory.dir("hokkaido/tmp/$name")
+    protected val workingDir: Provider<Directory> = project.layout.buildDirectory.dir("pinpit/tmp/$name")
 
     @get:OutputDirectory
     val destinationDir: DirectoryProperty = objects.directoryProperty()

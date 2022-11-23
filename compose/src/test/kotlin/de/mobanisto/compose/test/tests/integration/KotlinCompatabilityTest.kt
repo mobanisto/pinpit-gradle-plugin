@@ -31,8 +31,8 @@ class KotlinCompatabilityTest : GradlePluginTestBase() {
         )
     ) {
         val logLine = "Kotlin MPP app is running!"
-        gradle("hokkaidoRun").build().checks { check ->
-            check.taskOutcome(":hokkaidoRun", TaskOutcome.SUCCESS)
+        gradle("pinpitRun").build().checks { check ->
+            check.taskOutcome(":pinpitRun", TaskOutcome.SUCCESS)
             check.logContains(logLine)
         }
     }

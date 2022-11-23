@@ -21,7 +21,7 @@ internal class JvmDirectoriesProvider(
     private val layout: ProjectLayout
 ) {
     val composeDir: Provider<Directory>
-        get() = layout.buildDirectory.dir("hokkaido")
+        get() = layout.buildDirectory.dir("pinpit")
 
     fun tmpDir(name: String): Provider<Directory> =
         composeDir.dir("tmp/$name")

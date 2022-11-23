@@ -1,7 +1,7 @@
 plugins {
     id "org.jetbrains.kotlin.jvm"
     id "org.jetbrains.compose"
-    id "de.mobanisto.compose"
+    id "de.mobanisto.pinpit"
 }
 
 repositories {
@@ -44,7 +44,7 @@ dependencies {
 
 ext.versionCode = "1.0.0"
 
-hokkaido.desktop {
+pinpit.desktop {
     application {
         mainClass = "MainKt"
         nativeDistributions {

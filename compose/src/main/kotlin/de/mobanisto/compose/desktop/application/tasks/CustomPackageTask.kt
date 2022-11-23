@@ -44,7 +44,7 @@ abstract class CustomPackageTask @Inject constructor(
     @get:Input val targetFormat: TargetFormat,
 ) : AbstractComposeDesktopTask() {
     @get:LocalState
-    protected val workingDir: Provider<Directory> = project.layout.buildDirectory.dir("hokkaido/tmp/$name")
+    protected val workingDir: Provider<Directory> = project.layout.buildDirectory.dir("pinpit/tmp/$name")
 
     @get:OutputDirectory
     val destinationDir: DirectoryProperty = objects.directoryProperty()

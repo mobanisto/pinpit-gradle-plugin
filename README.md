@@ -1,19 +1,25 @@
-# Hokkaido Packaging and Distribution plugin
+# pinpit - Platform Independent Native Packaging and Installer Toolkit
 
-This project is a Gradle plugin for packaging of JVM applications for
-distribution on the desktop operating systems Linux, Windows and macOS.
-It is intended to work for all kinds of applications and UI toolkits,
-however focus is currently put on
-[Compose for Desktop](https://github.com/JetBrains/compose-jb) as a UI
-toolkit.
+pinpit is the **P**latform **I**ndependent **N**ative **P**ackaging and
+**I**nstaller **T**oolkit.
+It helps you distribute JVM applications to users of the operating systems
+Linux, Windows and macOS without the need to run the build on machines
+with the respective operating systems installed.
+This makes it possible to build your packages and installers on a plain
+old Linux box and also on a CI machine.
 
-Hokkaido is based on the Compose plugin developed by Jetbrains that lives in
+It comes as a Gradle plugin and is intended to work for all kinds of
+applications and UI toolkits, however focus is currently put on
+Swing and [Compose for Desktop](https://github.com/JetBrains/compose-jb)
+as UI toolkits.
+
+pinpit is based on the Compose plugin developed by Jetbrains that lives in
 the [JetBrains/compose-jb](https://github.com/JetBrains/compose-jb)
 repository.
 We found a bunch of shortcomings while working on some Compose-based
 applications and decided to create a fork detached from the rest of the
-Compose project. It still relies on the Compose plugin for compiling etc.
-but introduces its own Gradle tasks for packaging.
+Compose project. It still relies on the Compose plugin for managing the
+Compose dependencies but introduces its own Gradle tasks for packaging.
 
 Notable differences:
 

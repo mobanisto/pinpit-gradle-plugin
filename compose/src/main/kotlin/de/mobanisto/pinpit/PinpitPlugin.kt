@@ -5,8 +5,9 @@
 
 @file:Suppress("unused")
 
-package de.mobanisto.compose
+package de.mobanisto.pinpit
 
+import de.mobanisto.compose.ComposeCompilerKotlinSupportPlugin
 import de.mobanisto.compose.desktop.DesktopExtension
 import de.mobanisto.compose.desktop.application.internal.ComposeProperties
 import de.mobanisto.compose.desktop.application.internal.configureDesktop
@@ -15,12 +16,12 @@ import org.gradle.api.Project
 import org.gradle.api.artifacts.dsl.ComponentModuleMetadataHandler
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
-class ComposePlugin : Plugin<Project> {
+class PinpitPlugin : Plugin<Project> {
     override fun apply(project: Project) {
-        val composeExtension = project.extensions.create("hokkaido", ComposeExtension::class.java)
-        val desktopExtension = composeExtension.extensions.create("desktop", DesktopExtension::class.java)
+        val pinpitExtension = project.extensions.create("pinpit", PinpitExtension::class.java)
+        val desktopExtension = pinpitExtension.extensions.create("desktop", DesktopExtension::class.java)
 
-        project.plugins.apply(de.mobanisto.compose.ComposeCompilerKotlinSupportPlugin::class.java)
+        project.plugins.apply(ComposeCompilerKotlinSupportPlugin::class.java)
 
         project.afterEvaluate {
             configureDesktop(project, desktopExtension)

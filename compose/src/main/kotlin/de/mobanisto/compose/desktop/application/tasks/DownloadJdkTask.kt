@@ -54,14 +54,14 @@ abstract class DownloadJdkTask @Inject constructor() : AbstractComposeDesktopTas
     }
 
     /**
-     * Download and extract configured JVM to ~/.hokkaido/jdks/$vendor/$version
+     * Download and extract configured JVM to ~/.pinpit/jdks/$vendor/$version
      *
      * @param os linux, windows or mac
      * @param arch x64 or aarch64
      */
     private fun downloadJdk(os: String, arch: String) {
         val dirHome = Paths.get(System.getProperty("user.home"))
-        val dirTool = dirHome.resolve(".hokkaido")
+        val dirTool = dirHome.resolve(".pinpit")
         val dirJdks = dirTool.resolve("jdks")
         val extension = osToExtension[os] ?: throw GradleException("Invalid os: $os")
         val vendor = jvmVendor.get()

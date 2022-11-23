@@ -74,12 +74,12 @@ internal class CommonJvmPackageTasks(
 
 private fun JvmApplicationContext.configureCommonJvmDesktopTasks(): CommonJvmDesktopTasks {
     val unpackDefaultResources = tasks.register<AbstractUnpackDefaultComposeApplicationResourcesTask>(
-        taskNameAction = "hokkaidoUnpack",
+        taskNameAction = "pinpitUnpack",
         taskNameObject = "DefaultComposeDesktopJvmApplicationResources"
     ) {}
 
     val prepareAppResources = tasks.register<Sync>(
-        taskNameAction = "hokkaidoPrepare",
+        taskNameAction = "pinpitPrepare",
         taskNameObject = "appResources"
     ) {
         val appResourcesRootDir = app.nativeDistributions.appResourcesRootDir
@@ -118,7 +118,7 @@ private fun JvmApplicationContext.configurePackagingTasks(
         val packageTasks = configureCommonPackageTasks(tasks, jdkInfo, target, app, appTmpDir, commonTasks)
 
         val createDistributable = distributableTasks[target] ?: tasks.register<AppImageTask>(
-            taskNameAction = "hokkaido",
+            taskNameAction = "pinpit",
             taskNameObject = "distributable${target.name}",
             args = listOf(target)
         ) {
@@ -133,13 +133,13 @@ private fun JvmApplicationContext.configurePackagingTasks(
         }.also { distributableTasks[target] = it }
 
         val runDistributable = runTasks[target] ?: tasks.register<AbstractRunDistributableTask>(
-            taskNameAction = "hokkaidoRun",
+            taskNameAction = "pinpitRun",
             taskNameObject = "distributable${target.name}",
             args = listOf(createDistributable)
         ).also { runTasks[target] = it }
 
         tasks.register<CustomMsiTask>(
-            taskNameAction = "hokkaido",
+            taskNameAction = "pinpit",
             taskNameObject = "msi" + target.arch.id.uppercaseFirstChar(),
             args = listOf(target)
         ) {
@@ -164,7 +164,7 @@ private fun JvmApplicationContext.configurePackagingTasks(
         val packageTasks = configureCommonPackageTasks(tasks, jdkInfo, target, app, appTmpDir, commonTasks)
 
         val createDistributable = distributableTasks[target] ?: tasks.register<AppImageTask>(
-            taskNameAction = "hokkaido",
+            taskNameAction = "pinpit",
             taskNameObject = "distributable${target.name}",
             args = listOf(target)
         ) {
@@ -179,13 +179,13 @@ private fun JvmApplicationContext.configurePackagingTasks(
         }.also { distributableTasks[target] = it }
 
         val runDistributable = runTasks[target] ?: tasks.register<AbstractRunDistributableTask>(
-            taskNameAction = "hokkaidoRun",
+            taskNameAction = "pinpitRun",
             taskNameObject = "distributable${target.name}",
             args = listOf(createDistributable)
         ).also { runTasks[target] = it }
 
         tasks.register<CustomDebTask>(
-            taskNameAction = "hokkaido",
+            taskNameAction = "pinpit",
             taskNameObject = "deb" + distro.uppercaseFirstChar(),
             args = listOf(target, deb.qualifier!!)
         ) {
@@ -204,20 +204,20 @@ private fun JvmApplicationContext.configurePackagingTasks(
     }
 
     if (buildType === app.buildTypes.default) {
-        tasks.register<DefaultTask>("hokkaidoPackage") {
+        tasks.register<DefaultTask>("pinpitPackage") {
             // TODO: depend on all package tasks
             // dependsOn(packageForCurrentOS)
         }
     }
 
     val packageUberJarForCurrentOS = tasks.register<Jar>(
-        taskNameAction = "hokkaidoPackage",
+        taskNameAction = "pinpitPackage",
         taskNameObject = "uberJarForCurrentOS"
     ) {
         configurePackageUberJarForCurrentOS(this, currentOS)
     }
 
-    val run = tasks.register<JavaExec>(taskNameAction = "hokkaidoRun") {
+    val run = tasks.register<JavaExec>(taskNameAction = "pinpitRun") {
         configureRunTask(this, commonTasks.prepareAppResources)
     }
 }
@@ -231,7 +231,7 @@ private fun JvmApplicationContext.configureCommonPackageTasks(
     commonTasks: CommonJvmDesktopTasks,
 ): CommonJvmPackageTasks {
     val downloadJdk = downloadJdkTasks[target] ?: tasks.register<DownloadJdkTask>(
-        taskNameAction = "hokkaido",
+        taskNameAction = "pinpit",
         taskNameObject = "download${target.name}",
     ) {
         jvmVendor.set(app.nativeDistributions.jvmVendor)
@@ -241,7 +241,7 @@ private fun JvmApplicationContext.configureCommonPackageTasks(
     }.also { downloadJdkTasks[target] = it }
 
     val checkRuntime = checkRuntimeTasks[target] ?: tasks.register<AbstractCheckNativeDistributionRuntime>(
-        taskNameAction = "hokkaidoCheck",
+        taskNameAction = "pinpitCheck",
         taskNameObject = "runtime${target.name}"
     ) {
         dependsOn(downloadJdk)
@@ -251,7 +251,7 @@ private fun JvmApplicationContext.configureCommonPackageTasks(
     }.also { checkRuntimeTasks[target] = it }
 
     val suggestRuntimeModules = suggestModulesTasks[target] ?: tasks.register<AbstractSuggestModulesTask>(
-        taskNameAction = "hokkaidoSuggest",
+        taskNameAction = "pinpitSuggest",
         taskNameObject = "runtimeModules${target.name}"
     ) {
         dependsOn(checkRuntime)
@@ -266,7 +266,7 @@ private fun JvmApplicationContext.configureCommonPackageTasks(
 
     val runProguard = proguardTasks[target] ?: if (buildType.proguard.isEnabled.orNull == true) {
         tasks.register<AbstractProguardTask>(
-            taskNameAction = "hokkaidoProguard",
+            taskNameAction = "pinpitProguard",
             taskNameObject = "jars${target.name}"
         ) {
             configureProguardTask(this, target, /*targetData,*/ commonTasks.unpackDefaultResources)
@@ -274,7 +274,7 @@ private fun JvmApplicationContext.configureCommonPackageTasks(
     } else null
 
     val createRuntimeImage = runtimeTasks[target] ?: tasks.register<AbstractJLinkTask>(
-        taskNameAction = "hokkaido",
+        taskNameAction = "pinpit",
         taskNameObject = "runtimeImage${target.name}"
     ) {
         dependsOn(checkRuntime)
@@ -596,7 +596,7 @@ private fun JvmApplicationContext.configurePackageUberJarForCurrentOS(jar: Jar, 
     jar.archiveAppendix.set(currentTarget.id)
     jar.archiveBaseName.set(packageNameProvider)
     jar.archiveVersion.set(packageVersionFor(os))
-    jar.destinationDirectory.set(jar.project.layout.buildDirectory.dir("hokkaido/jars"))
+    jar.destinationDirectory.set(jar.project.layout.buildDirectory.dir("pinpit/jars"))
 
     jar.doLast {
         jar.logger.lifecycle("The jar is written to ${jar.archiveFile.ioFile.canonicalPath}")

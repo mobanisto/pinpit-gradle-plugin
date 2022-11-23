@@ -279,13 +279,13 @@ abstract class AppImageTask @Inject constructor(
     }
 
     @get:LocalState
-    protected val signDir: Provider<Directory> = project.layout.buildDirectory.dir("hokkaido/tmp/sign")
+    protected val signDir: Provider<Directory> = project.layout.buildDirectory.dir("pinpit/tmp/sign")
 
     @get:LocalState
-    protected val jpackageResources: Provider<Directory> = project.layout.buildDirectory.dir("hokkaido/tmp/resources")
+    protected val jpackageResources: Provider<Directory> = project.layout.buildDirectory.dir("pinpit/tmp/resources")
 
     @get:LocalState
-    protected val skikoDir: Provider<Directory> = project.layout.buildDirectory.dir("hokkaido/tmp/skiko")
+    protected val skikoDir: Provider<Directory> = project.layout.buildDirectory.dir("pinpit/tmp/skiko")
 
     @get:Internal
     private val libsDir: Provider<Directory> = workingDir.map {

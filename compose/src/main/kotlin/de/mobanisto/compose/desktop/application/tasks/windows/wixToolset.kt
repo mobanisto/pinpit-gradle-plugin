@@ -21,7 +21,7 @@ internal const val DOWNLOAD_WIX_PROPERTY = "compose.desktop.application.download
 
 internal fun JvmApplicationContext.configureWix() {
     val dirHome = Paths.get(System.getProperty("user.home"))
-    val dirTool = dirHome.resolve(".hokkaido")
+    val dirTool = dirHome.resolve(".pinpit")
     val dirWix = dirTool.resolve("wixToolset")
 
     val wixPath = System.getenv()[WIX_PATH_ENV_VAR]

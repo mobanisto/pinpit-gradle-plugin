@@ -5,7 +5,7 @@
 
 package de.mobanisto.compose.internal
 
-import de.mobanisto.compose.ComposeExtension
+import de.mobanisto.pinpit.PinpitExtension
 import org.gradle.api.Project
 import org.gradle.api.plugins.JavaPluginConvention
 import org.gradle.api.plugins.JavaPluginExtension
@@ -14,8 +14,8 @@ import org.gradle.util.GradleVersion
 import org.jetbrains.kotlin.gradle.dsl.KotlinJsProjectExtension
 import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
 
-internal val Project.composeExt: ComposeExtension?
-    get() = extensions.findByType(ComposeExtension::class.java)
+internal val Project.composeExt: PinpitExtension?
+    get() = extensions.findByType(PinpitExtension::class.java)
 
 internal val Project.mppExt: KotlinMultiplatformExtension
     get() = mppExtOrNull ?: error("Could not find KotlinMultiplatformExtension ($project)")
