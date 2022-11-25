@@ -5,4 +5,4 @@ pluginManagement {
     }
 }
 
-include(":compose")
+include(":pinpit")
