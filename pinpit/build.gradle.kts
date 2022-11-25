@@ -67,7 +67,7 @@ dependencies {
     testImplementation("org.tukaani:xz:1.9")
     testImplementation("commons-codec:commons-codec:1.15")
     testImplementation("io.github.java-diff-utils:java-diff-utils:4.12")
-
+    testImplementation("org.apache.commons:commons-compress:1.22")
 
     // include relocated download task to avoid potential runtime conflicts
     embedded("de.undercouch:gradle-download-task:4.1.1")
