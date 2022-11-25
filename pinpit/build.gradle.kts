@@ -79,9 +79,9 @@ dependencies {
 }
 
 val shadow = tasks.named<ShadowJar>("shadowJar") {
-    val fromPackage = "de.undercouch"
-    val toPackage = "de.mobanisto.pinpit.$fromPackage"
-    relocate(fromPackage, toPackage)
+    for (fromPackage in listOf("de.undercouch", "org.apache.commons.compress")) {
+        relocate(fromPackage, "de.mobanisto.pinpit.$fromPackage")
+    }
     archiveClassifier.set("shadow")
     configurations = listOf(embeddedDependencies)
     exclude("META-INF/gradle-plugins/de.undercouch.download.properties")
