@@ -6,6 +6,7 @@
 package de.mobanisto.pinpit.desktop.application.tasks.linux
 
 import de.mobanisto.pinpit.desktop.application.dsl.TargetFormat
+import de.mobanisto.pinpit.desktop.application.internal.Arch
 import de.mobanisto.pinpit.desktop.application.internal.DebianUtils
 import de.mobanisto.pinpit.desktop.application.internal.JvmRuntimeProperties
 import de.mobanisto.pinpit.desktop.application.internal.Target
@@ -28,6 +29,7 @@ import de.mobanisto.pinpit.desktop.application.tasks.CustomPackageTask
 import de.mobanisto.pinpit.desktop.application.tasks.FilesMapping
 import de.mobanisto.pinpit.desktop.application.tasks.isSkikoFor
 import de.mobanisto.pinpit.desktop.application.tasks.unpackSkikoFor
+import org.gradle.api.GradleException
 import org.gradle.api.file.Directory
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.file.RegularFile
@@ -298,11 +300,15 @@ abstract class CustomDebTask @Inject constructor(
         logger.lifecycle("building debian file tree at: $debFileTree")
         debFileTree.asFile.mkdirs()
 
+        val debArch = if (target.arch == Arch.X64) "amd64" else
+            throw GradleException("Undefined debian architecture for target architecture ${target.arch}")
+
         fileOperations.delete(debFileTree)
         buildDebFileTree(appImage, debFileTree)
-        buildDebianDir(appImage, debFileTree, target.arch.id)
+        buildDebianDir(appImage, debFileTree, debArch)
 
-        val deb = destination.file("${linuxPackageName.get()}-$qualifier-${target.arch.id}-${linuxDebPackageVersion.get()}.deb")
+        val deb =
+            destination.file("${linuxPackageName.get()}-$qualifier-${target.arch.id}-${linuxDebPackageVersion.get()}.deb")
         runExternalTool(
             tool = DebianUtils.fakeroot,
             args = listOf(DebianUtils.dpkgDeb.toString(), "-b", debFileTree.toString(), deb.toString())
