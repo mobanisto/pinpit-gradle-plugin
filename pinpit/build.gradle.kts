@@ -80,7 +80,7 @@ dependencies {
 
 val shadow = tasks.named<ShadowJar>("shadowJar") {
     val fromPackage = "de.undercouch"
-    val toPackage = "de.mobanisto.compose.$fromPackage"
+    val toPackage = "de.mobanisto.pinpit.$fromPackage"
     relocate(fromPackage, toPackage)
     archiveClassifier.set("shadow")
     configurations = listOf(embeddedDependencies)
@@ -107,7 +107,7 @@ val javaHomeForTests: String? = when {
 }
 val isWindows = getCurrentOperatingSystem().isWindows
 
-val gradleTestsPattern = "de.mobanisto.compose.test.tests.integration.*"
+val gradleTestsPattern = "de.mobanisto.pinpit.test.tests.integration.*"
 
 // check we don't accidentally including unexpected classes (e.g. from embedded dependencies)
 val checkJar by tasks.registering {
@@ -125,7 +125,7 @@ val checkJar by tasks.registering {
 fun checkJarContainsExpectedPackages(jar: ZipFile) {
     val expectedPackages = arrayOf(
         "kotlinx/serialization",
-        "de/mobanisto/compose",
+        "de/mobanisto/pinpit",
     )
     val unexpectedClasses = arrayListOf<String>()
 

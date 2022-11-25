@@ -7,10 +7,9 @@
 
 package de.mobanisto.pinpit
 
-import de.mobanisto.compose.ComposeCompilerKotlinSupportPlugin
-import de.mobanisto.compose.desktop.DesktopExtension
-import de.mobanisto.compose.desktop.application.internal.ComposeProperties
-import de.mobanisto.compose.desktop.application.internal.configureDesktop
+import de.mobanisto.pinpit.desktop.DesktopExtension
+import de.mobanisto.pinpit.desktop.application.internal.ComposeProperties
+import de.mobanisto.pinpit.desktop.application.internal.configureDesktop
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.artifacts.dsl.ComponentModuleMetadataHandler

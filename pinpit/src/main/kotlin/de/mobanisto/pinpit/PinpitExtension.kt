@@ -5,7 +5,7 @@
 
 package de.mobanisto.pinpit
 
-import de.mobanisto.compose.desktop.application.internal.nullableProperty
+import de.mobanisto.pinpit.desktop.application.internal.nullableProperty
 import org.gradle.api.model.ObjectFactory
 import org.gradle.api.plugins.ExtensionAware
 import org.gradle.api.provider.Property

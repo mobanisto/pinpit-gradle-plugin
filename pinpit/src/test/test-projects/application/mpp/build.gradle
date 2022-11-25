@@ -1,4 +1,4 @@
-import de.mobanisto.compose.desktop.application.dsl.TargetFormat
+import de.mobanisto.pinpit.desktop.application.dsl.TargetFormat
 
 plugins {
     id "com.android.application"
