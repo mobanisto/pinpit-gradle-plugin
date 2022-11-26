@@ -62,6 +62,7 @@ import java.nio.file.StandardOpenOption.TRUNCATE_EXISTING
 import java.nio.file.StandardOpenOption.WRITE
 import java.util.zip.ZipFile
 import javax.inject.Inject
+import kotlin.io.path.copyTo
 import kotlin.io.path.isRegularFile
 
 abstract class AppImageTask @Inject constructor(
@@ -486,9 +487,11 @@ abstract class AppImageTask @Inject constructor(
         extractZip(jpackageJMods, resAppLauncherAux, launcherLib)
         Files.setPosixFilePermissions(launcher, posixExecutable)
         Files.setPosixFilePermissions(launcherLib, posixExecutable)
-        // TODO: icon
         syncDir(runtimeImage.asPath(), dirRuntime)
         syncDir(libsDir.get().asPath(), dirApp)
+
+        val icon = dirLib.resolve("${packageName.get()}.png")
+        iconFile.asPath().copyTo(icon)
 
         val fileConfig = dirApp.resolve("${packageName.get()}.cfg")
         createConfig(fileConfig)
