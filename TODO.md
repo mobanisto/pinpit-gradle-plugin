@@ -12,3 +12,8 @@
 * [ ] Package RPM files
 * [ ] Package DMG or PKG files
 * [ ] Notarization etc
+
+## Linux
+
+* [ ] Custom installation path (instead of /opt/package-name/)
+* [ ] Ability to generate default preinst, postinst, prerm, postrm scripts
