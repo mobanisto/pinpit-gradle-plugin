@@ -498,7 +498,7 @@ abstract class AppImageTask @Inject constructor(
         val dirRuntime = dirAppImage.resolve("runtime")
         val dirApp = dirAppImage.resolve("app")
         // when equivalent of JPackage's --win-console option should be added, we need to use this file instead:
-        // "classes/jdk/jpackage/internal/resources/jpackageapplauncherw.exe" // not the "w" suffix at the end
+        // "classes/jdk/jpackage/internal/resources/jpackageapplauncherw.exe" // note the "w" suffix at the end
         val resAppLauncher = "classes/jdk/jpackage/internal/resources/jpackageapplauncher.exe"
         val launcher = dirAppImage.resolve("${packageName.get()}.exe")
         extractZip(jpackageJMods, resAppLauncher, launcher)
