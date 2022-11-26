@@ -20,12 +20,6 @@ class PinpitPlugin : Plugin<Project> {
         val pinpitExtension = project.extensions.create("pinpit", PinpitExtension::class.java)
         val desktopExtension = pinpitExtension.extensions.create("desktop", DesktopExtension::class.java)
 
-        // Only apply ComposeCompilerKotlinSupportPlugin if the Jetbrains Compose plugin is applied
-        val composePlugin = project.plugins.findPlugin("org.jetbrains.compose")
-        if (composePlugin != null) {
-            project.plugins.apply(ComposeCompilerKotlinSupportPlugin::class.java)
-        }
-
         project.afterEvaluate {
             configureDesktop(project, desktopExtension)
 
