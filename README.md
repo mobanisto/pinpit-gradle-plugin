@@ -195,6 +195,50 @@ installer:
             }
 ```
 
+This will add a set of tasks to your build:
+```
+Pinpit tasks
+------------
+pinpitCheckRuntimeLinuxX64
+pinpitCheckRuntimeWindowsX64
+pinpitDebUbuntuBionicX64
+pinpitDebUbuntuFocalX64
+pinpitDistributableLinuxX64
+pinpitDistributableWindowsX64
+pinpitDownloadLinuxX64
+pinpitDownloadWindowsX64
+pinpitMsiX64
+pinpitPackage
+pinpitPackageReleaseUberJarForCurrentOS
+pinpitPackageUberJarForCurrentOS
+pinpitPrepareAppResources
+pinpitProguardReleaseJarsLinuxX64
+pinpitProguardReleaseJarsWindowsX64
+pinpitReleaseDebUbuntuBionicX64
+pinpitReleaseDebUbuntuFocalX64
+pinpitReleaseMsiX64
+pinpitRun
+pinpitRunDistributableLinuxX64
+pinpitRunDistributableWindowsX64
+pinpitRunRelease
+pinpitRuntimeImageLinuxX64
+pinpitRuntimeImageWindowsX64
+pinpitSuggestRuntimeModulesLinuxX64
+pinpitSuggestRuntimeModulesWindowsX64
+pinpitUnpackDefaultComposeDesktopJvmApplicationResources
+```
+
+For example you can create the Debian package for Ubuntu Focal using:
+```
+./gradlew pinpitReleaseDebUbuntuFocalX64
+```
+
+or build the MSI for Windows:
+```
+./gradlew pinpitMsiX64
+```
+
+
 ## Development and publishing notes
 
 The build can be customized using environment variables. Under normal
