@@ -70,6 +70,12 @@ class GenerateProductWxs(
             setAttribute("InstallScope", "perMachine") // alternative: "perUser"
             // setAttribute("Platform", "x64") // Use of this switch is discouraged in favor of the -arch switch
         }
+        product.createChild("MajorUpgrade") {
+            setAttribute(
+                "DowngradeErrorMessage",
+                "A later version of $name is already installed. Setup will now exit."
+            )
+        }
         product.createChild("WixVariable", "WixUIBannerBmp") {
             setAttribute("Value", bitmapBanner.toString())
         }
