@@ -500,9 +500,15 @@ abstract class AppImageTask @Inject constructor(
     private fun packageWindows(dirAppImage: Path, jpackageJMods: Path) {
         val dirRuntime = dirAppImage.resolve("runtime")
         val dirApp = dirAppImage.resolve("app")
-        // when equivalent of JPackage's --win-console option should be added, we need to use this file instead:
-        // "classes/jdk/jpackage/internal/resources/jpackageapplauncherw.exe" // note the "w" suffix at the end
-        val resAppLauncher = "classes/jdk/jpackage/internal/resources/jpackageapplauncher.exe"
+        // The equivalent of JPackage's --win-console
+        val resAppLauncher = if (winConsole.get()!!) {
+            // Show console window while app is running
+            "classes/jdk/jpackage/internal/resources/jpackageapplauncher.exe"
+        } else {
+            // Do not show console window while app is running
+            "classes/jdk/jpackage/internal/resources/jpackageapplauncherw.exe"
+        }
+
         val launcher = dirAppImage.resolve("${packageName.get()}.exe")
         extractZip(jpackageJMods, resAppLauncher, launcher)
         Files.setPosixFilePermissions(launcher, posixExecutable)
