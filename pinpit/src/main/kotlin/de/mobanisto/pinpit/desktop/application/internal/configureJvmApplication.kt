@@ -112,7 +112,12 @@ private fun JvmApplicationContext.configurePackagingTasks(
     targetTasks: TargetTasks,
     commonTasks: CommonJvmDesktopTasks,
 ) {
-
+    if (app.nativeDistributions.jvmVendor == null) {
+        throw GradleException("Please specify a JVM vendor")
+    }
+    if (app.nativeDistributions.jvmVersion == null) {
+        throw GradleException("Please specify a JVM version")
+    }
     val jdkInfo = jdkInfo(app.nativeDistributions.jvmVendor!!, app.nativeDistributions.jvmVersion!!)
         ?: throw GradleException("Invalid JVM vendor or version")
 
