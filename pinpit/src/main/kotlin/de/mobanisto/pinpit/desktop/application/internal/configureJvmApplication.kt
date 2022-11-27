@@ -37,7 +37,7 @@ import org.gradle.jvm.tasks.Jar
 import java.io.File
 
 private val defaultJvmArgs = listOf("-D$CONFIGURE_SWING_GLOBALS=true")
-internal const val composeDesktopTaskGroup = "compose desktop"
+internal const val pluginTaskGroup = "pinpit"
 
 // todo: multiple launchers
 // todo: file associations

@@ -20,7 +20,7 @@ internal data class JvmApplicationContext(
     val project: Project,
     private val appInternal: JvmApplicationInternal,
     val buildType: JvmApplicationBuildType,
-    private val taskGroup: String = composeDesktopTaskGroup
+    private val taskGroup: String = pluginTaskGroup
 ) {
     val app: JvmApplicationData
         get() = appInternal.data
