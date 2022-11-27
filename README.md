@@ -48,15 +48,12 @@ Notable differences:
   mostly replaced by custom code that emulates its behavior and where
   relevant improves on it and offers better configurability.
 
-## Development and debugging notes
+## Development and publishing notes
 
-See `ComposeSystemProperties.kt` for flags and switches that can be passed
-to the plugin via Gradle project properties (`-P` flags).
-
-## Notes from the original plugin
-
-JetBrains Compose gradle plugin for easy configuration
-
-Environment variables:
-* `COMPOSE_GRADLE_PLUGIN_VERSION` - version of plugin
-* `COMPOSE_GRADLE_PLUGIN_COMPOSE_VERSION` - version of JetBrains Compose used by the plugin
+The build can be customized using environment variables. Under normal
+circumstances the values from `gradle.properties` will be used but can
+be overriden with the environment variables.
+* `COMPOSE_GRADLE_PLUGIN_VERSION` - version of plugin for publishing to
+  Maven (overrides `deploy.version`).
+* `COMPOSE_GRADLE_PLUGIN_COMPOSE_VERSION` - version of JetBrains Compose
+  used by the plugin (overrides `compose.version`).
