@@ -53,7 +53,13 @@ Notable differences:
 The build can be customized using environment variables. Under normal
 circumstances the values from `gradle.properties` will be used but can
 be overriden with the environment variables.
-* `COMPOSE_GRADLE_PLUGIN_VERSION` - version of plugin for publishing to
+* `PINPIT_GRADLE_PLUGIN_VERSION` - version of plugin for publishing to
   Maven (overrides `deploy.version`).
 * `COMPOSE_GRADLE_PLUGIN_COMPOSE_VERSION` - version of JetBrains Compose
   used by the plugin (overrides `compose.version`).
+
+For example, to publish a snapshot version to Maven local, you can use this:
+
+```
+PINPIT_GRADLE_PLUGIN_VERSION=0.X.0-SNAPSHOT ./gradlew publishToMavenLocal
+```
