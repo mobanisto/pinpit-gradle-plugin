@@ -54,6 +54,8 @@ Here are a few excerpts from a working project's `build.gradle.kts` file
 as an example on how to configure the plugin.
 For full examples, head over to
 [mobanisto/pinpit-gradle-examples](https://github.com/mobanisto/pinpit-gradle-examples).
+For more details, have a look at the [DSL reference](DSL_REFERENCE.md)
+where we build a description of all available options offered by the DSL.
 
 Apply the plugin like this:
 ```kotlin
@@ -237,7 +239,6 @@ or build the MSI for Windows:
 ```
 ./gradlew pinpitMsiX64
 ```
-
 
 ## Development and publishing notes
 
