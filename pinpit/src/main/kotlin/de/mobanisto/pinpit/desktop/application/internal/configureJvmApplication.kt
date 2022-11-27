@@ -19,8 +19,8 @@ import de.mobanisto.pinpit.desktop.application.tasks.AbstractSuggestModulesTask
 import de.mobanisto.pinpit.desktop.application.tasks.AppImageTask
 import de.mobanisto.pinpit.desktop.application.tasks.CustomPackageTask
 import de.mobanisto.pinpit.desktop.application.tasks.DownloadJdkTask
-import de.mobanisto.pinpit.desktop.application.tasks.linux.CustomDebTask
-import de.mobanisto.pinpit.desktop.application.tasks.windows.CustomMsiTask
+import de.mobanisto.pinpit.desktop.application.tasks.linux.PackageDebTask
+import de.mobanisto.pinpit.desktop.application.tasks.windows.PackageMsiTask
 import de.mobanisto.pinpit.desktop.tasks.AbstractUnpackDefaultComposeApplicationResourcesTask
 import de.mobanisto.pinpit.internal.addUnique
 import de.mobanisto.pinpit.internal.uppercaseFirstChar
@@ -147,7 +147,7 @@ private fun JvmApplicationContext.configurePackagingTasks(
             args = listOf(createDistributable)
         ).also { targetTasks.runTasks[target] = it }
 
-        tasks.register<CustomMsiTask>(
+        tasks.register<PackageMsiTask>(
             taskNameAction = "pinpit",
             taskNameObject = "msi" + target.arch.id.uppercaseFirstChar(),
             args = listOf(target)
@@ -193,7 +193,7 @@ private fun JvmApplicationContext.configurePackagingTasks(
             args = listOf(createDistributable)
         ).also { targetTasks.runTasks[target] = it }
 
-        tasks.register<CustomDebTask>(
+        tasks.register<PackageDebTask>(
             taskNameAction = "pinpit",
             taskNameObject = "deb" + distro.uppercaseFirstChar(),
             args = listOf(target, deb.qualifier!!)
@@ -449,7 +449,7 @@ internal fun JvmApplicationContext.configureCommonNotarizationSettings(
 }
 
 internal fun JvmApplicationContext.configurePlatformSettings(
-    packageTask: CustomDebTask,
+    packageTask: PackageDebTask,
     deb: DebianPlatformSettings,
     unpackDefaultResources: TaskProvider<AbstractUnpackDefaultComposeApplicationResourcesTask>
 ) {
@@ -479,7 +479,7 @@ internal fun JvmApplicationContext.configurePlatformSettings(
 }
 
 internal fun JvmApplicationContext.configurePlatformSettings(
-    packageTask: CustomMsiTask,
+    packageTask: PackageMsiTask,
     msi: MsiPlatformSettings,
     unpackDefaultResources: TaskProvider<AbstractUnpackDefaultComposeApplicationResourcesTask>
 ) {

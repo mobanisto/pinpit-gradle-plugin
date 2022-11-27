@@ -5,7 +5,7 @@
 
 package de.mobanisto.pinpit.desktop.application.internal
 
-import de.mobanisto.pinpit.desktop.application.tasks.windows.CustomMsiTask
+import de.mobanisto.pinpit.desktop.application.tasks.windows.PackageMsiTask
 import de.mobanisto.pinpit.desktop.application.tasks.windows.WindowsTask
 import de.undercouch.gradle.tasks.download.Download
 import org.gradle.api.Project
@@ -57,7 +57,7 @@ internal fun JvmApplicationContext.configureWix() {
 }
 
 private fun Project.eachWindowsPackageTask(fn: WindowsTask.() -> Unit) {
-    tasks.withType(CustomMsiTask::class.java).configureEach { packageTask ->
+    tasks.withType(PackageMsiTask::class.java).configureEach { packageTask ->
         if (packageTask.targetFormat.isCompatibleWith(OS.Windows)) {
             packageTask.fn()
         }

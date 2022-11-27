@@ -61,7 +61,7 @@ import javax.inject.Inject
 import kotlin.io.path.createDirectories
 
 
-abstract class CustomDebTask @Inject constructor(
+abstract class PackageDebTask @Inject constructor(
     target: Target,
     @Input val qualifier: String,
 ) : CustomPackageTask(target, TargetFormat.CustomDeb) {

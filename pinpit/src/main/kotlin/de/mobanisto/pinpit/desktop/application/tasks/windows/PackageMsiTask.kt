@@ -47,7 +47,7 @@ import java.nio.file.Path
 import java.util.*
 import javax.inject.Inject
 
-abstract class CustomMsiTask @Inject constructor(
+abstract class PackageMsiTask @Inject constructor(
     target: Target
 ) : CustomPackageTask(target, TargetFormat.CustomMsi), WindowsTask {
 
