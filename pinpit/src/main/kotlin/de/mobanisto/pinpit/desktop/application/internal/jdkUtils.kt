@@ -1,3 +1,8 @@
+/*
+ * Copyright 2022 Mobanisto UG (haftungsbeschraenkt) and respective authors and developers.
+ * Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE.txt file.
+ */
+
 package de.mobanisto.pinpit.desktop.application.internal
 
 import org.gradle.api.GradleException
