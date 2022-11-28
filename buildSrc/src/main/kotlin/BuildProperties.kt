@@ -7,7 +7,6 @@ import org.gradle.api.Project
 
 // "Global" properties
 object BuildProperties {
-    const val name = "Mobanisto Pinpit Plugin"
     const val group = "de.mobanisto.pinpit"
     const val website = "https://www.mobanisto.de"
     const val vcs = "https://github.com/mobanisto/pinpit-gradle-plugin"
