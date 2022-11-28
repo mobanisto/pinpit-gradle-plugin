@@ -35,7 +35,7 @@ Linux options go into a `linux` block:
 
 ## Windows options
 
-Windows options go into a `linux` block:
+Windows options go into a `windows` block:
 ```kotlin
         nativeDistributions {
             windows{
@@ -47,3 +47,21 @@ Windows options go into a `linux` block:
 * `console`: Boolean (default: `false`) - when set to true, launching the
   app will bring up an additional console window where the user can see
   stdout. Equivalent of JPackage's `--win-console` option.
+
+### MSI options
+
+MSI options go into an `msi` block:
+```kotlin
+            windows{
+                msi {
+                    …
+                }
+            }
+```
+
+* `bitmapDialog` - a 493 x 312 pixels bmp image file used on the welcome and
+  completion dialogs with the leftmost 164 pixel-wide column being visible
+  (see [Wix UI Customization Guide](https://wixtoolset.org/docs/v3/wixui/wixui_customizations/#replacing-the-default-bitmaps))
+* `bitmapBanner` - a 493 x 58 pixels bmp image file used as a top banner on
+  other dialogs
+  (see [Wix UI Customization Guide](https://wixtoolset.org/docs/v3/wixui/wixui_customizations/#replacing-the-default-bitmaps))
