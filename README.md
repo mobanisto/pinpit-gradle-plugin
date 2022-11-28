@@ -188,11 +188,11 @@ installer:
                 menuGroup = "pinpit"
                 upgradeUuid = "96D463E4-3317-44DA-88CD-AD61B845023F"
                 packageVersion = versionCode
+                iconFile.set(project.file("src/main/packaging/windows/hello.ico"))
                 msi {
                     arch = "x64"
                     bitmapBanner.set(project.file("src/main/packaging/windows/banner.bmp"))
                     bitmapDialog.set(project.file("src/main/packaging/windows/dialog.bmp"))
-                    icon.set(project.file("src/main/packaging/windows/hello.ico"))
                 }
             }
 ```
