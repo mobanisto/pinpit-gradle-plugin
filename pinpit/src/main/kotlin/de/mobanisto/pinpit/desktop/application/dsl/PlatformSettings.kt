@@ -147,5 +147,4 @@ abstract class MsiPlatformSettings : AbstractPlatformSettings() {
     var arch: String? = null
     val bitmapBanner: RegularFileProperty = objects.fileProperty()
     val bitmapDialog: RegularFileProperty = objects.fileProperty()
-    val icon: RegularFileProperty = objects.fileProperty()
 }

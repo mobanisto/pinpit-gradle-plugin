@@ -122,11 +122,6 @@ abstract class PackageMsiTask @Inject constructor(
     @get:PathSensitive(PathSensitivity.ABSOLUTE)
     val bitmapDialog: RegularFileProperty = objects.fileProperty()
 
-    @get:InputFile
-    @get:Optional
-    @get:PathSensitive(PathSensitivity.ABSOLUTE)
-    val icon: RegularFileProperty = objects.fileProperty()
-
     private lateinit var jvmRuntimeInfo: JvmRuntimeProperties
 
     @get:LocalState
@@ -275,9 +270,9 @@ abstract class PackageMsiTask @Inject constructor(
         val productName = packageName.get()
         val version = winPackageVersion.get()
         val description = packageDescription.get()
-        val bitmapBanner = this.bitmapBanner.get()
-        val bitmapDialog = this.bitmapDialog.get()
-        val icon = this.icon.get()
+        val bitmapBanner = this.bitmapBanner.orNull
+        val bitmapDialog = this.bitmapDialog.orNull
+        val icon = iconFile.get()
 
         val destination = destinationDir.get()
         logger.lifecycle("destination: $destination")
@@ -298,8 +293,8 @@ abstract class PackageMsiTask @Inject constructor(
             version!!,
             description,
             mainExecutable,
-            bitmapBanner.asPath(),
-            bitmapDialog.asPath(),
+            bitmapBanner?.asPath(),
+            bitmapDialog?.asPath(),
             icon.asPath(),
         ).execute()
 

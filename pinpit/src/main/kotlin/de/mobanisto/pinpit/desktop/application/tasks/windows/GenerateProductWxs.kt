@@ -24,8 +24,8 @@ class GenerateProductWxs(
     private val version: String,
     private val description: String,
     private val mainExecutable: FileEntry,
-    private val bitmapBanner: Path,
-    private val bitmapDialog: Path,
+    private val bitmapBanner: Path?,
+    private val bitmapDialog: Path?,
     private val icon: Path,
 ) {
 
@@ -76,11 +76,15 @@ class GenerateProductWxs(
                 "A later version of $name is already installed. Setup will now exit."
             )
         }
-        product.createChild("WixVariable", "WixUIBannerBmp") {
-            setAttribute("Value", bitmapBanner.toString())
+        if (bitmapBanner != null) {
+            product.createChild("WixVariable", "WixUIBannerBmp") {
+                setAttribute("Value", bitmapBanner.toString())
+            }
         }
-        product.createChild("WixVariable", "WixUIDialogBmp") {
-            setAttribute("Value", bitmapDialog.toString())
+        if (bitmapDialog != null ) {
+            product.createChild("WixVariable", "WixUIDialogBmp") {
+                setAttribute("Value", bitmapDialog.toString())
+            }
         }
         product.createChild("MediaTemplate") {
             setAttribute("EmbedCab", "yes")

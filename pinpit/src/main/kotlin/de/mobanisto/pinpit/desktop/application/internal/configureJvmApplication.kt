@@ -500,7 +500,6 @@ internal fun JvmApplicationContext.configurePlatformSettings(
         packageTask.installationPath.set(win.installationPath)
         packageTask.bitmapBanner.set(msi.bitmapBanner)
         packageTask.bitmapDialog.set(msi.bitmapDialog)
-        packageTask.icon.set(msi.icon)
     }
 }
 

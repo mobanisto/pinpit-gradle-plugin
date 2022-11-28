@@ -17,7 +17,7 @@
 ## Windows
 
 * [x] Package MSI using Wix
-* [ ] Use default resources for MSI when not configured (icon, banner etc.)
+* [x] Use default resources for MSI when not configured (icon, banner etc.)
 * [ ] Icon customization of launcher
 
 ## macOS
