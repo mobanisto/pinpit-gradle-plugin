@@ -2,6 +2,7 @@ build/
 /unbundled-build
 .classpath
 .gradle
+*.swp
 **/.idea/**
 !**/.idea/codeStyleSettings.xml
 !**/.idea/copyright
