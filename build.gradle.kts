@@ -30,15 +30,6 @@ subprojects {
         configureIfExists<PublishingExtension> {
             repositories {
                 maven {
-                    name = "ComposeRepo"
-                    setUrl(System.getenv("COMPOSE_REPO_URL"))
-                    credentials {
-                        username = System.getenv("COMPOSE_REPO_USERNAME")
-                        password = System.getenv("COMPOSE_REPO_KEY")
-                    }
-                }
-
-                maven {
                     name = "LocalDir"
                     url = rootProject.buildDir.resolve("repo").toURI()
                 }
