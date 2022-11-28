@@ -33,12 +33,32 @@ Linux options go into a `linux` block:
         }
 ```
 
+* `packageName` - first part for name of generated `.deb` files.
+* `debPackageVersion` - forth part for name of generated `.deb` files.
+
+### DEB options
+
+DEB options go into a `deb` block:
+```kotlin
+            linux {
+                deb {
+                    …
+                }
+            }
+```
+
+The package file name is constructed like this:
+`${linux.packageName}-${deb.qualifier}-${deb.arch}-${linux.debPackageVersion}.deb`
+
+* `qualifier` - second part for name of generated `.deb` files.
+* `arch` - third part for name of generated `.deb` files.
+
 ## Windows options
 
 Windows options go into a `windows` block:
 ```kotlin
         nativeDistributions {
-            windows{
+            windows {
                 …
             }
         }
@@ -52,7 +72,7 @@ Windows options go into a `windows` block:
 
 MSI options go into an `msi` block:
 ```kotlin
-            windows{
+            windows {
                 msi {
                     …
                 }
