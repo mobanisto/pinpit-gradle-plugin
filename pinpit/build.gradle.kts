@@ -18,8 +18,8 @@ gradlePluginConfig {
 }
 
 mavenPublicationConfig {
-    displayName = "Mobanisto Pinpit Gradle Plugin"
-    description = "Mobanisto Pinpit Gradle plugin for platform independent distribution"
+    displayName = "Pinpit Gradle Plugin"
+    description = "Pinpit Gradle plugin for platform independent distribution"
     artifactId = "pinpit-gradle-plugin"
 }
 
