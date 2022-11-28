@@ -33,8 +33,13 @@ Linux options go into a `linux` block:
         }
 ```
 
-* `packageName` - first part for name of generated `.deb` files.
-* `debPackageVersion` - forth part for name of generated `.deb` files.
+* `packageName`: String - first part for name of generated `.deb` files.
+* `debPackageVersion`: File - fourth part for name of generated `.deb` files.
+* `debPreInst`: File - custom pre-installation script to use
+* `debPostInst`: File - custom post-installation script to use
+* `debPreRm`: File - custom pre-removal script to use
+* `debPostRm`: File - custom post-removal script to use
+* `debLauncher`: File - custom launcher file to include
 
 ### DEB options
 
@@ -50,8 +55,10 @@ DEB options go into a `deb` block:
 The package file name is constructed like this:
 `${linux.packageName}-${deb.qualifier}-${deb.arch}-${linux.debPackageVersion}.deb`
 
-* `qualifier` - second part for name of generated `.deb` files.
-* `arch` - third part for name of generated `.deb` files.
+* `qualifier`: String - second part for name of generated `.deb` files.
+* `arch`: String - third part for name of generated `.deb` files.
+* `depends`: vararg\<String> - list of system packages that the `.deb` will
+  depend on (ends up in the `control` file's `Depends:` section)
 
 ## Windows options
 
@@ -79,9 +86,10 @@ MSI options go into an `msi` block:
             }
 ```
 
-* `bitmapDialog` - a 493 x 312 pixels bmp image file used on the welcome and
-  completion dialogs with the leftmost 164 pixel-wide column being visible
+* `bitmapDialog`: File - a 493 x 312 pixels bmp image file used on the
+  welcome and completion dialogs with the leftmost 164 pixel-wide column
+  being visible
   (see [Wix UI Customization Guide](https://wixtoolset.org/docs/v3/wixui/wixui_customizations/#replacing-the-default-bitmaps))
-* `bitmapBanner` - a 493 x 58 pixels bmp image file used as a top banner on
-  other dialogs
+* `bitmapBanner`: Fie - a 493 x 58 pixels bmp image file used as a top
+  banner on other dialogs
   (see [Wix UI Customization Guide](https://wixtoolset.org/docs/v3/wixui/wixui_customizations/#replacing-the-default-bitmaps))
