@@ -69,6 +69,9 @@ fun Project.configureMavenPublication(
                 name.set(config.displayName)
                 description.set(config.description)
                 url.set(BuildProperties.website)
+                scm {
+                    url.set(BuildProperties.vcs)
+                }
                 licenses {
                     license {
                         name.set("The Apache License, Version 2.0")
