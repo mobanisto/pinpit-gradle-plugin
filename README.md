@@ -290,6 +290,33 @@ should be defintely possible to re-enable this for building on macOS itself
 our goal here would be to implement this for Linux-based systems in order
 to be able to produce packages on the Linux-CI.
 
+### Future work
+
+It's also a goal of this project to implement packaging for more common
+packaging formats for any of the operating systems and their distributions.
+
+One format that seems to make sense is simple `zip` and `tar.gz` packages
+that can just be unpacked on the target system and run from there.
+The kind of no-install application that you can also carry on your USB drive.
+It will not work for all kinds of applications (such as those which require
+the installer or packaging system to do some work on the system like
+setting up launchers or manipulating the registry with administrator
+priviliges) but for some this will be feasible and a nice packaging
+mechanism.
+
+On Linux, RPM should probably be worked on to support Redhat Linux and
+Fedora. JPackage already supports this and it would be good to find a
+cross-platform solution for building RPMs like it should be possible
+with Debian packages.
+
+For Linux there are new cross-distro packaging formats that could be worked
+on like [AppImage](https://appimage.org/) and
+[Flatpak](https://flatpak.org/).
+
+For Windows, there are different tools than Wix like Inno Setup or the
+Nullsoft Scriptable Install System (NSIS) that could be used to build
+alternative installers for Windows.
+
 ## Development and publishing notes
 
 The build can be customized using environment variables. Under normal
