@@ -53,7 +53,9 @@ Notable differences:
 Here are a few excerpts from a working project's `build.gradle.kts` file
 as an example on how to configure the plugin.
 For full examples, head over to
-[mobanisto/pinpit-gradle-examples](https://github.com/mobanisto/pinpit-gradle-examples).
+[mobanisto/pinpit-gradle-examples](https://github.com/mobanisto/pinpit-gradle-examples)
+or learn from an existing multiplatform app that uses pinpit:
+[sebkur/lanchat](https://github.com/sebkur/lanchat).
 For more details, have a look at the [DSL reference](DSL_REFERENCE.md)
 where we build a description of all available options offered by the DSL.
 
