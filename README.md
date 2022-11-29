@@ -242,6 +242,54 @@ or build the MSI for Windows:
 ./gradlew pinpitMsiX64
 ```
 
+## Platform compatibility
+
+It's currently possible to build Linux and Windows packages from a Linux
+host system. All other combinations do not work yet.
+
+One building block for bundling packages for any platform is creating
+a JDK runtime image to ship with the application.
+Fortunately, assembling a runtime image from a given JDK image works
+cross-platform because `jlink` can assemble runtime images from JDK
+images for different platforms than the build host platform.
+
+Assembling Debian packages currently still relies on Debian-specific native
+tools (i.e. `dpkg`), but it is planned to replace those with pure
+JVM-based archiving tools in a future release so that building Debian
+packages will become possible for all host systems.
+
+Assembling MSI installers uses the Wix toolchain and uses Wine to run that
+on a Linux host. For this to work, you need to have the current stable
+version of Wine installed (from the
+[WineHQ download page](https://wiki.winehq.org/Download), at
+the time of writing version 7.0.1).
+
+Here's a summary of the supported build hosts and target formats and what
+we plan to work on:
+
+| Build host              | Debian/Ubuntu       | Windows | macOS   |
+|:------------------------|---------------------|---------|---------|
+| Target: Linux (deb)     | yes                 | planned | planned |
+| Target: Windows (MSI)   | yes (Wine required) | planned | no      |
+| Target: macOS (PKG/DMG) | planned for Q1 2023 | no      | planned |
+
+Building Debian packages should become possible on Windows and macOS once
+we migrate the packaging code away from `dpkg` towards pure JVM code using
+`commons-compress`.
+
+Building MSI installers on Windows should not be problematic to implement.
+Wix can run natively there and we mainly need to add a condition that uses
+Wine on Unix-based systems and does not on Windows.
+
+Building MSI installers on macOS can work on systems for which Wine is
+available. See https://github.com/mobanisto/pinpit-gradle-plugin/issues/11
+for details.
+
+Building macOS packages is planned to be worked on in Q1 2023. While it
+should be defintely possible to re-enable this for building on macOS itself
+our goal here would be to implement this for Linux-based systems in order
+to be able to produce packages on the Linux-CI.
+
 ## Development and publishing notes
 
 The build can be customized using environment variables. Under normal
