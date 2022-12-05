@@ -3,10 +3,10 @@
  * Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE.txt file.
  */
 
-package de.mobanisto.pinpit.desktop.application.internal
+package de.mobanisto.pinpit.desktop.application.tasks.windows
 
-import de.mobanisto.pinpit.desktop.application.tasks.windows.PackageMsiTask
-import de.mobanisto.pinpit.desktop.application.tasks.windows.WindowsTask
+import de.mobanisto.pinpit.desktop.application.internal.JvmApplicationContext
+import de.mobanisto.pinpit.desktop.application.internal.OS
 import de.undercouch.gradle.tasks.download.Download
 import org.gradle.api.Project
 import org.gradle.api.tasks.Copy

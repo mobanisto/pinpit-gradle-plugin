@@ -15,6 +15,7 @@ import de.mobanisto.pinpit.desktop.application.internal.OS.MacOS
 import de.mobanisto.pinpit.desktop.application.internal.OS.Windows
 import de.mobanisto.pinpit.desktop.application.internal.SKIKO_LIBRARY_PATH
 import de.mobanisto.pinpit.desktop.application.internal.Target
+import de.mobanisto.pinpit.desktop.application.internal.UnixUtils
 import de.mobanisto.pinpit.desktop.application.internal.currentOS
 import de.mobanisto.pinpit.desktop.application.internal.files.MacJarSignFileCopyingProcessor
 import de.mobanisto.pinpit.desktop.application.internal.files.SimpleFileCopyingProcessor
@@ -512,12 +513,37 @@ abstract class AppImageTask @Inject constructor(
         val launcher = dirAppImage.resolve("${packageName.get()}.exe")
         extractZip(jpackageJMods, resAppLauncher, launcher)
         Files.setPosixFilePermissions(launcher, posixExecutable)
-        // TODO: icon
+
+        // Set icon and exe properties such as version, company, app name etc.
+        rebrandExecutable(launcher)
+
         syncDir(runtimeImage.asPath(), dirRuntime)
         syncDir(libsDir.get().asPath(), dirApp)
 
         val fileConfig = dirApp.resolve("${packageName.get()}.cfg")
         createConfig(fileConfig)
+    }
+
+    @OptIn(ExperimentalStdlibApi::class)
+    private fun rebrandExecutable(launcher: Path) {
+        val peRebrander = peRebranderDir.file("PE-Rebrander.exe").get().toString()
+        runExternalTool(
+            tool = UnixUtils.wine,
+            args = buildList {
+                add(peRebrander)
+                add(launcher.toString())
+                if (iconFile.isPresent) {
+                    addAll(listOf("--icon", iconFile.get().toString()))
+                }
+                val version = packageVersion.get()!!
+                addAll(listOf("--file-version", "$version.0"))
+                addAll(listOf("--product-version", version))
+                packageVendor.orNull?.let { addAll(listOf("--company-name", it)) }
+                packageName.orNull?.let { addAll(listOf("--product-name", it)) }
+                packageCopyright.orNull?.let { addAll(listOf("--legal-copyright", it)) }
+                packageDescription.orNull?.let { addAll(listOf("--file-description", it)) }
+            }
+        )
     }
 
     private fun packageMacOs() {

@@ -11,4 +11,7 @@ interface WindowsTask : Task {
     @get:Optional
     val wixToolsetDir: DirectoryProperty
 
+    @get:InputDirectory
+    @get:Optional
+    val peRebranderDir: DirectoryProperty
 }

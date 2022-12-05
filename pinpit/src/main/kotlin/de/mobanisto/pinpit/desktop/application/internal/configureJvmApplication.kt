@@ -21,6 +21,8 @@ import de.mobanisto.pinpit.desktop.application.tasks.CustomPackageTask
 import de.mobanisto.pinpit.desktop.application.tasks.DownloadJdkTask
 import de.mobanisto.pinpit.desktop.application.tasks.linux.PackageDebTask
 import de.mobanisto.pinpit.desktop.application.tasks.windows.PackageMsiTask
+import de.mobanisto.pinpit.desktop.application.tasks.windows.configurePeRebrander
+import de.mobanisto.pinpit.desktop.application.tasks.windows.configureWix
 import de.mobanisto.pinpit.desktop.tasks.AbstractUnpackDefaultComposeApplicationResourcesTask
 import de.mobanisto.pinpit.internal.addUnique
 import de.mobanisto.pinpit.internal.uppercaseFirstChar
@@ -60,6 +62,7 @@ internal fun JvmApplicationContext.configureJvmApplication() {
     configurePackagingTasks(targetTasks, commonTasks)
     copy(buildType = app.buildTypes.release).configurePackagingTasks(targetTasks, commonTasks)
     configureWix()
+    configurePeRebrander()
 }
 
 internal class TargetTasks {
