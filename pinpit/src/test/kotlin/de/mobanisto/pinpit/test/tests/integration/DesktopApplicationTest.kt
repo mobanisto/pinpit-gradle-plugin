@@ -590,8 +590,8 @@ class DesktopApplicationTest : GradlePluginTestBase() {
         val addPackage = addDebPackage(listOf(extraPackage))
         file("build.gradle").modify { "$it\n$addPackage" }
 
-        gradle(":pinpitPackageCustomDeb").build().checks { check ->
-            check.taskOutcome(":pinpitPackageCustomDeb", TaskOutcome.SUCCESS)
+        gradle(":pinpitDebCustomDistroX64").build().checks { check ->
+            check.taskOutcome(":pinpitDebCustomDistroX64", TaskOutcome.SUCCESS)
             checkDebContent { content ->
                 assertTrue(content.contains(extraPackage))
             }
@@ -604,8 +604,8 @@ class DesktopApplicationTest : GradlePluginTestBase() {
         val addPackage = addDebPackage(extraPackages)
         file("build.gradle").modify { "$it\n$addPackage" }
 
-        gradle(":pinpitPackageCustomDeb").build().checks { check ->
-            check.taskOutcome(":pinpitPackageCustomDeb", TaskOutcome.SUCCESS)
+        gradle(":pinpitDebCustomDistroX64").build().checks { check ->
+            check.taskOutcome(":pinpitDebCustomDistroX64", TaskOutcome.SUCCESS)
             checkDebContent { content ->
                 for (extraPackage in extraPackages) {
                     assertTrue(content.contains(extraPackage))
@@ -619,7 +619,12 @@ class DesktopApplicationTest : GradlePluginTestBase() {
                 pinpit.desktop {
                     application {
                         nativeDistributions.linux {
-                            debAdditionalDependencies("${packages.joinToString(", ")}")
+                            deb("CustomDistroX64") {
+                                qualifier = "custom-distro"
+                                arch = "x64"
+                                depends("libc6", "libexpat1", "libgcc-s1", "libpcre3", "libuuid1", "xdg-utils",
+                                        "zlib1g", ${packages.joinToString(", ") { "\"$it\"" }})
+                            }
                         }
                     }
                 }
@@ -627,7 +632,7 @@ class DesktopApplicationTest : GradlePluginTestBase() {
     }
 
     private fun TestProject.checkDebContent(check: (content: String) -> Unit) {
-        val packageDir = file("build/pinpit/binaries/main/custom-deb")
+        val packageDir = file("build/pinpit/binaries/main/linux/x64/deb")
         val packageDirFiles = packageDir.listFiles() ?: arrayOf()
         check(packageDirFiles.size == 1) {
             "Expected single package in $packageDir, got [${packageDirFiles.joinToString(", ") { it.name }}]"
