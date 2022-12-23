@@ -8,6 +8,9 @@ package de.mobanisto.pinpit.desktop.tasks
 import de.mobanisto.pinpit.desktop.application.internal.ComposeProperties
 import de.mobanisto.pinpit.desktop.application.internal.ExternalToolRunner
 import de.mobanisto.pinpit.desktop.application.internal.ExternalToolRunnerWithOutput
+import de.mobanisto.pinpit.desktop.application.internal.OS
+import de.mobanisto.pinpit.desktop.application.internal.UnixUtils
+import de.mobanisto.pinpit.desktop.application.internal.currentOS
 import de.mobanisto.pinpit.desktop.application.internal.notNullProperty
 import org.gradle.api.DefaultTask
 import org.gradle.api.file.Directory
@@ -20,6 +23,7 @@ import org.gradle.api.provider.ProviderFactory
 import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.LocalState
 import org.gradle.process.ExecOperations
+import java.io.File
 import javax.inject.Inject
 
 abstract class AbstractComposeDesktopTask : DefaultTask() {
@@ -57,6 +61,21 @@ abstract class AbstractComposeDesktopTask : DefaultTask() {
         for (dir in dirs) {
             fileOperations.delete(dir)
             fileOperations.mkdir(dir)
+        }
+    }
+
+    @OptIn(ExperimentalStdlibApi::class)
+    internal fun runExternalWindowsTool(tool: File, args: List<String>) {
+        if (currentOS == OS.Windows) {
+            runExternalTool(tool = tool, args = args)
+        } else {
+            runExternalTool(
+                tool = UnixUtils.wine,
+                args = buildList {
+                    add(tool.toString())
+                    addAll(args)
+                }
+            )
         }
     }
 }

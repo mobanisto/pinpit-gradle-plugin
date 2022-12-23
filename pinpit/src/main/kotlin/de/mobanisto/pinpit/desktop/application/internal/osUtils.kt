@@ -67,6 +67,10 @@ internal val currentOS: OS by lazy {
     }
 }
 
+internal fun OS.isUnix(): Boolean {
+    return this == OS.Linux || this == OS.MacOS
+}
+
 internal fun executableName(nameWithoutExtension: String): String =
     if (currentOS == OS.Windows) "$nameWithoutExtension.exe" else nameWithoutExtension
 

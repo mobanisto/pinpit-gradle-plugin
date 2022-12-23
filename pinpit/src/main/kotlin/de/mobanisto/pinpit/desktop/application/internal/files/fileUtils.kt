@@ -8,8 +8,9 @@ package de.mobanisto.pinpit.desktop.application.internal.files
 import de.mobanisto.pinpit.desktop.application.dsl.TargetFormat
 import de.mobanisto.pinpit.desktop.application.internal.FileVisitorBuilder
 import de.mobanisto.pinpit.desktop.application.internal.FileVisitorBuilderImpl
-import de.mobanisto.pinpit.desktop.application.internal.OS
+import de.mobanisto.pinpit.desktop.application.internal.OS.Windows
 import de.mobanisto.pinpit.desktop.application.internal.currentOS
+import de.mobanisto.pinpit.desktop.application.internal.isUnix
 import org.gradle.api.file.Directory
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.file.RegularFile
@@ -133,7 +134,7 @@ internal val File.isJarFile: Boolean
     get() = name.endsWith(".jar", ignoreCase = true) && isFile
 
 internal fun File.normalizedPath() =
-    if (currentOS == OS.Windows) absolutePath.replace("\\", "\\\\") else absolutePath
+    if (currentOS == Windows) absolutePath.replace("\\", "\\\\") else absolutePath
 
 internal fun Writer.writeLn(s: String? = null) {
     s?.let { write(it) }
@@ -183,11 +184,17 @@ internal fun syncDir(source: Path, target: Path, takeFile: (file: Path) -> Boole
                 return FileVisitResult.CONTINUE
             }
             val pathTarget = target.resolve(relative)
-            Files.createDirectories(pathTarget.parent, PosixFilePermissions.asFileAttribute(posixExecutable))
-            if (Files.isExecutable(file)) {
-                Files.setPosixFilePermissions(file, posixExecutable)
+            if (currentOS.isUnix()) {
+                Files.createDirectories(pathTarget.parent, PosixFilePermissions.asFileAttribute(posixExecutable))
             } else {
-                Files.setPosixFilePermissions(file, posixRegular)
+                Files.createDirectories(pathTarget.parent)
+            }
+            if (currentOS.isUnix()) {
+                if (Files.isExecutable(file)) {
+                    Files.setPosixFilePermissions(file, posixExecutable)
+                } else {
+                    Files.setPosixFilePermissions(file, posixRegular)
+                }
             }
             Files.copy(file, pathTarget)
             return FileVisitResult.CONTINUE

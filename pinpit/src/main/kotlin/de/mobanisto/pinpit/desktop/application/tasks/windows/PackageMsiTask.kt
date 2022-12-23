@@ -7,8 +7,10 @@ package de.mobanisto.pinpit.desktop.application.tasks.windows
 
 import de.mobanisto.pinpit.desktop.application.dsl.TargetFormat
 import de.mobanisto.pinpit.desktop.application.internal.JvmRuntimeProperties
+import de.mobanisto.pinpit.desktop.application.internal.OS.Windows
 import de.mobanisto.pinpit.desktop.application.internal.Target
 import de.mobanisto.pinpit.desktop.application.internal.UnixUtils
+import de.mobanisto.pinpit.desktop.application.internal.currentOS
 import de.mobanisto.pinpit.desktop.application.internal.files.SimpleFileCopyingProcessor
 import de.mobanisto.pinpit.desktop.application.internal.files.asPath
 import de.mobanisto.pinpit.desktop.application.internal.files.findOutputFileOrDir
@@ -316,22 +318,20 @@ abstract class PackageMsiTask @Inject constructor(
 
         val wixWine = winePaths(destinationWix)
 
-        val candle = wixToolsetDir.file("candle.exe").get().toString()
-        val light = wixToolsetDir.file("light.exe").get().toString()
+        val candle = wixToolsetDir.file("candle.exe").get()
+        val light = wixToolsetDir.file("light.exe").get()
 
-        runExternalTool(
-            tool = UnixUtils.wine,
+        runExternalWindowsTool(
+            tool = candle.asFile,
             args = buildList {
-                add(candle)
                 addAll(wxsFilesWine)
                 addAll(listOf("-dPlatform=x64", "-arch", "x64"))
                 addAll(listOf("-out", wixWine))
             }
         )
-        runExternalTool(
-            tool = UnixUtils.wine,
+        runExternalWindowsTool(
+            tool = light.asFile,
             args = buildList {
-                add(light)
                 add("-sval")
                 addAll(wixobjFilesWine)
                 addAll(listOf("-ext", "WixUIExtension"))
@@ -341,6 +341,11 @@ abstract class PackageMsiTask @Inject constructor(
     }
 
     private fun winePaths(path: Path): String {
+        if (currentOS == Windows) {
+            // Make sure to pass directories with trailing backslash. Important as candle won't treat them as
+            // directories otherwise.
+            return path.toString() + if (Files.isDirectory(path)) "\\" else ""
+        }
         val output = runExternalToolAndGetOutput(
             tool = UnixUtils.winepath,
             // Make sure to pass directories with trailing slash so that resulting Windows paths returned by winepath

@@ -15,7 +15,6 @@ import de.mobanisto.pinpit.desktop.application.internal.OS.MacOS
 import de.mobanisto.pinpit.desktop.application.internal.OS.Windows
 import de.mobanisto.pinpit.desktop.application.internal.SKIKO_LIBRARY_PATH
 import de.mobanisto.pinpit.desktop.application.internal.Target
-import de.mobanisto.pinpit.desktop.application.internal.UnixUtils
 import de.mobanisto.pinpit.desktop.application.internal.currentOS
 import de.mobanisto.pinpit.desktop.application.internal.files.MacJarSignFileCopyingProcessor
 import de.mobanisto.pinpit.desktop.application.internal.files.SimpleFileCopyingProcessor
@@ -28,6 +27,7 @@ import de.mobanisto.pinpit.desktop.application.internal.files.syncDir
 import de.mobanisto.pinpit.desktop.application.internal.files.writeLn
 import de.mobanisto.pinpit.desktop.application.internal.ioFile
 import de.mobanisto.pinpit.desktop.application.internal.ioFileOrNull
+import de.mobanisto.pinpit.desktop.application.internal.isUnix
 import de.mobanisto.pinpit.desktop.application.internal.notNullProperty
 import de.mobanisto.pinpit.desktop.application.internal.nullableProperty
 import de.mobanisto.pinpit.desktop.application.internal.provider
@@ -512,7 +512,9 @@ abstract class AppImageTask @Inject constructor(
 
         val launcher = dirAppImage.resolve("${packageName.get()}.exe")
         extractZip(jpackageJMods, resAppLauncher, launcher)
-        Files.setPosixFilePermissions(launcher, posixExecutable)
+        if (currentOS.isUnix()) {
+            Files.setPosixFilePermissions(launcher, posixExecutable)
+        }
 
         // Set icon and exe properties such as version, company, app name etc.
         rebrandExecutable(launcher)
@@ -526,11 +528,10 @@ abstract class AppImageTask @Inject constructor(
 
     @OptIn(ExperimentalStdlibApi::class)
     private fun rebrandExecutable(launcher: Path) {
-        val peRebrander = peRebranderDir.file("PE-Rebrander.exe").get().toString()
-        runExternalTool(
-            tool = UnixUtils.wine,
+        val peRebrander = peRebranderDir.file("PE-Rebrander.exe").get()
+        runExternalWindowsTool(
+            tool = peRebrander.asFile,
             args = buildList {
-                add(peRebrander)
                 add(launcher.toString())
                 if (iconFile.isPresent) {
                     addAll(listOf("--icon", iconFile.get().toString()))
@@ -542,8 +543,7 @@ abstract class AppImageTask @Inject constructor(
                 packageName.orNull?.let { addAll(listOf("--product-name", it)) }
                 packageCopyright.orNull?.let { addAll(listOf("--legal-copyright", it)) }
                 packageDescription.orNull?.let { addAll(listOf("--file-description", it)) }
-            }
-        )
+            })
     }
 
     private fun packageMacOs() {
