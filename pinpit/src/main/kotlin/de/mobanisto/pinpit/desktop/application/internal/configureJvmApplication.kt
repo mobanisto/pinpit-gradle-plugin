@@ -20,6 +20,7 @@ import de.mobanisto.pinpit.desktop.application.tasks.AppImageTask
 import de.mobanisto.pinpit.desktop.application.tasks.CustomPackageTask
 import de.mobanisto.pinpit.desktop.application.tasks.DownloadJdkTask
 import de.mobanisto.pinpit.desktop.application.tasks.linux.PackageDebTask
+import de.mobanisto.pinpit.desktop.application.tasks.linux.SuggestDebDependenciesTask
 import de.mobanisto.pinpit.desktop.application.tasks.windows.PackageMsiTask
 import de.mobanisto.pinpit.desktop.application.tasks.windows.configurePeRebrander
 import de.mobanisto.pinpit.desktop.application.tasks.windows.configureWix
@@ -231,6 +232,16 @@ private fun JvmApplicationContext.configurePackagingTasks(
 
     val run = tasks.register<JavaExec>(taskNameAction = "pinpitRun") {
         configureRunTask(this, commonTasks.prepareAppResources)
+    }
+
+    if (currentOS == Linux) {
+        val createDistributable = targetTasks.distributableTasks[currentTarget]
+        if (createDistributable != null) {
+            tasks.register<SuggestDebDependenciesTask>(taskNameAction = "pinpitSuggestDebDependencies") {
+                dependsOn(createDistributable)
+                appImage.set(createDistributable.flatMap { it.destinationDir })
+            }
+        }
     }
 }
 
@@ -475,9 +486,9 @@ internal fun JvmApplicationContext.configurePlatformSettings(
         packageTask.linuxDebPostInst.set(linux.debPostInst)
         packageTask.linuxDebPreRm.set(linux.debPreRm)
         packageTask.linuxDebPostRm.set(linux.debPostRm)
-        packageTask.linuxDebAdditionalDependencies.set(provider { linux.debAdditionalDependencies })
         packageTask.linuxDebCopyright.set(linux.debCopyright)
         packageTask.linuxDebLauncher.set(linux.debLauncher)
+        packageTask.depends.set(deb.depends)
     }
 }
 

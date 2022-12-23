@@ -90,10 +90,6 @@ abstract class LinuxPlatformSettings : AbstractBasePlatformSettings() {
     val debPostInst: RegularFileProperty = objects.fileProperty()
     val debPreRm: RegularFileProperty = objects.fileProperty()
     val debPostRm: RegularFileProperty = objects.fileProperty()
-    var debAdditionalDependencies = arrayListOf<String>()
-    fun debAdditionalDependencies(vararg dependencies: String) {
-        this.debAdditionalDependencies.addAll(dependencies.toList())
-    }
 
     val debCopyright: RegularFileProperty = objects.fileProperty()
     val debLauncher: RegularFileProperty = objects.fileProperty()

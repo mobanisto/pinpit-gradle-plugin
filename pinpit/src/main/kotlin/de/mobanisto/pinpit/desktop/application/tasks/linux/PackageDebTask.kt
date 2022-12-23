@@ -6,7 +6,6 @@
 package de.mobanisto.pinpit.desktop.application.tasks.linux
 
 import de.mobanisto.pinpit.desktop.application.dsl.TargetFormat
-import de.mobanisto.pinpit.desktop.application.internal.Arch
 import de.mobanisto.pinpit.desktop.application.internal.DebianUtils
 import de.mobanisto.pinpit.desktop.application.internal.JvmRuntimeProperties
 import de.mobanisto.pinpit.desktop.application.internal.Target
@@ -29,7 +28,6 @@ import de.mobanisto.pinpit.desktop.application.tasks.CustomPackageTask
 import de.mobanisto.pinpit.desktop.application.tasks.FilesMapping
 import de.mobanisto.pinpit.desktop.application.tasks.isSkikoFor
 import de.mobanisto.pinpit.desktop.application.tasks.unpackSkikoFor
-import org.gradle.api.GradleException
 import org.gradle.api.file.Directory
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.file.RegularFile
@@ -55,8 +53,6 @@ import java.nio.file.Path
 import java.nio.file.Paths
 import java.nio.file.attribute.PosixFilePermission
 import java.nio.file.attribute.PosixFilePermissions.asFileAttribute
-import java.util.regex.Matcher
-import java.util.regex.Pattern
 import javax.inject.Inject
 import kotlin.io.path.createDirectories
 
@@ -65,11 +61,6 @@ abstract class PackageDebTask @Inject constructor(
     target: Target,
     @Input val qualifier: String,
 ) : CustomPackageTask(target, TargetFormat.CustomDeb) {
-
-    companion object {
-        private val PACKAGE_NAME_REGEX: Pattern = Pattern.compile("^(^\\S+):")
-        private val LIB_IN_LDD_OUTPUT_REGEX = Pattern.compile("^\\s*\\S+\\s*=>\\s*(\\S+)\\s+\\(0[xX]\\p{XDigit}+\\)")
-    }
 
     @get:Input
     @get:Optional
@@ -153,10 +144,6 @@ abstract class PackageDebTask @Inject constructor(
     @get:PathSensitive(PathSensitivity.ABSOLUTE)
     val linuxDebPostRm: RegularFileProperty = objects.fileProperty()
 
-    @get:Input
-    @get:Optional
-    val linuxDebAdditionalDependencies: ListProperty<String> = objects.listProperty(String::class.java)
-
     @get:InputFile
     @get:Optional
     @get:PathSensitive(PathSensitivity.ABSOLUTE)
@@ -166,6 +153,10 @@ abstract class PackageDebTask @Inject constructor(
     @get:Optional
     @get:PathSensitive(PathSensitivity.ABSOLUTE)
     val linuxDebLauncher: RegularFileProperty = objects.fileProperty()
+
+    @get:Input
+    @get:Optional
+    val depends: ListProperty<String> = objects.listProperty(String::class.java)
 
     private lateinit var jvmRuntimeInfo: JvmRuntimeProperties
 
@@ -300,12 +291,9 @@ abstract class PackageDebTask @Inject constructor(
         logger.lifecycle("building debian file tree at: $debFileTree")
         debFileTree.asFile.mkdirs()
 
-        val debArch = if (target.arch == Arch.X64) "amd64" else
-            throw GradleException("Undefined debian architecture for target architecture ${target.arch}")
-
         fileOperations.delete(debFileTree)
         buildDebFileTree(appImage, debFileTree)
-        buildDebianDir(appImage, debFileTree, debArch)
+        buildDebianDir(appImage, debFileTree)
 
         val deb =
             destination.file("${linuxPackageName.get()}-$qualifier-${target.arch.id}-${linuxDebPackageVersion.get()}.deb")
@@ -331,11 +319,11 @@ abstract class PackageDebTask @Inject constructor(
         }
     }
 
-    private fun buildDebianDir(appImage: Directory, debFileTree: Directory, debArch: String) {
+    private fun buildDebianDir(appImage: Directory, debFileTree: Directory) {
         val dirDebian = debFileTree.dir("DEBIAN")
         dirDebian.asPath().createDirectories(asFileAttribute(posixExecutable))
         val fileControl = dirDebian.file("control")
-        createControlFile(fileControl, appImage, debArch)
+        createControlFile(fileControl, appImage)
         linuxDebPreInst.copy(dirDebian.file("preinst"), posixExecutable)
         linuxDebPostInst.copy(dirDebian.file("postinst"), posixExecutable)
         linuxDebPreRm.copy(dirDebian.file("prerm"), posixExecutable)
@@ -349,26 +337,16 @@ abstract class PackageDebTask @Inject constructor(
         Files.setPosixFilePermissions(target.asPath(), permissions)
     }
 
-    private fun createControlFile(fileControl: RegularFile, appImage: Directory, debArch: String) {
+    private fun createControlFile(fileControl: RegularFile, appImage: Directory) {
         // Determine installed size as in jdk.jpackage.internal.LinuxDebBundler#createReplacementData()
         val sizeInBytes = sizeInBytes(appImage.asFile.toPath())
         val installedSize = (sizeInBytes shr 10).toString()
         logger.lifecycle("size in bytes: $sizeInBytes")
         logger.lifecycle("installed size: $installedSize")
 
-        // Determine package dependencies as in jdk.jpackage.internal.LibProvidersLookup and
-        // jdk.jpackage.internal.LinuxDebBundler
-        val packages = findPackageDependencies(debArch)
-
-        logger.lifecycle("arch packages: ${packages.archPackages}")
-        logger.lifecycle("other packages: ${packages.otherPackages}")
         val list = mutableListOf<String>().apply {
-            addAll(packages.archPackages)
-            addAll(packages.otherPackages)
+            addAll(depends.get())
         }
-        // TODO: only add this if launcher is included (see jdk.jpackage.internal.DesktopIntegration)
-        list.add("xdg-utils")
-        linuxDebAdditionalDependencies.orNull?.let { list.addAll(it) }
         list.sort()
 
         fileControl.asFile.bufferedWriter().use { writer ->
@@ -385,48 +363,6 @@ abstract class PackageDebTask @Inject constructor(
         }
     }
 
-    data class FindPackageResults(val archPackages: Set<String>, val otherPackages: Set<String>)
-
-    private fun findPackageDependencies(debArch: String): FindPackageResults {
-        val set = mutableSetOf<Path>()
-        for (file in appImage.asFileTree.filter { canDependOnLibs(it) }) {
-            val resultLdd = runExternalToolAndGetOutput(
-                tool = DebianUtils.ldd,
-                args = listOf(file.toString())
-            )
-            resultLdd.stdout.lines().forEach { line ->
-                val matcher = LIB_IN_LDD_OUTPUT_REGEX.matcher(line)
-                if (matcher.find()) {
-                    set.add(Paths.get(matcher.group(1)))
-                }
-            }
-        }
-        logger.lifecycle("lib files: $set")
-
-        val archPackages = mutableSetOf<String>()
-        val otherPackages = mutableSetOf<String>()
-
-        for (path in set) {
-            val resultDpkg = runExternalToolAndGetOutput(
-                tool = DebianUtils.dpkg,
-                args = listOf("-S", debFileTree.toString(), path.toString())
-            )
-            resultDpkg.stdout.lines().forEach { line ->
-                val matcher: Matcher = PACKAGE_NAME_REGEX.matcher(line)
-                if (matcher.find()) {
-                    var name: String = matcher.group(1)
-                    if (name.endsWith(":$debArch")) {
-                        name = name.substring(0, name.length - (debArch.length + 1))
-                        archPackages.add(name)
-                    } else {
-                        otherPackages.add(name)
-                    }
-                }
-            }
-        }
-
-        return FindPackageResults(archPackages, otherPackages)
-    }
 
     // Same algorithm as jdk.jpackage.internal.PathGroup.Facade#sizeInBytes()
     open fun sizeInBytes(dir: Path): Long {
@@ -436,10 +372,6 @@ abstract class PackageDebTask @Inject constructor(
                 .mapToLong { f -> f.toFile().length() }.sum()
         }
         return sum
-    }
-
-    private fun canDependOnLibs(file: File): Boolean {
-        return file.canExecute() || file.toString().endsWith(".so")
     }
 
     override fun checkResult(result: ExecResult) {
