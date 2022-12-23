@@ -1,10 +1,8 @@
-import de.mobanisto.pinpit.desktop.application.dsl.TargetFormat
-
 plugins {
     id "com.android.application"
     id "org.jetbrains.kotlin.multiplatform"
     id "org.jetbrains.compose"
-    id "de.mobanisto.compose"
+    id "de.mobanisto.pinpit"
 }
 
 repositories {
@@ -44,7 +42,8 @@ pinpit.desktop {
     application {
         mainClass = "MainKt"
         nativeDistributions {
-            targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb)
+            jvmVendor = "adoptium"
+            jvmVersion = "17.0.5+8"
 
             packageVersion = versionCode
             packageName = "TestPackage"
