@@ -71,14 +71,15 @@ class DesktopApplicationTest : GradlePluginTestBase() {
 
     @Test
     fun testRunMpp() = with(testProject(TestProjects.mpp)) {
+        val targetName = currentTarget.name
         val logLine = "Kotlin MPP app is running!"
         gradle("pinpitRun").build().checks { check ->
             check.taskOutcome(":pinpitRun", TaskOutcome.SUCCESS)
             check.logContains(logLine)
         }
-        gradle("pinpitRunDistributable").build().checks { check ->
-            check.taskOutcome(":pinpitCreateDistributable", TaskOutcome.SUCCESS)
-            check.taskOutcome(":pinpitRunDistributable", TaskOutcome.SUCCESS)
+        gradle("pinpitRunDistributable$targetName").build().checks { check ->
+            check.taskOutcome(":pinpitCreateDistributable$targetName", TaskOutcome.SUCCESS)
+            check.taskOutcome(":pinpitRunDistributable$targetName", TaskOutcome.SUCCESS)
             check.logContains(logLine)
         }
     }

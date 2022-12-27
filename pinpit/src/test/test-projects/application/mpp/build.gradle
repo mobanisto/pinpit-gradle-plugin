@@ -59,6 +59,11 @@ pinpit.desktop {
                 debPackageVersion = versionCode
                 appCategory = "utils"
                 menuGroup = "System;Utility;"
+                deb("UbuntuFocalX64") {
+                    qualifier = "ubuntu-20.04"
+                    arch = "x64"
+                    depends("libc6", "libexpat1", "libgcc-s1", "libpcre3", "libuuid1", "xdg-utils", "zlib1g", "libnotify4")
+                }
             }
             windows {
                 console = true
@@ -68,6 +73,9 @@ pinpit.desktop {
                 menu = true
                 menuGroup = "compose"
                 upgradeUuid = "2d6ff464-75be-40ad-a256-56420b9cc374"
+                msi() {
+                    arch = "x64"
+                }
             }
         }
     }

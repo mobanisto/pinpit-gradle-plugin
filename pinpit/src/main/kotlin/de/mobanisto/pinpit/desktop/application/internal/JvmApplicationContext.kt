@@ -34,17 +34,12 @@ internal data class JvmApplicationContext(
         )
 
     fun <T : Task> T.useAppRuntimeFiles(target: Target, fn: T.(JvmApplicationRuntimeFiles) -> Unit) {
-        /*val runtimeFiles = app.jvmApplicationRuntimeFilesProvider?.jvmApplicationRuntimeFiles(project)
-            ?: JvmApplicationRuntimeFiles(
-                allRuntimeJars = app.fromFiles,
-                mainJar = app.mainJar,
-                taskDependencies = app.dependenciesTaskNames.toTypedArray()
-            )*/
-        val provider = JvmApplicationRuntimeFilesProvider.FromGradleSourceSet(
-            project.javaSourceSets.getByName("main"),
-            project.configurations.getByName(target.configuration)
-        )
-        val runtimeFiles = provider.jvmApplicationRuntimeFiles(project)
+        // app.jvmApplicationRuntimeFilesProvider is non-null for Kotlin-Mpp builds and null otherwise
+        val runtimeFiles = app.jvmApplicationRuntimeFilesProvider?.jvmApplicationRuntimeFiles(project)
+            ?: JvmApplicationRuntimeFilesProvider.FromGradleSourceSet(
+                project.javaSourceSets.getByName("main"),
+                project.configurations.getByName(target.configuration)
+            ).jvmApplicationRuntimeFiles(project)
         runtimeFiles.configureUsageBy(this, fn)
     }
 
@@ -57,7 +52,6 @@ internal data class JvmApplicationContext(
         project.provider(fn)
 
     fun configureDefaultApp() {
-        // TODO: support for org.jetbrains.kotlin.multiplatform is probably broken now
         if (project.plugins.hasPlugin(KOTLIN_MPP_PLUGIN_ID)) {
             var isJvmTargetConfigured = false
             project.mppExt.targets.all { target ->
