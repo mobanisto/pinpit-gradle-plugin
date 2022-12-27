@@ -39,6 +39,12 @@ import java.util.jar.JarFile
 
 class DesktopApplicationTest : GradlePluginTestBase() {
     @Test
+    fun targetNameIsAsExpected() {
+        val targetName = currentTarget.name
+        assertTrue(targetName == "LinuxX64" || targetName == "WindowsX64")
+    }
+
+    @Test
     fun smokeTestRunTask() = with(testProject(TestProjects.jvm)) {
         val targetName = currentTarget.name
         file("build.gradle").modify {
