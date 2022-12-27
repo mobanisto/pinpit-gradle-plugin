@@ -1,5 +1,7 @@
 package de.mobanisto.pinpit.desktop.application.tasks
 
+import de.mobanisto.pinpit.desktop.application.internal.currentOS
+import de.mobanisto.pinpit.desktop.application.internal.isUnix
 import de.mobanisto.pinpit.desktop.application.internal.jdkInfo
 import de.mobanisto.pinpit.desktop.application.internal.notNullProperty
 import de.mobanisto.pinpit.desktop.tasks.AbstractComposeDesktopTask
@@ -107,7 +109,9 @@ abstract class DownloadJdkTask @Inject constructor() : AbstractComposeDesktopTas
                     val file = targetDir.resolve(path.subpath(1, path.nameCount))
                     createDirectories(file.parent)
                     Files.copy(it, file)
-                    Files.setPosixFilePermissions(file, PermissionUtils.permissionsFromMode(entry.mode))
+                    if (currentOS.isUnix()) {
+                        Files.setPosixFilePermissions(file, PermissionUtils.permissionsFromMode(entry.mode))
+                    }
                 }
             }
         }
