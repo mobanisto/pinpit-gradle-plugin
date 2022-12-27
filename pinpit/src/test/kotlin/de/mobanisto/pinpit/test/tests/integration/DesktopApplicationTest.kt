@@ -40,6 +40,7 @@ import java.util.jar.JarFile
 class DesktopApplicationTest : GradlePluginTestBase() {
     @Test
     fun smokeTestRunTask() = with(testProject(TestProjects.jvm)) {
+        val targetName = currentTarget.name
         file("build.gradle").modify {
             it + """
                 afterEvaluate {
@@ -47,7 +48,7 @@ class DesktopApplicationTest : GradlePluginTestBase() {
                         throw new StopExecutionException("Skip run task")
                     }
                     
-                    tasks.getByName("pinpitRunDistributable").doFirst {
+                    tasks.getByName("pinpitRunDistributable$targetName").doFirst {
                         throw new StopExecutionException("Skip runDistributable task")
                     }
                 }
@@ -56,9 +57,9 @@ class DesktopApplicationTest : GradlePluginTestBase() {
         gradle("pinpitRun").build().let { result ->
             assertEquals(TaskOutcome.SUCCESS, result.task(":pinpitRun")?.outcome)
         }
-        gradle("pinpitRunDistributable").build().let { result ->
-            assertEquals(TaskOutcome.SUCCESS, result.task(":pinpitCreateDistributable")!!.outcome)
-            assertEquals(TaskOutcome.SUCCESS, result.task(":pinpitRunDistributable")?.outcome)
+        gradle("pinpitRunDistributable$targetName").build().let { result ->
+            assertEquals(TaskOutcome.SUCCESS, result.task(":pinpitCreateDistributable$targetName")!!.outcome)
+            assertEquals(TaskOutcome.SUCCESS, result.task(":pinpitRunDistributable$targetName")?.outcome)
         }
     }
 

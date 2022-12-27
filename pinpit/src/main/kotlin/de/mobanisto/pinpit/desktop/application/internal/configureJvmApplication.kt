@@ -131,7 +131,7 @@ private fun JvmApplicationContext.configurePackagingTasks(
         val packageTasks = configureCommonPackageTasks(tasks, jdkInfo, target, app, appTmpDir, targetTasks, commonTasks)
 
         val createDistributable = targetTasks.distributableTasks[target] ?: tasks.register<AppImageTask>(
-            taskNameAction = "pinpit",
+            taskNameAction = "pinpitCreate",
             taskNameObject = "distributable${target.name}",
             args = listOf(target)
         ) {
@@ -177,7 +177,7 @@ private fun JvmApplicationContext.configurePackagingTasks(
         val packageTasks = configureCommonPackageTasks(tasks, jdkInfo, target, app, appTmpDir, targetTasks, commonTasks)
 
         val createDistributable = targetTasks.distributableTasks[target] ?: tasks.register<AppImageTask>(
-            taskNameAction = "pinpit",
+            taskNameAction = "pinpitCreate",
             taskNameObject = "distributable${target.name}",
             args = listOf(target)
         ) {
