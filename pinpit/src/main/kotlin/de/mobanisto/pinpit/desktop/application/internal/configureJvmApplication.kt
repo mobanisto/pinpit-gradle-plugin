@@ -94,12 +94,14 @@ internal class CommonJvmPackageTasks(
 private fun JvmApplicationContext.configureCommonJvmDesktopTasks(): CommonJvmDesktopTasks {
     val unpackDefaultResources = tasks.register<AbstractUnpackDefaultComposeApplicationResourcesTask>(
         taskNameAction = "pinpitUnpack",
-        taskNameObject = "DefaultComposeDesktopJvmApplicationResources"
+        taskNameObject = "DefaultComposeDesktopJvmApplicationResources",
+        useBuildTypeForTaskName = false,
     ) {}
 
     val prepareAppResources = tasks.register<Sync>(
         taskNameAction = "pinpitPrepare",
-        taskNameObject = "appResources"
+        taskNameObject = "appResources",
+        useBuildTypeForTaskName = false,
     ) {
         val appResourcesRootDir = app.nativeDistributions.appResourcesRootDir
         if (appResourcesRootDir.isPresent) {
