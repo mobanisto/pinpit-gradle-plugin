@@ -49,7 +49,7 @@ class DesktopApplicationTest : GradlePluginTestBase() {
         file("build.gradle").modify {
             it + """
                 afterEvaluate {
-                    tasks.getByName("pinpitRunDefault").doFirst {
+                    tasks.getByName("pinpitRun").doFirst {
                         throw new StopExecutionException("Skip run task")
                     }
                     
@@ -59,8 +59,8 @@ class DesktopApplicationTest : GradlePluginTestBase() {
                 }
             """.trimIndent()
         }
-        gradle("pinpitRunDefault").build().let { result ->
-            assertEquals(TaskOutcome.SUCCESS, result.task(":pinpitRunDefault")?.outcome)
+        gradle("pinpitRun").build().let { result ->
+            assertEquals(TaskOutcome.SUCCESS, result.task(":pinpitRun")?.outcome)
         }
         gradle("pinpitRunDefaultDistributable$targetName").build().let { result ->
             assertEquals(TaskOutcome.SUCCESS, result.task(":pinpitCreateDefaultDistributable$targetName")!!.outcome)
