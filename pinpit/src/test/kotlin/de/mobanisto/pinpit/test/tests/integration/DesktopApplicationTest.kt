@@ -85,7 +85,8 @@ class DesktopApplicationTest : GradlePluginTestBase() {
 
     @Test
     fun testAndroidxCompiler() = with(testProject(TestProjects.androidxCompiler, defaultAndroidxCompilerEnvironment)) {
-        gradle(":pinpitRunDefaultDistributable").build().checks { check ->
+        val targetName = currentTarget.name
+        gradle(":pinpitRunDefaultDistributable$targetName").build().checks { check ->
             val actualMainImage = file("main-image.actual.png")
             val expectedMainImage = file("main-image.expected.png")
             assert(actualMainImage.readBytes().contentEquals(expectedMainImage.readBytes())) {
