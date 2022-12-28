@@ -73,6 +73,7 @@ internal class TargetTasks {
     val downloadJdkTasks = mutableMapOf<Target, TaskProvider<DownloadJdkTask>>()
     val checkRuntimeTasks = mutableMapOf<Target, TaskProvider<AbstractCheckNativeDistributionRuntime>>()
     val suggestModulesTasks = mutableMapOf<Target, TaskProvider<AbstractSuggestModulesTask>>()
+    val prepareAppResources = mutableMapOf<Target, TaskProvider<Sync>>()
     val proguardTasks = mutableMapOf<TargetAndBuildType, TaskProvider<AbstractProguardTask>>()
     val runtimeTasks = mutableMapOf<TargetAndBuildType, TaskProvider<AbstractJLinkTask>>()
     val distributableTasks = mutableMapOf<TargetAndBuildType, TaskProvider<AppImageTask>>()
@@ -82,7 +83,6 @@ internal class TargetTasks {
 
 internal class CommonJvmDesktopTasks(
     val unpackDefaultResources: TaskProvider<AbstractUnpackDefaultComposeApplicationResourcesTask>,
-    val prepareAppResources: TaskProvider<Sync>,
 )
 
 internal class CommonJvmPackageTasks(
@@ -99,23 +99,8 @@ private fun JvmApplicationContext.configureCommonJvmDesktopTasks(): CommonJvmDes
         description = "Unpacks the default Compose resources such as launcher icons",
     ) {}
 
-    val prepareAppResources = tasks.register<Sync>(
-        taskNameAction = "pinpitPrepare",
-        taskNameObject = "appResources",
-        useBuildTypeForTaskName = false,
-    ) {
-        val appResourcesRootDir = app.nativeDistributions.appResourcesRootDir
-        if (appResourcesRootDir.isPresent) {
-            from(appResourcesRootDir.dir("common"))
-            from(appResourcesRootDir.dir(currentOS.id))
-            from(appResourcesRootDir.dir(currentTarget.id))
-        }
-        into(jvmTmpDirForTask())
-    }
-
     return CommonJvmDesktopTasks(
         unpackDefaultResources,
-        prepareAppResources,
     )
 }
 
@@ -148,7 +133,7 @@ private fun JvmApplicationContext.configurePackagingTasks(
             configureAppImageTask(
                 this,
                 createRuntimeImage = packageTasks.createRuntimeImage,
-                prepareAppResources = commonTasks.prepareAppResources,
+                prepareAppResources = targetTasks.prepareAppResources[target],
                 checkRuntime = packageTasks.checkRuntime,
                 unpackDefaultResources = commonTasks.unpackDefaultResources,
                 runProguard = packageTasks.runProguard
@@ -197,7 +182,7 @@ private fun JvmApplicationContext.configurePackagingTasks(
             configureAppImageTask(
                 this,
                 createRuntimeImage = packageTasks.createRuntimeImage,
-                prepareAppResources = commonTasks.prepareAppResources,
+                prepareAppResources = targetTasks.prepareAppResources[target],
                 checkRuntime = packageTasks.checkRuntime,
                 unpackDefaultResources = commonTasks.unpackDefaultResources,
                 runProguard = packageTasks.runProguard
@@ -248,7 +233,8 @@ private fun JvmApplicationContext.configurePackagingTasks(
             taskNameAction = "pinpitRun",
             useBuildTypeForTaskName = false
         ) {
-            configureRunTask(this, commonTasks.prepareAppResources)
+            val prepareAppResources = checkNotNull(targetTasks.prepareAppResources[currentTarget])
+            configureRunTask(this, prepareAppResources)
         }
     }
 
@@ -315,6 +301,21 @@ private fun JvmApplicationContext.configureCommonPackageTasks(
             launcherMainJar.set(mainJar)
         }
     }.also { targetTasks.suggestModulesTasks[target] = it }
+
+    val prepareAppResources = targetTasks.prepareAppResources[target] ?: tasks.register<Sync>(
+        taskNameAction = "pinpitPrepare",
+        taskNameObject = "appResources${target.name}",
+        useBuildTypeForTaskName = false,
+        description = "Merge all app resources for ${target.name} into a single build directory",
+    ) {
+        val appResourcesRootDir = app.nativeDistributions.appResourcesRootDir
+        if (appResourcesRootDir.isPresent) {
+            from(appResourcesRootDir.dir("common"))
+            from(appResourcesRootDir.dir(target.os.id))
+            from(appResourcesRootDir.dir(target.id))
+        }
+        into(jvmTmpDirForTask())
+    }.also { targetTasks.prepareAppResources[target] = it }
 
     val runProguard =
         targetTasks.proguardTasks[targetAndBuildType] ?: if (buildType.proguard.isEnabled.orNull == true) {
