@@ -118,6 +118,8 @@ private fun JvmApplicationContext.configurePackagingTasks(
     val jdkInfo = jdkInfo(app.nativeDistributions.jvmVendor!!, app.nativeDistributions.jvmVersion!!)
         ?: throw GradleException("Invalid JVM vendor or version")
 
+    val allPackageTasks = mutableListOf<TaskProvider<out CustomPackageTask>>()
+
     app.nativeDistributions.windows.msis.forEach { msi ->
         val target = Target(Windows, arch(msi.arch))
         val targetBuild = TargetAndBuildType(target, buildType)
@@ -143,7 +145,7 @@ private fun JvmApplicationContext.configurePackagingTasks(
                 msi = msi,
                 unpackDefaultResources = commonTasks.unpackDefaultResources
             )
-        }
+        }.also { allPackageTasks.add(it) }
     }
 
     app.nativeDistributions.linux.debs.forEach { deb ->
@@ -172,14 +174,17 @@ private fun JvmApplicationContext.configurePackagingTasks(
                 deb = deb,
                 unpackDefaultResources = commonTasks.unpackDefaultResources
             )
-        }
+        }.also { allPackageTasks.add(it) }
     }
 
     tasks.register<DefaultTask>(
         taskNameAction = "pinpitPackage",
         description = "Builds packages for all systems and architectures.",
     ) {
-        // TODO: depend on all package tasks
+        allPackageTasks.forEach {
+            dependsOn(it)
+        }
+        // TODO: depend on uber jar tasks too?
         // dependsOn(packageForCurrentOS)
     }
 
