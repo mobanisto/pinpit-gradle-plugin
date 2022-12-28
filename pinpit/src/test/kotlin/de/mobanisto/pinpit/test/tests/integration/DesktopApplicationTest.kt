@@ -260,8 +260,8 @@ class DesktopApplicationTest : GradlePluginTestBase() {
     }
 
     private fun TestProject.testPackageUberJarForCurrentOS() {
-        gradle(":pinpitPackageUberJarForCurrentOS").build().let { result ->
-            assertEquals(TaskOutcome.SUCCESS, result.task(":pinpitPackageUberJarForCurrentOS")?.outcome)
+        gradle(":pinpitPackageDefaultUberJarForCurrentOS").build().let { result ->
+            assertEquals(TaskOutcome.SUCCESS, result.task(":pinpitPackageDefaultUberJarForCurrentOS")?.outcome)
 
             val resultJarFile = file("build/pinpit/jars/TestPackage-${currentTarget.id}-1.0.0.jar")
             resultJarFile.checkExists()
