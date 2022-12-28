@@ -39,7 +39,7 @@ abstract class AbstractCheckNativeDistributionRuntime : AbstractComposeDesktopTa
     val jdk: Property<Path> = objects.notNullProperty()
 
     @Internal
-    val targetJdkVersion: Property<String> = objects.notNullProperty()
+    val targetJdkVersion: Property<Int> = objects.notNullProperty()
 
     private val taskDir = project.layout.buildDirectory.dir("pinpit/tmp/$name")
 
@@ -82,7 +82,7 @@ abstract class AbstractCheckNativeDistributionRuntime : AbstractComposeDesktopTa
             """.trimMargin()
         }
 
-        val targetJdk = Integer.parseInt(targetJdkVersion.get())
+        val targetJdk = targetJdkVersion.get()
         check(javaRuntimeVersion >= targetJdk) {
             """|The JDK you would like to package is a JDK $targetJdk but you build JDK is only $javaRuntimeVersion
                |Java home: ${javaHome.get()}

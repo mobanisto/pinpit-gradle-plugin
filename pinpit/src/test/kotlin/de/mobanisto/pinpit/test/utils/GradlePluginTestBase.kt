@@ -27,4 +27,16 @@ abstract class GradlePluginTestBase {
         testEnvironment: TestEnvironment = defaultTestEnvironment
     ): TestProject =
         TestProject(name, testEnvironment = testEnvironment)
+
+    fun testProject(
+        name: String,
+        jvmVersion: String
+    ): TestProject =
+        TestProject(
+            name,
+            testEnvironment = TestEnvironment(
+                workingDir = testWorkDir,
+                pinpitJvmVersion = jvmVersion
+            )
+        )
 }

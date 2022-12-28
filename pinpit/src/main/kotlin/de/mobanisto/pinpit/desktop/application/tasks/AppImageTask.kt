@@ -271,9 +271,12 @@ abstract class AppImageTask @Inject constructor(
     @get:Internal
     val jdkDir: Property<Path> = objects.notNullProperty()
 
+    @get:Internal
+    val jdkVersion: Property<Int> = objects.notNullProperty()
+
     private val macSigner: MacSigner? by lazy {
         val nonValidatedSettings = nonValidatedMacSigningSettings
-        if (currentOS == OS.MacOS && nonValidatedSettings?.sign?.get() == true) {
+        if (currentOS == MacOS && nonValidatedSettings?.sign?.get() == true) {
             val validatedSettings =
                 nonValidatedSettings.validate(nonValidatedMacBundleID, project, macAppStore)
             MacSigner(validatedSettings, runExternalTool)
@@ -481,13 +484,15 @@ abstract class AppImageTask @Inject constructor(
         val dirApp = dirLib.resolve("app")
 
         val resAppLauncher = "classes/jdk/jpackage/internal/resources/jpackageapplauncher"
-        val resAppLauncherAux = "classes/jdk/jpackage/internal/resources/libjpackageapplauncheraux.so"
         val launcher = dirBin.resolve("${packageName.get()}")
-        val launcherLib = dirLib.resolve("libapplauncher.so")
         extractZip(jpackageJMods, resAppLauncher, launcher)
-        extractZip(jpackageJMods, resAppLauncherAux, launcherLib)
         Files.setPosixFilePermissions(launcher, posixExecutable)
-        Files.setPosixFilePermissions(launcherLib, posixExecutable)
+        if (jdkVersion.get() >= 17) {
+            val resAppLauncherAux = "classes/jdk/jpackage/internal/resources/libjpackageapplauncheraux.so"
+            val launcherLib = dirLib.resolve("libapplauncher.so")
+            extractZip(jpackageJMods, resAppLauncherAux, launcherLib)
+            Files.setPosixFilePermissions(launcherLib, posixExecutable)
+        }
         syncDir(runtimeImage.asPath(), dirRuntime)
         syncDir(libsDir.get().asPath(), dirApp)
 

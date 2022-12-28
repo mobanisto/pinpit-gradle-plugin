@@ -420,6 +420,7 @@ private fun JvmApplicationContext.configureAppImageTask(
         packageTask.dependsOn(checkRuntime)
         packageTask.javaRuntimePropertiesFile.set(checkRuntime.flatMap { it.javaRuntimePropertiesFile })
         packageTask.jdkDir.set(checkRuntime.flatMap { it.jdk })
+        packageTask.jdkVersion.set(checkRuntime.flatMap { it.targetJdkVersion })
     }
 
     configurePlatformSettings(packageTask, unpackDefaultResources)

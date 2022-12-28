@@ -184,27 +184,29 @@ class DesktopApplicationTest : GradlePluginTestBase() {
     }
 
     @Test
-    fun testJdk15() = with(customJdkProject(15)) {
+    fun testJdk16() = with(customJdkProject(16, "16.0.2+7")) {
         testPackageJvmDistributions()
     }
 
     @Test
-    fun testJdk17() = with(customJdkProject(17)) {
+    fun testJdk17() = with(customJdkProject(17, "17.0.5+8")) {
         testPackageJvmDistributions()
     }
 
     @Test
-    fun testJdk18() = with(customJdkProject(18)) {
+    fun testJdk18() = with(customJdkProject(18, "18.0.2+9")) {
+        // Latest released version is actually jdk-18.0.2.1+1, but we currently do not support another dot and number
+        // after the patch version.
         testPackageJvmDistributions()
     }
 
     @Test
-    fun testJdk19() = with(customJdkProject(19)) {
+    fun testJdk19() = with(customJdkProject(19, "19.0.1+10")) {
         testPackageJvmDistributions()
     }
 
-    private fun customJdkProject(javaVersion: Int): TestProject =
-        testProject(TestProjects.jvm).apply {
+    private fun customJdkProject(javaVersion: Int, jvmVersion: String): TestProject =
+        testProject(TestProjects.jvm, jvmVersion).apply {
             appendText("build.gradle") {
                 """
                     pinpit.desktop.application {

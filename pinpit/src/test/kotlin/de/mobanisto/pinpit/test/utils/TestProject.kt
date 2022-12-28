@@ -15,6 +15,8 @@ data class TestEnvironment(
     val kotlinVersion: String = TestKotlinVersions.Default,
     val composeGradlePluginVersion: String = TestProperties.composeGradlePluginVersion,
     val pinpitGradlePluginVersion: String = TestProperties.pinpitGradlePluginVersion,
+    val pinpitJvmVendor: String = TestProperties.pinpitJvmVendor,
+    val pinpitJvmVersion: String = TestProperties.pinpitJvmVersion,
     val composeCompilerArtifact: String? = null,
 ) {
     private val placeholders = linkedMapOf(
@@ -22,6 +24,8 @@ data class TestEnvironment(
         "COMPOSE_GRADLE_PLUGIN_VERSION_PLACEHOLDER" to composeGradlePluginVersion,
         "KOTLIN_VERSION_PLACEHOLDER" to kotlinVersion,
         "COMPOSE_COMPILER_ARTIFACT_PLACEHOLDER" to composeCompilerArtifact,
+        "PINPIT_JVM_VENDOR" to pinpitJvmVendor,
+        "PINPIT_JVM_VERSION" to pinpitJvmVersion,
     )
 
     fun replacePlaceholdersInFile(file: File) {

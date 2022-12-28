@@ -27,6 +27,12 @@ object TestProperties {
     val pinpitGradlePluginVersion: String
         get() = notNullSystemProperty("compose.tests.pinpit.gradle.plugin.version")
 
+    val pinpitJvmVendor: String
+        get() = notNullSystemProperty("compose.tests.pinpit.jvm.vendor")
+
+    val pinpitJvmVersion: String
+        get() = notNullSystemProperty("compose.tests.pinpit.jvm.version")
+
     val gradleVersionForTests: String?
         get() = System.getProperty("compose.tests.gradle.version")
 

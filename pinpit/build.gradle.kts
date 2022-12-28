@@ -182,6 +182,8 @@ tasks.withType<Test>().configureEach {
 
     systemProperty("compose.tests.compose.gradle.plugin.version", "1.2.1")
     systemProperty("compose.tests.pinpit.gradle.plugin.version", BuildProperties.deployVersion(project))
+    systemProperty("compose.tests.pinpit.jvm.vendor", "adoptium")
+    systemProperty("compose.tests.pinpit.jvm.version", "17.0.5+8")
     for ((k, v) in project.properties) {
         if (k.startsWith("compose.")) {
             systemProperty(k, v.toString())

@@ -42,8 +42,8 @@ pinpit.desktop {
     application {
         mainClass = "MainKt"
         nativeDistributions {
-            jvmVendor = "adoptium"
-            jvmVersion = "17.0.5+8"
+            jvmVendor = "PINPIT_JVM_VENDOR"
+            jvmVersion = "PINPIT_JVM_VERSION"
 
             packageVersion = versionCode
             packageName = "TestPackage"
