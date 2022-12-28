@@ -96,7 +96,7 @@ private fun JvmApplicationContext.configureCommonJvmDesktopTasks(): CommonJvmDes
         taskNameAction = "pinpitUnpack",
         taskNameObject = "DefaultComposeDesktopJvmApplicationResources",
         useBuildTypeForTaskName = false,
-        description = "Unpacks the default Compose resources such as launcher icons",
+        description = "Unpacks the default Compose resources such as launcher icons.",
     ) {}
 
     return CommonJvmDesktopTasks(
@@ -128,7 +128,8 @@ private fun JvmApplicationContext.configurePackagingTasks(
         val createDistributable = targetTasks.distributableTasks[targetBuild] ?: tasks.register<AppImageTask>(
             taskNameAction = "pinpitCreate",
             taskNameObject = "distributable${target.name}",
-            args = listOf(target)
+            description = "Creates a directory for ${target.name} containing all files to be distributed, includes launcher, app and runtime image.",
+            args = listOf(target),
         ) {
             configureAppImageTask(
                 this,
@@ -143,13 +144,15 @@ private fun JvmApplicationContext.configurePackagingTasks(
         val runDistributable = targetTasks.runTasks[targetBuild] ?: tasks.register<AbstractRunDistributableTask>(
             taskNameAction = "pinpitRun",
             taskNameObject = "distributable${target.name}",
-            args = listOf(createDistributable)
+            description = "Runs the app from the created distributable directory for ${target.name}.",
+            args = listOf(createDistributable),
         ).also { targetTasks.runTasks[targetBuild] = it }
 
         tasks.register<PackageMsiTask>(
             taskNameAction = "pinpitPackage",
             taskNameObject = "msi" + target.arch.id.uppercaseFirstChar(),
-            args = listOf(target)
+            description = "Builds an MSI package for ${target.name}",
+            args = listOf(target),
         ) {
             configureCustomPackageTask(
                 this,
@@ -177,7 +180,8 @@ private fun JvmApplicationContext.configurePackagingTasks(
         val createDistributable = targetTasks.distributableTasks[targetBuild] ?: tasks.register<AppImageTask>(
             taskNameAction = "pinpitCreate",
             taskNameObject = "distributable${target.name}",
-            args = listOf(target)
+            description = "Creates a directory for ${target.name} containing all files to be distributed, includes launcher, app and runtime image.",
+            args = listOf(target),
         ) {
             configureAppImageTask(
                 this,
@@ -192,13 +196,15 @@ private fun JvmApplicationContext.configurePackagingTasks(
         val runDistributable = targetTasks.runTasks[targetBuild] ?: tasks.register<AbstractRunDistributableTask>(
             taskNameAction = "pinpitRun",
             taskNameObject = "distributable${target.name}",
-            args = listOf(createDistributable)
+            description = "Runs the app from the created distributable directory for ${target.name}.",
+            args = listOf(createDistributable),
         ).also { targetTasks.runTasks[targetBuild] = it }
 
         tasks.register<PackageDebTask>(
             taskNameAction = "pinpitPackage",
             taskNameObject = "deb" + distro.uppercaseFirstChar(),
-            args = listOf(target, deb.qualifier!!)
+            description = "Builds a DEB package for ${target.name}",
+            args = listOf(target, deb.qualifier!!),
         ) {
             configureCustomPackageTask(
                 this,
@@ -306,7 +312,7 @@ private fun JvmApplicationContext.configureCommonPackageTasks(
         taskNameAction = "pinpitPrepare",
         taskNameObject = "appResources${target.name}",
         useBuildTypeForTaskName = false,
-        description = "Merge all app resources for ${target.name} into a single build directory",
+        description = "Merge all app resources for ${target.name} into a single build directory.",
     ) {
         val appResourcesRootDir = app.nativeDistributions.appResourcesRootDir
         if (appResourcesRootDir.isPresent) {
