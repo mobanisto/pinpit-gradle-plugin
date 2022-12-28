@@ -165,13 +165,14 @@ class DesktopApplicationTest : GradlePluginTestBase() {
             """.trimIndent()
         }
 
-        val packagingTask = ":pinpitPackageDistributionForCurrentOS"
+        val packagingTask = ":pinpitPackageDefault"
         gradle(packagingTask).build().checks { check ->
             check.taskOutcome(packagingTask, TaskOutcome.SUCCESS)
         }
 
         gradle("clean", packagingTask).build().checks { check ->
-            check.taskOutcome(":pinpitCheckRuntime", TaskOutcome.FROM_CACHE)
+            check.taskOutcome(":pinpitCheckRuntimeLinuxX64", TaskOutcome.FROM_CACHE)
+            check.taskOutcome(":pinpitCheckRuntimeWindowsX64", TaskOutcome.FROM_CACHE)
             check.taskOutcome(packagingTask, TaskOutcome.SUCCESS)
         }
     }
