@@ -276,8 +276,8 @@ class DesktopApplicationTest : GradlePluginTestBase() {
     }
 
     private fun TestProject.testPackageDebUbuntuFocal() {
-        gradle(":pinpitDefaultDebUbuntuFocalX64").build().let { result ->
-            assertEquals(TaskOutcome.SUCCESS, result.task(":pinpitDefaultDebUbuntuFocalX64")?.outcome)
+        gradle(":pinpitPackageDefaultDebUbuntuFocalX64").build().let { result ->
+            assertEquals(TaskOutcome.SUCCESS, result.task(":pinpitPackageDefaultDebUbuntuFocalX64")?.outcome)
 
             val resultFile = file("build/pinpit/binaries/main-default/linux/x64/deb/test-package-ubuntu-20.04-x64-1.0.0.deb")
             resultFile.checkExists()
@@ -290,8 +290,8 @@ class DesktopApplicationTest : GradlePluginTestBase() {
     }
 
     private fun TestProject.testPackageMsi() {
-        gradle(":pinpitDefaultMsiX64").build().let { result ->
-            assertEquals(TaskOutcome.SUCCESS, result.task(":pinpitDefaultMsiX64")?.outcome)
+        gradle(":pinpitPackageDefaultMsiX64").build().let { result ->
+            assertEquals(TaskOutcome.SUCCESS, result.task(":pinpitPackageDefaultMsiX64")?.outcome)
 
             val resultFile = file("build/pinpit/binaries/main-default/windows/x64/msi/TestPackage-x64-1.0.0.msi")
             resultFile.checkExists()
@@ -579,8 +579,8 @@ class DesktopApplicationTest : GradlePluginTestBase() {
         val addPackage = addDebPackage(listOf(extraPackage))
         file("build.gradle").modify { "$it\n$addPackage" }
 
-        gradle(":pinpitDefaultDebCustomDistroX64").build().checks { check ->
-            check.taskOutcome(":pinpitDefaultDebCustomDistroX64", TaskOutcome.SUCCESS)
+        gradle(":pinpitPackageDefaultDebCustomDistroX64").build().checks { check ->
+            check.taskOutcome(":pinpitPackageDefaultDebCustomDistroX64", TaskOutcome.SUCCESS)
             checkDebContent { content ->
                 assertTrue(content.contains(extraPackage))
             }
@@ -593,8 +593,8 @@ class DesktopApplicationTest : GradlePluginTestBase() {
         val addPackage = addDebPackage(extraPackages)
         file("build.gradle").modify { "$it\n$addPackage" }
 
-        gradle(":pinpitDefaultDebCustomDistroX64").build().checks { check ->
-            check.taskOutcome(":pinpitDefaultDebCustomDistroX64", TaskOutcome.SUCCESS)
+        gradle(":pinpitPackageDefaultDebCustomDistroX64").build().checks { check ->
+            check.taskOutcome(":pinpitPackageDefaultDebCustomDistroX64", TaskOutcome.SUCCESS)
             checkDebContent { content ->
                 for (extraPackage in extraPackages) {
                     assertTrue(content.contains(extraPackage))

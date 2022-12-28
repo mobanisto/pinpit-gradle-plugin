@@ -159,7 +159,7 @@ private fun JvmApplicationContext.configurePackagingTasks(
         ).also { targetTasks.runTasks[targetBuild] = it }
 
         tasks.register<PackageMsiTask>(
-            taskNameAction = "pinpit",
+            taskNameAction = "pinpitPackage",
             taskNameObject = "msi" + target.arch.id.uppercaseFirstChar(),
             args = listOf(target)
         ) {
@@ -208,7 +208,7 @@ private fun JvmApplicationContext.configurePackagingTasks(
         ).also { targetTasks.runTasks[targetBuild] = it }
 
         tasks.register<PackageDebTask>(
-            taskNameAction = "pinpit",
+            taskNameAction = "pinpitPackage",
             taskNameObject = "deb" + distro.uppercaseFirstChar(),
             args = listOf(target, deb.qualifier!!)
         ) {
