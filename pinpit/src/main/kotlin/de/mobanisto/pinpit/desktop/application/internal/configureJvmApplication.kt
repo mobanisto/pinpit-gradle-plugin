@@ -419,8 +419,6 @@ private fun JvmApplicationContext.configureCustomPackageTask(
     }
 
     packageTask.launcherMainClass.set(provider { app.mainClass })
-//    packageTask.launcherJvmArgs.set(provider { defaultJvmArgs + app.jvmArgs })
-//    packageTask.launcherArgs.set(provider { app.args })
 }
 
 private fun JvmApplicationContext.configureAppImageTask(

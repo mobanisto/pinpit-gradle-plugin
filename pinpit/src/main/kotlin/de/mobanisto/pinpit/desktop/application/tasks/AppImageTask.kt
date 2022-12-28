@@ -9,7 +9,6 @@ import de.mobanisto.pinpit.desktop.application.dsl.MacOSSigningSettings
 import de.mobanisto.pinpit.desktop.application.internal.APP_RESOURCES_DIR
 import de.mobanisto.pinpit.desktop.application.internal.JvmRuntimeProperties
 import de.mobanisto.pinpit.desktop.application.internal.MacSigner
-import de.mobanisto.pinpit.desktop.application.internal.OS
 import de.mobanisto.pinpit.desktop.application.internal.OS.Linux
 import de.mobanisto.pinpit.desktop.application.internal.OS.MacOS
 import de.mobanisto.pinpit.desktop.application.internal.OS.Windows
@@ -604,11 +603,15 @@ abstract class AppImageTask @Inject constructor(
                     writeLn("java-options=$arg")
                 }
                 writeLn("java-options=-D$SKIKO_LIBRARY_PATH=${appDir()}")
+                if (launcherArgs.get().isNotEmpty()) {
+                    writeLn()
+                    writeLn("[ArgOptions]")
+                    launcherArgs.get().forEach { arg ->
+                        writeLn("arguments=$arg")
+                    }
+                }
             }
         }
-
-        // TODO use launcherArgs, i.e add an [ArgOptions] section if present.
-        //  Before implementing this, check out how this looks in practice.
 
         println("launcher jvm args: ${launcherJvmArgs.get()}")
         println("launcher args: ${launcherArgs.get()}")
