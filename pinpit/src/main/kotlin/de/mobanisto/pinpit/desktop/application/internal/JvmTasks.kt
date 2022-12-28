@@ -29,7 +29,7 @@ internal class JvmTasks(
         taskNameAction: String,
         taskNameObject: String = "",
         args: List<Any> = emptyList(),
-        description: String = "TODO",
+        description: String,
         useBuildTypeForTaskName: Boolean = true,
         noinline configureFn: T.() -> Unit = {}
     ): TaskProvider<T> {

@@ -129,7 +129,7 @@ private fun JvmApplicationContext.configurePackagingTasks(
         tasks.register<PackageMsiTask>(
             taskNameAction = "pinpitPackage",
             taskNameObject = "msi" + target.arch.id.uppercaseFirstChar(),
-            description = "Builds an MSI package for ${target.name}",
+            description = "Builds an MSI package for ${target.name}.",
             args = listOf(target),
         ) {
             configureCustomPackageTask(
@@ -158,7 +158,7 @@ private fun JvmApplicationContext.configurePackagingTasks(
         tasks.register<PackageDebTask>(
             taskNameAction = "pinpitPackage",
             taskNameObject = "deb" + distro.uppercaseFirstChar(),
-            description = "Builds a DEB package for ${target.name}",
+            description = "Builds a DEB package for ${target.name}.",
             args = listOf(target, deb.qualifier!!),
         ) {
             configureCustomPackageTask(
@@ -175,16 +175,18 @@ private fun JvmApplicationContext.configurePackagingTasks(
         }
     }
 
-    if (buildType === app.buildTypes.default) {
-        tasks.register<DefaultTask>("pinpitPackage") {
-            // TODO: depend on all package tasks
-            // dependsOn(packageForCurrentOS)
-        }
+    tasks.register<DefaultTask>(
+        taskNameAction = "pinpitPackage",
+        description = "Builds packages for all systems and architectures.",
+    ) {
+        // TODO: depend on all package tasks
+        // dependsOn(packageForCurrentOS)
     }
 
     val packageUberJarForCurrentOS = tasks.register<Jar>(
         taskNameAction = "pinpitPackage",
-        taskNameObject = "uberJarForCurrentOS"
+        taskNameObject = "uberJarForCurrentOS",
+        description = "Packages an Uber-Jar for the current OS.",
     ) {
         configurePackageUberJarForCurrentOS(this, currentOS)
     }
@@ -192,7 +194,8 @@ private fun JvmApplicationContext.configurePackagingTasks(
     if (buildType == app.buildTypes.default) {
         val run = tasks.register<JavaExec>(
             taskNameAction = "pinpitRun",
-            useBuildTypeForTaskName = false
+            description = "Runs the application.",
+            useBuildTypeForTaskName = false,
         ) {
             val prepareAppResources = checkNotNull(targetTasks.prepareAppResources[currentTarget])
             configureRunTask(this, prepareAppResources)
@@ -206,7 +209,8 @@ private fun JvmApplicationContext.configurePackagingTasks(
         if (createDistributable != null && suggestDebDependencies == null) {
             tasks.register<SuggestDebDependenciesTask>(
                 taskNameAction = "pinpitSuggestDebDependencies",
-                useBuildTypeForTaskName = false
+                description = "Suggests Debian package dependencies to use for the current OS using dpkg.",
+                useBuildTypeForTaskName = false,
             ) {
                 dependsOn(createDistributable)
                 appImage.set(createDistributable.flatMap { it.destinationDir })
@@ -229,7 +233,8 @@ private fun JvmApplicationContext.configureCommonPackageTasks(
     val downloadJdk = targetTasks.downloadJdkTasks[target] ?: tasks.register<DownloadJdkTask>(
         taskNameAction = "pinpitDownload",
         taskNameObject = "jdk${target.name}",
-        useBuildTypeForTaskName = false
+        description = "Downloads the JDK for ${target.name} that is used to derive a runtime to distribute with the app.",
+        useBuildTypeForTaskName = false,
     ) {
         jvmVendor.set(app.nativeDistributions.jvmVendor)
         jvmVersion.set(app.nativeDistributions.jvmVersion)
@@ -240,7 +245,8 @@ private fun JvmApplicationContext.configureCommonPackageTasks(
     val checkRuntime = targetTasks.checkRuntimeTasks[target] ?: tasks.register<AbstractCheckNativeDistributionRuntime>(
         taskNameAction = "pinpitCheck",
         taskNameObject = "runtime${target.name}",
-        useBuildTypeForTaskName = false
+        description = "Checks that the JDK used for building is compatible with the distribution JVM.",
+        useBuildTypeForTaskName = false,
     ) {
         dependsOn(downloadJdk)
         targetJdkVersion.set(jdkInfo.major)
@@ -251,7 +257,8 @@ private fun JvmApplicationContext.configureCommonPackageTasks(
     val suggestRuntimeModules = targetTasks.suggestModulesTasks[target] ?: tasks.register<AbstractSuggestModulesTask>(
         taskNameAction = "pinpitSuggest",
         taskNameObject = "runtimeModules${target.name}",
-        useBuildTypeForTaskName = false
+        description = "Suggests JVM modules to include for the distribution using jdeps.",
+        useBuildTypeForTaskName = false,
     ) {
         dependsOn(checkRuntime)
         jdk.set(provider { downloadJdk.get().jdkDir })
@@ -282,7 +289,8 @@ private fun JvmApplicationContext.configureCommonPackageTasks(
         targetTasks.proguardTasks[targetBuild] ?: if (buildType.proguard.isEnabled.orNull == true) {
             tasks.register<AbstractProguardTask>(
                 taskNameAction = "pinpitProguard",
-                taskNameObject = "jars${target.name}"
+                taskNameObject = "jars${target.name}",
+                description = "Runs Proguard to minify and obfuscate release jars.",
             ) {
                 configureProguardTask(this, target, /*targetData,*/ commonTasks.unpackDefaultResources)
             }.also { targetTasks.proguardTasks[targetBuild] = it }
@@ -290,7 +298,8 @@ private fun JvmApplicationContext.configureCommonPackageTasks(
 
     val createRuntimeImage = targetTasks.runtimeTasks[targetBuild] ?: tasks.register<AbstractJLinkTask>(
         taskNameAction = "pinpitCreate",
-        taskNameObject = "runtimeImage${target.name}"
+        taskNameObject = "runtimeImage${target.name}",
+        description = "Creates a runtime image from the JVM for ${target.name} using jlink."
     ) {
         dependsOn(checkRuntime)
         dependsOn(downloadJdk)
@@ -305,7 +314,7 @@ private fun JvmApplicationContext.configureCommonPackageTasks(
     val createDistributable = targetTasks.distributableTasks[targetBuild] ?: tasks.register<AppImageTask>(
         taskNameAction = "pinpitCreate",
         taskNameObject = "distributable${target.name}",
-        description = "Creates a directory for ${target.name} containing all files to be distributed, includes launcher, app and runtime image.",
+        description = "Creates a directory for ${target.name} containing all files to be distributed including launcher, app and runtime image.",
         args = listOf(target),
     ) {
         configureAppImageTask(
