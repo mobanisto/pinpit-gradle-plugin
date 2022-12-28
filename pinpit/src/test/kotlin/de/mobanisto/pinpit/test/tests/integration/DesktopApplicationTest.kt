@@ -528,9 +528,10 @@ class DesktopApplicationTest : GradlePluginTestBase() {
 
     @Test
     fun testSuggestModules() {
+        val targetName = currentTarget.name
         with(testProject(TestProjects.jvm)) {
-            gradle(":pinpitSuggestRuntimeModules").build().checks { check ->
-                check.taskOutcome(":pinpitSuggestRuntimeModules", TaskOutcome.SUCCESS)
+            gradle(":pinpitSuggestRuntimeModules$targetName").build().checks { check ->
+                check.taskOutcome(":pinpitSuggestRuntimeModules$targetName", TaskOutcome.SUCCESS)
                 check.logContains("Suggested runtime modules to include:")
                 check.logContains("modules(\"java.instrument\", \"jdk.unsupported\")")
             }
