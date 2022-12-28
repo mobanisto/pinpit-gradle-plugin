@@ -564,12 +564,14 @@ class DesktopApplicationTest : GradlePluginTestBase() {
 
     @Test
     fun resources() = with(testProject(TestProjects.resources)) {
-        gradle(":run").build().checks { check ->
-            check.taskOutcome(":run", TaskOutcome.SUCCESS)
+        gradle(":pinpitRun").build().checks { check ->
+            check.taskOutcome(":pinpitRun", TaskOutcome.SUCCESS)
         }
 
-        gradle(":runDistributable").build().checks { check ->
-            check.taskOutcome(":runDistributable", TaskOutcome.SUCCESS)
+        val targetName = currentTarget.name
+
+        gradle(":pinpitRunDefaultDistributable$targetName").build().checks { check ->
+            check.taskOutcome(":pinpitRunDefaultDistributable$targetName", TaskOutcome.SUCCESS)
         }
     }
 
