@@ -29,24 +29,33 @@ internal class JvmTasks(
         taskNameAction: String,
         taskNameObject: String = "",
         args: List<Any> = emptyList(),
+        description: String = "TODO",
         useBuildTypeForTaskName: Boolean = true,
         noinline configureFn: T.() -> Unit = {}
     ): TaskProvider<T> {
         val buildTypeClassifier = if (useBuildTypeForTaskName) buildType.classifier.uppercaseFirstChar() else ""
         val objectClassifier = taskNameObject.uppercaseFirstChar()
         val taskName = "$taskNameAction$buildTypeClassifier$objectClassifier"
-        return register(taskName, klass = T::class.java, args = args, configureFn = configureFn)
+        return register(
+            taskName,
+            klass = T::class.java,
+            args = args,
+            description = description,
+            configureFn = configureFn
+        )
     }
 
     fun <T : Task> register(
         name: String,
         klass: Class<T>,
         args: List<Any>,
+        description: String,
         configureFn: T.() -> Unit
     ): TaskProvider<T> =
         project.tasks.register(name, klass, *args.toTypedArray()).apply {
             configure { task ->
                 task.group = taskGroup
+                task.description = description
                 task.configureFn()
             }
         }

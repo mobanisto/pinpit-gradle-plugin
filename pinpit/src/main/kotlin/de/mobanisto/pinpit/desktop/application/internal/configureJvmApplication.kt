@@ -96,6 +96,7 @@ private fun JvmApplicationContext.configureCommonJvmDesktopTasks(): CommonJvmDes
         taskNameAction = "pinpitUnpack",
         taskNameObject = "DefaultComposeDesktopJvmApplicationResources",
         useBuildTypeForTaskName = false,
+        description = "Unpacks the default Compose resources such as launcher icons",
     ) {}
 
     val prepareAppResources = tasks.register<Sync>(
