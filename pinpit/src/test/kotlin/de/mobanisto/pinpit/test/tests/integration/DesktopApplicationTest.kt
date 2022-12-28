@@ -240,11 +240,6 @@ class DesktopApplicationTest : GradlePluginTestBase() {
     }
 
     @Test
-    fun packageCustomDeb() = with(testProject(TestProjects.jvm)) {
-        testPackageCustomDeb()
-    }
-
-    @Test
     fun packageDebsAndCompareContent() = with(testProject(TestProjects.jvm)) {
         testPackageDebsAndCompareContent()
     }
@@ -297,19 +292,6 @@ class DesktopApplicationTest : GradlePluginTestBase() {
 
             val resultFile = file("build/pinpit/binaries/main-default/windows/x64/msi/TestPackage-x64-1.0.0.msi")
             resultFile.checkExists()
-        }
-    }
-
-    private fun TestProject.testPackageCustomDeb() {
-        gradle(":pinpitPackageCustomDeb").build().let { result ->
-            assertEquals(TaskOutcome.SUCCESS, result.task(":pinpitPackageCustomDeb")?.outcome)
-
-            val resultFile = file("build/pinpit/binaries/main/linux/x64/deb/test-package_1.0.0-1_$currentOsArch.deb")
-            resultFile.checkExists()
-
-            resultFile.inputStream().use { fis ->
-                ValidateDeb.validate(fis)
-            }
         }
     }
 
