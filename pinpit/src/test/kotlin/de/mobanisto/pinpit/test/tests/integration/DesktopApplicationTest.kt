@@ -9,7 +9,6 @@ import de.mobanisto.pinpit.desktop.application.internal.MacUtils
 import de.mobanisto.pinpit.desktop.application.internal.OS
 import de.mobanisto.pinpit.desktop.application.internal.currentArch
 import de.mobanisto.pinpit.desktop.application.internal.currentOS
-import de.mobanisto.pinpit.desktop.application.internal.currentOsArch
 import de.mobanisto.pinpit.desktop.application.internal.currentTarget
 import de.mobanisto.pinpit.test.utils.GradlePluginTestBase
 import de.mobanisto.pinpit.test.utils.ProcessRunResult
@@ -24,7 +23,6 @@ import de.mobanisto.pinpit.test.utils.modify
 import de.mobanisto.pinpit.test.utils.runProcess
 import de.mobanisto.pinpit.validation.deb.DebContentBuilder
 import de.mobanisto.pinpit.validation.deb.DebContentUtils
-import de.mobanisto.pinpit.validation.deb.ValidateDeb
 import org.gradle.internal.impldep.org.testng.Assert
 import org.gradle.testkit.runner.TaskOutcome
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -69,7 +67,7 @@ class DesktopApplicationTest : GradlePluginTestBase() {
     }
 
     @Test
-    fun testRunMpp() = with(testProject(TestProjects.mpp)) {
+    fun runMpp() = with(testProject(TestProjects.mpp)) {
         val targetName = currentTarget.name
         val logLine = "Kotlin MPP app is running!"
         gradle("pinpitRun").build().checks { check ->
@@ -84,7 +82,7 @@ class DesktopApplicationTest : GradlePluginTestBase() {
     }
 
     @Test
-    fun testAndroidxCompiler() = with(testProject(TestProjects.androidxCompiler, defaultAndroidxCompilerEnvironment)) {
+    fun androidxCompiler() = with(testProject(TestProjects.androidxCompiler, defaultAndroidxCompilerEnvironment)) {
         val targetName = currentTarget.name
         gradle(":pinpitRunDefaultDistributable$targetName").build().checks { check ->
             val actualMainImage = file("main-image.actual.png")
@@ -188,24 +186,24 @@ class DesktopApplicationTest : GradlePluginTestBase() {
     }
 
     @Test
-    fun testJdk16() = with(customJdkProject(16, "16.0.2+7")) {
+    fun jdk16() = with(customJdkProject(16, "16.0.2+7")) {
         testPackageJvmDistributions()
     }
 
     @Test
-    fun testJdk17() = with(customJdkProject(17, "17.0.5+8")) {
+    fun jdk17() = with(customJdkProject(17, "17.0.5+8")) {
         testPackageJvmDistributions()
     }
 
     @Test
-    fun testJdk18() = with(customJdkProject(18, "18.0.2+9")) {
+    fun jdk18() = with(customJdkProject(18, "18.0.2+9")) {
         // Latest released version is actually jdk-18.0.2.1+1, but we currently do not support another dot and number
         // after the patch version.
         testPackageJvmDistributions()
     }
 
     @Test
-    fun testJdk19() = with(customJdkProject(19, "19.0.1+10")) {
+    fun jdk19() = with(customJdkProject(19, "19.0.1+10")) {
         testPackageJvmDistributions()
     }
 
@@ -354,7 +352,7 @@ class DesktopApplicationTest : GradlePluginTestBase() {
     }
 
     @Test
-    fun testModuleClash() = with(testProject(TestProjects.moduleClashCli)) {
+    fun moduleClash() = with(testProject(TestProjects.moduleClashCli)) {
         gradle(":app:runDistributable").build().checks { check ->
             check.taskOutcome(":app:createDistributable", TaskOutcome.SUCCESS)
             check.taskOutcome(":app:runDistributable", TaskOutcome.SUCCESS)
@@ -364,7 +362,7 @@ class DesktopApplicationTest : GradlePluginTestBase() {
     }
 
     @Test
-    fun testJavaLogger() = with(testProject(TestProjects.javaLogger)) {
+    fun javaLogger() = with(testProject(TestProjects.javaLogger)) {
         gradle(":runDistributable").build().checks { check ->
             check.taskOutcome(":runDistributable", TaskOutcome.SUCCESS)
             check.logContains("Compose Gradle plugin test log warning!")
@@ -372,7 +370,7 @@ class DesktopApplicationTest : GradlePluginTestBase() {
     }
 
     @Test
-    fun testMacOptions() {
+    fun macOptions() {
         fun String.normalized(): String =
             trim().replace(
                 "Copyright (C) ${Calendar.getInstance().get(Calendar.YEAR)}",
@@ -396,7 +394,7 @@ class DesktopApplicationTest : GradlePluginTestBase() {
     }
 
     @Test
-    fun testMacSign() {
+    fun macSign() {
         Assumptions.assumeTrue(currentOS == OS.MacOS)
 
         fun security(vararg args: Any): ProcessRunResult {
@@ -451,7 +449,7 @@ class DesktopApplicationTest : GradlePluginTestBase() {
     }
 
     @Test
-    fun testOptionsWithSpaces() {
+    fun optionsWithSpaces() {
         with(testProject(TestProjects.optionsWithSpaces)) {
             fun testRunTask(runTask: String) {
                 gradle(runTask).build().checks { check ->
@@ -473,7 +471,7 @@ class DesktopApplicationTest : GradlePluginTestBase() {
     }
 
     @Test
-    fun testDefaultArgs() {
+    fun defaultArgs() {
         with(testProject(TestProjects.defaultArgs)) {
             fun testRunTask(runTask: String) {
                 gradle(runTask).build().checks { check ->
@@ -492,7 +490,7 @@ class DesktopApplicationTest : GradlePluginTestBase() {
     }
 
     @Test
-    fun testDefaultArgsOverride() {
+    fun defaultArgsOverride() {
         with(testProject(TestProjects.defaultArgsOverride)) {
             fun testRunTask(runTask: String) {
                 gradle(runTask).build().checks { check ->
@@ -511,7 +509,7 @@ class DesktopApplicationTest : GradlePluginTestBase() {
     }
 
     @Test
-    fun testSuggestModules() {
+    fun suggestModules() {
         val targetName = currentTarget.name
         with(testProject(TestProjects.jvm)) {
             gradle(":pinpitSuggestRuntimeModules$targetName").build().checks { check ->
@@ -523,7 +521,7 @@ class DesktopApplicationTest : GradlePluginTestBase() {
     }
 
     @Test
-    fun testUnpackSkiko() {
+    fun unpackSkiko() {
         with(testProject(TestProjects.unpackSkiko)) {
             gradle(":runDistributable").build().checks { check ->
                 check.taskOutcome(":runDistributable", TaskOutcome.SUCCESS)
