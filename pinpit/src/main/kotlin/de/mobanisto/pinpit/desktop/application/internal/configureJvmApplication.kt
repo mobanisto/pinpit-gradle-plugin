@@ -324,7 +324,7 @@ private fun JvmApplicationContext.configureCommonPackageTasks(
         } else null
 
     val createRuntimeImage = targetTasks.runtimeTasks[targetAndBuildType] ?: tasks.register<AbstractJLinkTask>(
-        taskNameAction = "pinpit",
+        taskNameAction = "pinpitCreate",
         taskNameObject = "runtimeImage${target.name}"
     ) {
         dependsOn(checkRuntime)
