@@ -6,6 +6,7 @@
 package de.mobanisto.pinpit.desktop.application.internal
 
 import de.mobanisto.pinpit.desktop.application.dsl.DebianPlatformSettings
+import de.mobanisto.pinpit.desktop.application.dsl.JvmApplicationBuildType
 import de.mobanisto.pinpit.desktop.application.dsl.MsiPlatformSettings
 import de.mobanisto.pinpit.desktop.application.internal.OS.Linux
 import de.mobanisto.pinpit.desktop.application.internal.OS.Windows
@@ -66,14 +67,16 @@ internal fun JvmApplicationContext.configureJvmApplication() {
     configurePeRebrander()
 }
 
+internal data class TargetAndBuildType(val target: Target, val buildType: JvmApplicationBuildType)
+
 internal class TargetTasks {
     val downloadJdkTasks = mutableMapOf<Target, TaskProvider<DownloadJdkTask>>()
     val checkRuntimeTasks = mutableMapOf<Target, TaskProvider<AbstractCheckNativeDistributionRuntime>>()
     val suggestModulesTasks = mutableMapOf<Target, TaskProvider<AbstractSuggestModulesTask>>()
-    val proguardTasks = mutableMapOf<Target, TaskProvider<AbstractProguardTask>>()
-    val runtimeTasks = mutableMapOf<Target, TaskProvider<AbstractJLinkTask>>()
-    val distributableTasks = mutableMapOf<Target, TaskProvider<AppImageTask>>()
-    val runTasks = mutableMapOf<Target, TaskProvider<AbstractRunDistributableTask>>()
+    val proguardTasks = mutableMapOf<TargetAndBuildType, TaskProvider<AbstractProguardTask>>()
+    val runtimeTasks = mutableMapOf<TargetAndBuildType, TaskProvider<AbstractJLinkTask>>()
+    val distributableTasks = mutableMapOf<TargetAndBuildType, TaskProvider<AppImageTask>>()
+    val runTasks = mutableMapOf<TargetAndBuildType, TaskProvider<AbstractRunDistributableTask>>()
 }
 
 internal class CommonJvmDesktopTasks(
@@ -127,10 +130,13 @@ private fun JvmApplicationContext.configurePackagingTasks(
 
     app.nativeDistributions.windows.msis.forEach { msi ->
         val target = Target(Windows, arch(msi.arch))
+        val targetBuild = TargetAndBuildType(target, buildType)
 
-        val packageTasks = configureCommonPackageTasks(tasks, jdkInfo, target, app, appTmpDir, targetTasks, commonTasks)
+        val packageTasks = configureCommonPackageTasks(
+            tasks, jdkInfo, targetBuild, app, appTmpDir, targetTasks, commonTasks
+        )
 
-        val createDistributable = targetTasks.distributableTasks[target] ?: tasks.register<AppImageTask>(
+        val createDistributable = targetTasks.distributableTasks[targetBuild] ?: tasks.register<AppImageTask>(
             taskNameAction = "pinpitCreate",
             taskNameObject = "distributable${target.name}",
             args = listOf(target)
@@ -143,13 +149,13 @@ private fun JvmApplicationContext.configurePackagingTasks(
                 unpackDefaultResources = commonTasks.unpackDefaultResources,
                 runProguard = packageTasks.runProguard
             )
-        }.also { targetTasks.distributableTasks[target] = it }
+        }.also { targetTasks.distributableTasks[targetBuild] = it }
 
-        val runDistributable = targetTasks.runTasks[target] ?: tasks.register<AbstractRunDistributableTask>(
+        val runDistributable = targetTasks.runTasks[targetBuild] ?: tasks.register<AbstractRunDistributableTask>(
             taskNameAction = "pinpitRun",
             taskNameObject = "distributable${target.name}",
             args = listOf(createDistributable)
-        ).also { targetTasks.runTasks[target] = it }
+        ).also { targetTasks.runTasks[targetBuild] = it }
 
         tasks.register<PackageMsiTask>(
             taskNameAction = "pinpit",
@@ -172,11 +178,14 @@ private fun JvmApplicationContext.configurePackagingTasks(
 
     app.nativeDistributions.linux.debs.forEach { deb ->
         val target = Target(Linux, arch(deb.arch))
+        val targetBuild = TargetAndBuildType(target, buildType)
         val distro = deb.distro!!
 
-        val packageTasks = configureCommonPackageTasks(tasks, jdkInfo, target, app, appTmpDir, targetTasks, commonTasks)
+        val packageTasks = configureCommonPackageTasks(
+            tasks, jdkInfo, targetBuild, app, appTmpDir, targetTasks, commonTasks
+        )
 
-        val createDistributable = targetTasks.distributableTasks[target] ?: tasks.register<AppImageTask>(
+        val createDistributable = targetTasks.distributableTasks[targetBuild] ?: tasks.register<AppImageTask>(
             taskNameAction = "pinpitCreate",
             taskNameObject = "distributable${target.name}",
             args = listOf(target)
@@ -189,13 +198,13 @@ private fun JvmApplicationContext.configurePackagingTasks(
                 unpackDefaultResources = commonTasks.unpackDefaultResources,
                 runProguard = packageTasks.runProguard
             )
-        }.also { targetTasks.distributableTasks[target] = it }
+        }.also { targetTasks.distributableTasks[targetBuild] = it }
 
-        val runDistributable = targetTasks.runTasks[target] ?: tasks.register<AbstractRunDistributableTask>(
+        val runDistributable = targetTasks.runTasks[targetBuild] ?: tasks.register<AbstractRunDistributableTask>(
             taskNameAction = "pinpitRun",
             taskNameObject = "distributable${target.name}",
             args = listOf(createDistributable)
-        ).also { targetTasks.runTasks[target] = it }
+        ).also { targetTasks.runTasks[targetBuild] = it }
 
         tasks.register<PackageDebTask>(
             taskNameAction = "pinpit",
@@ -235,7 +244,8 @@ private fun JvmApplicationContext.configurePackagingTasks(
     }
 
     if (currentOS == Linux) {
-        val createDistributable = targetTasks.distributableTasks[currentTarget]
+        val defaultTargetBuild = TargetAndBuildType(currentTarget, app.buildTypes.default)
+        val createDistributable = targetTasks.distributableTasks[defaultTargetBuild]
         if (createDistributable != null) {
             tasks.register<SuggestDebDependenciesTask>(taskNameAction = "pinpitSuggestDebDependencies") {
                 dependsOn(createDistributable)
@@ -248,12 +258,14 @@ private fun JvmApplicationContext.configurePackagingTasks(
 private fun JvmApplicationContext.configureCommonPackageTasks(
     tasks: JvmTasks,
     jdkInfo: JdkInfo,
-    target: Target,
+    targetAndBuildType: TargetAndBuildType,
     app: JvmApplicationData,
     appTmpDir: Provider<Directory>,
     targetTasks: TargetTasks,
     commonTasks: CommonJvmDesktopTasks,
 ): CommonJvmPackageTasks {
+    val target = targetAndBuildType.target
+
     val downloadJdk = targetTasks.downloadJdkTasks[target] ?: tasks.register<DownloadJdkTask>(
         taskNameAction = "pinpit",
         taskNameObject = "download${target.name}",
@@ -288,16 +300,17 @@ private fun JvmApplicationContext.configureCommonPackageTasks(
         }
     }.also { targetTasks.suggestModulesTasks[target] = it }
 
-    val runProguard = targetTasks.proguardTasks[target] ?: if (buildType.proguard.isEnabled.orNull == true) {
-        tasks.register<AbstractProguardTask>(
-            taskNameAction = "pinpitProguard",
-            taskNameObject = "jars${target.name}"
-        ) {
-            configureProguardTask(this, target, /*targetData,*/ commonTasks.unpackDefaultResources)
-        }.also { targetTasks.proguardTasks[target] = it }
-    } else null
+    val runProguard =
+        targetTasks.proguardTasks[targetAndBuildType] ?: if (buildType.proguard.isEnabled.orNull == true) {
+            tasks.register<AbstractProguardTask>(
+                taskNameAction = "pinpitProguard",
+                taskNameObject = "jars${target.name}"
+            ) {
+                configureProguardTask(this, target, /*targetData,*/ commonTasks.unpackDefaultResources)
+            }.also { targetTasks.proguardTasks[targetAndBuildType] = it }
+        } else null
 
-    val createRuntimeImage = targetTasks.runtimeTasks[target] ?: tasks.register<AbstractJLinkTask>(
+    val createRuntimeImage = targetTasks.runtimeTasks[targetAndBuildType] ?: tasks.register<AbstractJLinkTask>(
         taskNameAction = "pinpit",
         taskNameObject = "runtimeImage${target.name}"
     ) {
@@ -309,7 +322,7 @@ private fun JvmApplicationContext.configureCommonPackageTasks(
         includeAllModules.set(provider { app.nativeDistributions.includeAllModules })
         javaRuntimePropertiesFile.set(checkRuntime.flatMap { it.javaRuntimePropertiesFile })
         destinationDir.set(appTmpDir.dir("${target.os.id}/${target.arch.id}/runtime"))
-    }.also { targetTasks.runtimeTasks[target] = it }
+    }.also { targetTasks.runtimeTasks[targetAndBuildType] = it }
 
     return CommonJvmPackageTasks(checkRuntime, runProguard, createRuntimeImage)
 }

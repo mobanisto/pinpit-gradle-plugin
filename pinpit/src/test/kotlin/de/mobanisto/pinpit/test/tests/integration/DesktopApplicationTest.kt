@@ -125,9 +125,11 @@ class DesktopApplicationTest : GradlePluginTestBase() {
             }
         }
 
+        val targetName = currentTarget.name
+
         checkImageBeforeBuild()
-        gradle(":runReleaseDistributable").build().checks { check ->
-            check.taskOutcome(":proguardReleaseJars", TaskOutcome.SUCCESS)
+        gradle(":pinpitRunReleaseDistributable$targetName").build().checks { check ->
+            check.taskOutcome(":pinpitProguardReleaseJars$targetName", TaskOutcome.SUCCESS)
             checkImageAfterBuild()
             assertEqualTextFiles(file("main-methods.actual.txt"), file("main-methods.expected.txt"))
         }
@@ -135,8 +137,8 @@ class DesktopApplicationTest : GradlePluginTestBase() {
         file("build.gradle").modify { "$it\n$enableObfuscation" }
         actualMainImage.delete()
         checkImageBeforeBuild()
-        gradle(":runReleaseDistributable").build().checks { check ->
-            check.taskOutcome(":proguardReleaseJars", TaskOutcome.SUCCESS)
+        gradle(":pinpitRunReleaseDistributable$targetName").build().checks { check ->
+            check.taskOutcome(":pinpitProguardReleaseJars$targetName", TaskOutcome.SUCCESS)
             checkImageAfterBuild()
             assertNotEqualTextFiles(file("main-methods.actual.txt"), file("main-methods.expected.txt"))
         }
