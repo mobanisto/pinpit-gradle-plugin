@@ -11,7 +11,6 @@ import de.mobanisto.pinpit.desktop.application.internal.currentArch
 import de.mobanisto.pinpit.desktop.application.internal.currentOS
 import de.mobanisto.pinpit.desktop.application.internal.currentOsArch
 import de.mobanisto.pinpit.desktop.application.internal.currentTarget
-import de.mobanisto.pinpit.internal.uppercaseFirstChar
 import de.mobanisto.pinpit.test.utils.GradlePluginTestBase
 import de.mobanisto.pinpit.test.utils.ProcessRunResult
 import de.mobanisto.pinpit.test.utils.TestProject
@@ -180,32 +179,8 @@ class DesktopApplicationTest : GradlePluginTestBase() {
     }
 
     private fun TestProject.testPackageJvmDistributions() {
-        val result = gradle(":pinpitPackageDistributionForCurrentOS").build()
-        val ext = when (currentOS) {
-            OS.Linux -> "deb"
-            OS.Windows -> "msi"
-            OS.MacOS -> "dmg"
-        }
-        val packageDir = file("build/pinpit/binaries/main/$ext")
-        val packageDirFiles = packageDir.listFiles() ?: arrayOf()
-        check(packageDirFiles.size == 1) {
-            "Expected single package in $packageDir, got [${packageDirFiles.joinToString(", ") { it.name }}]"
-        }
-        val packageFile = packageDirFiles.single()
-
-        if (currentOS == OS.Linux) {
-            val isTestPackage = packageFile.name.contains("test-package", ignoreCase = true) ||
-                    packageFile.name.contains("testpackage", ignoreCase = true)
-            val isDeb = packageFile.name.endsWith(".$ext")
-            check(isTestPackage && isDeb) {
-                "Expected contain testpackage*.deb or test-package*.deb package in $packageDir, got '${packageFile.name}'"
-            }
-        } else {
-            Assert.assertEquals(packageFile.name, "TestPackage-1.0.0.$ext", "Unexpected package name")
-        }
-        // TODO: assert outcome of pinpitPackageCustomDeb task
-        assertEquals(TaskOutcome.SUCCESS, result.task(":pinpitPackage${ext.uppercaseFirstChar()}")?.outcome)
-        assertEquals(TaskOutcome.SUCCESS, result.task(":pinpitPackageDistributionForCurrentOS")?.outcome)
+        testPackageDebUbuntuFocal()
+        testPackageMsi()
     }
 
     @Test
@@ -303,9 +278,10 @@ class DesktopApplicationTest : GradlePluginTestBase() {
             val resultFile = file("build/pinpit/binaries/main/linux/x64/deb/test-package-ubuntu-20.04-x64-1.0.0.deb")
             resultFile.checkExists()
 
-            resultFile.inputStream().use { fis ->
+            // TODO: add some in-depth validation
+            /*resultFile.inputStream().use { fis ->
                 ValidateDeb.validate(fis)
-            }
+            }*/
         }
     }
 
