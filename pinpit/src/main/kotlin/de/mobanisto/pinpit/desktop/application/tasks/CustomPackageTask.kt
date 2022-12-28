@@ -36,12 +36,6 @@ abstract class CustomPackageTask @Inject constructor(
     @get:OutputDirectory
     val destinationDir: DirectoryProperty = objects.directoryProperty()
 
-    @get:Input
-    val jvmVendor: Property<String> = objects.notNullProperty()
-
-    @get:Input
-    val jvmVersion: Property<String> = objects.notNullProperty()
-
     @get:InputFiles
     val files: ConfigurableFileCollection = objects.fileCollection()
 
@@ -70,9 +64,6 @@ abstract class CustomPackageTask @Inject constructor(
      */
     @get:Input
     val mangleJarFilesNames: Property<Boolean> = objects.notNullProperty(true)
-
-    @get:Input
-    val launcherMainClass: Property<String> = objects.notNullProperty()
 
     @get:InputFile
     @get:PathSensitive(PathSensitivity.ABSOLUTE)

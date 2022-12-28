@@ -394,8 +394,6 @@ private fun JvmApplicationContext.configureCustomPackageTask(
     packageTask.dependsOn(unpackDefaultResources)
 
     app.nativeDistributions.let { executables ->
-        packageTask.jvmVendor.set(provider { executables.jvmVendor })
-        packageTask.jvmVersion.set(provider { executables.jvmVersion })
         packageTask.packageName.set(provider { executables.packageName })
         packageTask.packageDescription.set(packageTask.provider { executables.description })
         packageTask.packageCopyright.set(packageTask.provider { executables.copyright })
@@ -417,8 +415,6 @@ private fun JvmApplicationContext.configureCustomPackageTask(
             launcherMainJar.set(mainJar)
         }
     }
-
-    packageTask.launcherMainClass.set(provider { app.mainClass })
 }
 
 private fun JvmApplicationContext.configureAppImageTask(
