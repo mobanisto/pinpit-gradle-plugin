@@ -64,6 +64,21 @@ pinpit.desktop {
                     arch = "x64"
                     depends("libc6", "libexpat1", "libgcc-s1", "libpcre3", "libuuid1", "xdg-utils", "zlib1g", "libnotify4")
                 }
+                deb("UbuntuBionicX64") {
+                    qualifier = "ubuntu-18.04"
+                    arch = "x64"
+                    depends("libasound2", "libc6", "libexpat1", "libfontconfig1", "libfreetype6", "libgcc1",
+                            "libglib2.0-0", "libgraphite2-3", "libharfbuzz0b", "libjpeg-turbo8", "liblcms2-2",
+                            "libpcre3", "libpng16-16", "libstdc++6", "xdg-utils", "zlib1g", "libnotify4")
+                }
+                deb("DebianBullseyeX64") {
+                    qualifier = "debian-bullseye"
+                    arch = "x64"
+                    depends("libasound2", "libbrotli1", "libc6", "libexpat1", "libfontconfig1", "libfreetype6",
+                            "libgcc-s1", "libglib2.0-0", "libgraphite2-3", "libharfbuzz0b", "libjpeg62-turbo",
+                            "liblcms2-2", "libpcre3", "libpng16-16", "libstdc++6", "libuuid1", "xdg-utils", "zlib1g",
+                            "libnotify4")
+                }
             }
             windows {
                 console = true
@@ -73,8 +88,12 @@ pinpit.desktop {
                 menu = true
                 menuGroup = "compose"
                 upgradeUuid = "2d6ff464-75be-40ad-a256-56420b9cc374"
+                packageVersion = versionCode
+                iconFile.set(project.file("src/desktopMain/packaging/windows/hello.ico"))
                 msi() {
                     arch = "x64"
+                    bitmapBanner.set(project.file("src/desktopMain/packaging/windows/banner.bmp"))
+                    bitmapDialog.set(project.file("src/desktopMain/packaging/windows/dialog.bmp"))
                 }
             }
         }
