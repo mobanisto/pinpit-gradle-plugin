@@ -77,6 +77,7 @@ internal class TargetTasks {
     val runtimeTasks = mutableMapOf<TargetAndBuildType, TaskProvider<AbstractJLinkTask>>()
     val distributableTasks = mutableMapOf<TargetAndBuildType, TaskProvider<AppImageTask>>()
     val runTasks = mutableMapOf<TargetAndBuildType, TaskProvider<AbstractRunDistributableTask>>()
+    val suggestDebDependenciesTasks = mutableMapOf<TargetAndBuildType, TaskProvider<SuggestDebDependenciesTask>>()
 }
 
 internal class CommonJvmDesktopTasks(
@@ -239,18 +240,27 @@ private fun JvmApplicationContext.configurePackagingTasks(
         configurePackageUberJarForCurrentOS(this, currentOS)
     }
 
-    val run = tasks.register<JavaExec>(taskNameAction = "pinpitRun") {
-        configureRunTask(this, commonTasks.prepareAppResources)
+    if (buildType == app.buildTypes.default) {
+        val run = tasks.register<JavaExec>(
+            taskNameAction = "pinpitRun",
+            useBuildTypeForTaskName = false
+        ) {
+            configureRunTask(this, commonTasks.prepareAppResources)
+        }
     }
 
     if (currentOS == Linux) {
         val defaultTargetBuild = TargetAndBuildType(currentTarget, app.buildTypes.default)
         val createDistributable = targetTasks.distributableTasks[defaultTargetBuild]
-        if (createDistributable != null) {
-            tasks.register<SuggestDebDependenciesTask>(taskNameAction = "pinpitSuggestDebDependencies") {
+        val suggestDebDependencies = targetTasks.suggestDebDependenciesTasks[defaultTargetBuild]
+        if (createDistributable != null && suggestDebDependencies == null) {
+            tasks.register<SuggestDebDependenciesTask>(
+                taskNameAction = "pinpitSuggestDebDependencies",
+                useBuildTypeForTaskName = false
+            ) {
                 dependsOn(createDistributable)
                 appImage.set(createDistributable.flatMap { it.destinationDir })
-            }
+            }.also { targetTasks.suggestDebDependenciesTasks[defaultTargetBuild] = it }
         }
     }
 }
@@ -267,8 +277,9 @@ private fun JvmApplicationContext.configureCommonPackageTasks(
     val target = targetAndBuildType.target
 
     val downloadJdk = targetTasks.downloadJdkTasks[target] ?: tasks.register<DownloadJdkTask>(
-        taskNameAction = "pinpit",
-        taskNameObject = "download${target.name}",
+        taskNameAction = "pinpitDownload",
+        taskNameObject = "jdk${target.name}",
+        useBuildTypeForTaskName = false
     ) {
         jvmVendor.set(app.nativeDistributions.jvmVendor)
         jvmVersion.set(app.nativeDistributions.jvmVersion)
@@ -278,7 +289,8 @@ private fun JvmApplicationContext.configureCommonPackageTasks(
 
     val checkRuntime = targetTasks.checkRuntimeTasks[target] ?: tasks.register<AbstractCheckNativeDistributionRuntime>(
         taskNameAction = "pinpitCheck",
-        taskNameObject = "runtime${target.name}"
+        taskNameObject = "runtime${target.name}",
+        useBuildTypeForTaskName = false
     ) {
         dependsOn(downloadJdk)
         targetJdkVersion.set(jdkInfo.major)
@@ -288,7 +300,8 @@ private fun JvmApplicationContext.configureCommonPackageTasks(
 
     val suggestRuntimeModules = targetTasks.suggestModulesTasks[target] ?: tasks.register<AbstractSuggestModulesTask>(
         taskNameAction = "pinpitSuggest",
-        taskNameObject = "runtimeModules${target.name}"
+        taskNameObject = "runtimeModules${target.name}",
+        useBuildTypeForTaskName = false
     ) {
         dependsOn(checkRuntime)
         jdk.set(provider { downloadJdk.get().jdkDir })

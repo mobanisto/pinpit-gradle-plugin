@@ -29,9 +29,10 @@ internal class JvmTasks(
         taskNameAction: String,
         taskNameObject: String = "",
         args: List<Any> = emptyList(),
+        useBuildTypeForTaskName: Boolean = true,
         noinline configureFn: T.() -> Unit = {}
     ): TaskProvider<T> {
-        val buildTypeClassifier = buildType.classifier.uppercaseFirstChar()
+        val buildTypeClassifier = if (useBuildTypeForTaskName) buildType.classifier.uppercaseFirstChar() else ""
         val objectClassifier = taskNameObject.uppercaseFirstChar()
         val taskName = "$taskNameAction$buildTypeClassifier$objectClassifier"
         return register(taskName, klass = T::class.java, args = args, configureFn = configureFn)

@@ -13,15 +13,7 @@ import javax.inject.Inject
 abstract class JvmApplicationBuildTypes @Inject constructor(
     objects: ObjectFactory
 ) {
-    /**
-     * The default build type does not have a classifier
-     * to preserve compatibility with tasks, existing before
-     * the introduction of the release build type,
-     * e.g. we don't want to break existing packageDmg,
-     * createDistributable tasks after the introduction
-     * of packageReleaseDmg and createReleaseDistributable tasks.
-     */
-    internal val default: JvmApplicationBuildType = objects.new("")
+    internal val default: JvmApplicationBuildType = objects.new("default")
 
     val release: JvmApplicationBuildType = objects.new<JvmApplicationBuildType>("release").apply {
         proguard.isEnabled.set(true)

@@ -49,22 +49,22 @@ class DesktopApplicationTest : GradlePluginTestBase() {
         file("build.gradle").modify {
             it + """
                 afterEvaluate {
-                    tasks.getByName("pinpitRun").doFirst {
+                    tasks.getByName("pinpitRunDefault").doFirst {
                         throw new StopExecutionException("Skip run task")
                     }
                     
-                    tasks.getByName("pinpitRunDistributable$targetName").doFirst {
+                    tasks.getByName("pinpitRunDefaultDistributable$targetName").doFirst {
                         throw new StopExecutionException("Skip runDistributable task")
                     }
                 }
             """.trimIndent()
         }
-        gradle("pinpitRun").build().let { result ->
-            assertEquals(TaskOutcome.SUCCESS, result.task(":pinpitRun")?.outcome)
+        gradle("pinpitRunDefault").build().let { result ->
+            assertEquals(TaskOutcome.SUCCESS, result.task(":pinpitRunDefault")?.outcome)
         }
-        gradle("pinpitRunDistributable$targetName").build().let { result ->
-            assertEquals(TaskOutcome.SUCCESS, result.task(":pinpitCreateDistributable$targetName")!!.outcome)
-            assertEquals(TaskOutcome.SUCCESS, result.task(":pinpitRunDistributable$targetName")?.outcome)
+        gradle("pinpitRunDefaultDistributable$targetName").build().let { result ->
+            assertEquals(TaskOutcome.SUCCESS, result.task(":pinpitCreateDefaultDistributable$targetName")!!.outcome)
+            assertEquals(TaskOutcome.SUCCESS, result.task(":pinpitRunDefaultDistributable$targetName")?.outcome)
         }
     }
 
@@ -76,16 +76,16 @@ class DesktopApplicationTest : GradlePluginTestBase() {
             check.taskOutcome(":pinpitRun", TaskOutcome.SUCCESS)
             check.logContains(logLine)
         }
-        gradle("pinpitRunDistributable$targetName").build().checks { check ->
-            check.taskOutcome(":pinpitCreateDistributable$targetName", TaskOutcome.SUCCESS)
-            check.taskOutcome(":pinpitRunDistributable$targetName", TaskOutcome.SUCCESS)
+        gradle("pinpitRunDefaultDistributable$targetName").build().checks { check ->
+            check.taskOutcome(":pinpitCreateDefaultDistributable$targetName", TaskOutcome.SUCCESS)
+            check.taskOutcome(":pinpitRunDefaultDistributable$targetName", TaskOutcome.SUCCESS)
             check.logContains(logLine)
         }
     }
 
     @Test
     fun testAndroidxCompiler() = with(testProject(TestProjects.androidxCompiler, defaultAndroidxCompilerEnvironment)) {
-        gradle(":runDistributable").build().checks { check ->
+        gradle(":pinpitRunDefaultDistributable").build().checks { check ->
             val actualMainImage = file("main-image.actual.png")
             val expectedMainImage = file("main-image.expected.png")
             assert(actualMainImage.readBytes().contentEquals(expectedMainImage.readBytes())) {
@@ -276,10 +276,10 @@ class DesktopApplicationTest : GradlePluginTestBase() {
     }
 
     private fun TestProject.testPackageDebUbuntuFocal() {
-        gradle(":pinpitDebUbuntuFocalX64").build().let { result ->
-            assertEquals(TaskOutcome.SUCCESS, result.task(":pinpitDebUbuntuFocalX64")?.outcome)
+        gradle(":pinpitDefaultDebUbuntuFocalX64").build().let { result ->
+            assertEquals(TaskOutcome.SUCCESS, result.task(":pinpitDefaultDebUbuntuFocalX64")?.outcome)
 
-            val resultFile = file("build/pinpit/binaries/main/linux/x64/deb/test-package-ubuntu-20.04-x64-1.0.0.deb")
+            val resultFile = file("build/pinpit/binaries/main-default/linux/x64/deb/test-package-ubuntu-20.04-x64-1.0.0.deb")
             resultFile.checkExists()
 
             // TODO: add some in-depth validation
@@ -290,10 +290,10 @@ class DesktopApplicationTest : GradlePluginTestBase() {
     }
 
     private fun TestProject.testPackageMsi() {
-        gradle(":pinpitMsiX64").build().let { result ->
-            assertEquals(TaskOutcome.SUCCESS, result.task(":pinpitMsiX64")?.outcome)
+        gradle(":pinpitDefaultMsiX64").build().let { result ->
+            assertEquals(TaskOutcome.SUCCESS, result.task(":pinpitDefaultMsiX64")?.outcome)
 
-            val resultFile = file("build/pinpit/binaries/main/windows/x64/msi/TestPackage-x64-1.0.0.msi")
+            val resultFile = file("build/pinpit/binaries/main-default/windows/x64/msi/TestPackage-x64-1.0.0.msi")
             resultFile.checkExists()
         }
     }
@@ -578,8 +578,8 @@ class DesktopApplicationTest : GradlePluginTestBase() {
         val addPackage = addDebPackage(listOf(extraPackage))
         file("build.gradle").modify { "$it\n$addPackage" }
 
-        gradle(":pinpitDebCustomDistroX64").build().checks { check ->
-            check.taskOutcome(":pinpitDebCustomDistroX64", TaskOutcome.SUCCESS)
+        gradle(":pinpitDefaultDebCustomDistroX64").build().checks { check ->
+            check.taskOutcome(":pinpitDefaultDebCustomDistroX64", TaskOutcome.SUCCESS)
             checkDebContent { content ->
                 assertTrue(content.contains(extraPackage))
             }
@@ -592,8 +592,8 @@ class DesktopApplicationTest : GradlePluginTestBase() {
         val addPackage = addDebPackage(extraPackages)
         file("build.gradle").modify { "$it\n$addPackage" }
 
-        gradle(":pinpitDebCustomDistroX64").build().checks { check ->
-            check.taskOutcome(":pinpitDebCustomDistroX64", TaskOutcome.SUCCESS)
+        gradle(":pinpitDefaultDebCustomDistroX64").build().checks { check ->
+            check.taskOutcome(":pinpitDefaultDebCustomDistroX64", TaskOutcome.SUCCESS)
             checkDebContent { content ->
                 for (extraPackage in extraPackages) {
                     assertTrue(content.contains(extraPackage))
@@ -620,7 +620,7 @@ class DesktopApplicationTest : GradlePluginTestBase() {
     }
 
     private fun TestProject.checkDebContent(check: (content: String) -> Unit) {
-        val packageDir = file("build/pinpit/binaries/main/linux/x64/deb")
+        val packageDir = file("build/pinpit/binaries/main-default/linux/x64/deb")
         val packageDirFiles = packageDir.listFiles() ?: arrayOf()
         check(packageDirFiles.size == 1) {
             "Expected single package in $packageDir, got [${packageDirFiles.joinToString(", ") { it.name }}]"
