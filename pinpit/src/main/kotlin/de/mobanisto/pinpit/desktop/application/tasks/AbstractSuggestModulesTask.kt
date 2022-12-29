@@ -6,8 +6,8 @@
 package de.mobanisto.pinpit.desktop.application.tasks
 
 import de.mobanisto.pinpit.desktop.application.dsl.DEFAULT_RUNTIME_MODULES
-import de.mobanisto.pinpit.desktop.application.internal.ComposeProperties
 import de.mobanisto.pinpit.desktop.application.internal.ExternalToolRunner
+import de.mobanisto.pinpit.desktop.application.internal.PinpitProperties
 import de.mobanisto.pinpit.desktop.application.internal.files.normalizedPath
 import de.mobanisto.pinpit.desktop.application.internal.ioFile
 import de.mobanisto.pinpit.desktop.application.internal.jvmToolFile
@@ -86,7 +86,7 @@ abstract class AbstractSuggestModulesTask : AbstractComposeDesktopTask() {
                 }
             )
         } finally {
-            if (!ComposeProperties.preserveWorkingDir(providers).get()) {
+            if (!PinpitProperties.preserveWorkingDir(providers).get()) {
                 fileOperations.delete(workingDir)
             }
         }

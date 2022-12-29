@@ -5,10 +5,10 @@
 
 package de.mobanisto.pinpit.desktop.tasks
 
-import de.mobanisto.pinpit.desktop.application.internal.ComposeProperties
 import de.mobanisto.pinpit.desktop.application.internal.ExternalToolRunner
 import de.mobanisto.pinpit.desktop.application.internal.ExternalToolRunnerWithOutput
 import de.mobanisto.pinpit.desktop.application.internal.OS
+import de.mobanisto.pinpit.desktop.application.internal.PinpitProperties
 import de.mobanisto.pinpit.desktop.application.internal.UnixUtils
 import de.mobanisto.pinpit.desktop.application.internal.currentOS
 import de.mobanisto.pinpit.desktop.application.internal.notNullProperty
@@ -45,7 +45,7 @@ abstract class AbstractComposeDesktopTask : DefaultTask() {
     @get:Internal
     val verbose: Property<Boolean> = objects.notNullProperty<Boolean>().apply {
         set(providers.provider {
-            logger.isDebugEnabled || ComposeProperties.isVerbose(providers).get()
+            logger.isDebugEnabled || PinpitProperties.isVerbose(providers).get()
         })
     }
 

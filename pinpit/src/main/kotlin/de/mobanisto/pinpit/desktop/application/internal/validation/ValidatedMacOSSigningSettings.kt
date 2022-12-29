@@ -6,8 +6,8 @@
 package de.mobanisto.pinpit.desktop.application.internal.validation
 
 import de.mobanisto.pinpit.desktop.application.dsl.MacOSSigningSettings
-import de.mobanisto.pinpit.desktop.application.internal.ComposeProperties
 import de.mobanisto.pinpit.desktop.application.internal.OS
+import de.mobanisto.pinpit.desktop.application.internal.PinpitProperties
 import de.mobanisto.pinpit.desktop.application.internal.currentOS
 import org.gradle.api.Project
 import org.gradle.api.provider.Provider
@@ -71,11 +71,11 @@ private val ERR_WRONG_OS =
 private val ERR_UNKNOWN_PREFIX =
     """|$ERR_PREFIX Could not infer signing prefix. To specify:
        |  * Set bundleID to reverse DNS notation (e.g. "com.mycompany.myapp");
-       |  * Use '${ComposeProperties.MAC_SIGN_PREFIX}' Gradle property;
+       |  * Use '${PinpitProperties.MAC_SIGN_PREFIX}' Gradle property;
        |  * Use 'nativeExecutables.macOS.signing.prefix' DSL property;
     """.trimMargin()
 private val ERR_UNKNOWN_SIGN_ID =
     """|$ERR_PREFIX signing identity is null or empty. To specify:
-       |  * Use '${ComposeProperties.MAC_SIGN_ID}' Gradle property;
+       |  * Use '${PinpitProperties.MAC_SIGN_ID}' Gradle property;
        |  * Use 'nativeExecutables.macOS.signing.identity' DSL property;
     """.trimMargin()

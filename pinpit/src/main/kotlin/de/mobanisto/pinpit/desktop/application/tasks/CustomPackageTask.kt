@@ -1,7 +1,7 @@
 package de.mobanisto.pinpit.desktop.application.tasks
 
 import de.mobanisto.pinpit.desktop.application.dsl.TargetFormat
-import de.mobanisto.pinpit.desktop.application.internal.ComposeProperties
+import de.mobanisto.pinpit.desktop.application.internal.PinpitProperties
 import de.mobanisto.pinpit.desktop.application.internal.Target
 import de.mobanisto.pinpit.desktop.application.internal.notNullProperty
 import de.mobanisto.pinpit.desktop.application.internal.nullableProperty
@@ -109,7 +109,7 @@ abstract class CustomPackageTask @Inject constructor(
         try {
             createPackage()
         } finally {
-            if (!ComposeProperties.preserveWorkingDir(providers).get()) {
+            if (!PinpitProperties.preserveWorkingDir(providers).get()) {
                 fileOperations.delete(workingDir)
             }
         }

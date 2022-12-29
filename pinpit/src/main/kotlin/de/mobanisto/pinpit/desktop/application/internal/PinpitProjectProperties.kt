@@ -8,17 +8,17 @@ package de.mobanisto.pinpit.desktop.application.internal
 import org.gradle.api.provider.Provider
 import org.gradle.api.provider.ProviderFactory
 
-internal object ComposeProperties {
-    internal const val VERBOSE = "compose.desktop.verbose"
-    internal const val OVERRIDE_KOTLIN_JVM_TARGET = "compose.desktop.override.default.kotlin.jvm.target"
-    internal const val PRESERVE_WD = "compose.preserve.working.dir"
-    internal const val MAC_SIGN = "compose.desktop.mac.sign"
-    internal const val MAC_SIGN_ID = "compose.desktop.mac.signing.identity"
-    internal const val MAC_SIGN_KEYCHAIN = "compose.desktop.mac.signing.keychain"
-    internal const val MAC_SIGN_PREFIX = "compose.desktop.mac.signing.prefix"
-    internal const val MAC_NOTARIZATION_APPLE_ID = "compose.desktop.mac.notarization.appleID"
-    internal const val MAC_NOTARIZATION_PASSWORD = "compose.desktop.mac.notarization.password"
-    internal const val MAC_NOTARIZATION_ASC_PROVIDER = "compose.desktop.mac.notarization.ascProvider"
+internal object PinpitProperties {
+    internal const val VERBOSE = "pinpit.desktop.verbose"
+    internal const val OVERRIDE_KOTLIN_JVM_TARGET = "pinpit.desktop.override.default.kotlin.jvm.target"
+    internal const val PRESERVE_WD = "pinpit.preserve.working.dir"
+    internal const val MAC_SIGN = "pinpit.desktop.mac.sign"
+    internal const val MAC_SIGN_ID = "pinpit.desktop.mac.signing.identity"
+    internal const val MAC_SIGN_KEYCHAIN = "pinpit.desktop.mac.signing.keychain"
+    internal const val MAC_SIGN_PREFIX = "pinpit.desktop.mac.signing.prefix"
+    internal const val MAC_NOTARIZATION_APPLE_ID = "pinpit.desktop.mac.notarization.appleID"
+    internal const val MAC_NOTARIZATION_PASSWORD = "pinpit.desktop.mac.notarization.password"
+    internal const val MAC_NOTARIZATION_ASC_PROVIDER = "pinpit.desktop.mac.notarization.ascProvider"
 
     fun isVerbose(providers: ProviderFactory): Provider<Boolean> =
         providers.findProperty(VERBOSE).toBoolean()

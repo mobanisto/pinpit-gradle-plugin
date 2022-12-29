@@ -8,7 +8,7 @@
 package de.mobanisto.pinpit
 
 import de.mobanisto.pinpit.desktop.DesktopExtension
-import de.mobanisto.pinpit.desktop.application.internal.ComposeProperties
+import de.mobanisto.pinpit.desktop.application.internal.PinpitProperties
 import de.mobanisto.pinpit.desktop.application.internal.configureDesktop
 import org.gradle.api.Plugin
 import org.gradle.api.Project
@@ -29,7 +29,7 @@ class PinpitPlugin : Plugin<Project> {
                 }
             }
 
-            val overrideDefaultJvmTarget = ComposeProperties.overrideKotlinJvmTarget(project.providers).get()
+            val overrideDefaultJvmTarget = PinpitProperties.overrideKotlinJvmTarget(project.providers).get()
             project.tasks.withType(KotlinCompile::class.java) {
                 it.kotlinOptions.apply {
                     if (overrideDefaultJvmTarget) {

@@ -5,7 +5,7 @@
 
 package de.mobanisto.pinpit.test.utils
 
-import de.mobanisto.pinpit.desktop.application.internal.ComposeProperties
+import de.mobanisto.pinpit.desktop.application.internal.PinpitProperties
 import org.gradle.testkit.runner.GradleRunner
 import java.io.File
 import java.util.*
@@ -47,7 +47,7 @@ class TestProject(
     private val additionalArgs = listOf(
         "--stacktrace",
         "--init-script", testProjectsRootDir.resolve("init.gradle").absolutePath,
-        "-P${ComposeProperties.VERBOSE}=true"
+        "-P${PinpitProperties.VERBOSE}=true"
     )
 
     init {

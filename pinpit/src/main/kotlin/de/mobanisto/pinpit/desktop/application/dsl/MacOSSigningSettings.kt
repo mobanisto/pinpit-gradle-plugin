@@ -5,7 +5,7 @@
 
 package de.mobanisto.pinpit.desktop.application.dsl
 
-import de.mobanisto.pinpit.desktop.application.internal.ComposeProperties
+import de.mobanisto.pinpit.desktop.application.internal.PinpitProperties
 import de.mobanisto.pinpit.desktop.application.internal.notNullProperty
 import de.mobanisto.pinpit.desktop.application.internal.nullableProperty
 import org.gradle.api.model.ObjectFactory
@@ -24,23 +24,23 @@ abstract class MacOSSigningSettings {
     @get:Input
     val sign: Property<Boolean> = objects.notNullProperty<Boolean>().apply {
         set(
-            ComposeProperties.macSign(providers)
+            PinpitProperties.macSign(providers)
                 .orElse(false)
         )
     }
     @get:Input
     @get:Optional
     val identity: Property<String?> = objects.nullableProperty<String>().apply {
-        set(ComposeProperties.macSignIdentity(providers))
+        set(PinpitProperties.macSignIdentity(providers))
     }
     @get:Input
     @get:Optional
     val keychain: Property<String?> = objects.nullableProperty<String>().apply {
-        set(ComposeProperties.macSignKeychain(providers))
+        set(PinpitProperties.macSignKeychain(providers))
     }
     @get:Input
     @get:Optional
     val prefix: Property<String?> = objects.nullableProperty<String>().apply {
-        set(ComposeProperties.macSignPrefix(providers))
+        set(PinpitProperties.macSignPrefix(providers))
     }
 }

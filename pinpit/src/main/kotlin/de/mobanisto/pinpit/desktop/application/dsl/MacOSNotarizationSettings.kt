@@ -5,7 +5,7 @@
 
 package de.mobanisto.pinpit.desktop.application.dsl
 
-import de.mobanisto.pinpit.desktop.application.internal.ComposeProperties
+import de.mobanisto.pinpit.desktop.application.internal.PinpitProperties
 import de.mobanisto.pinpit.desktop.application.internal.nullableProperty
 import org.gradle.api.model.ObjectFactory
 import org.gradle.api.provider.Property
@@ -24,18 +24,18 @@ abstract class MacOSNotarizationSettings {
     @get:Input
     @get:Optional
     val appleID: Property<String?> = objects.nullableProperty<String>().apply {
-        set(ComposeProperties.macNotarizationAppleID(providers))
+        set(PinpitProperties.macNotarizationAppleID(providers))
     }
 
     @get:Input
     @get:Optional
     val password: Property<String?> = objects.nullableProperty<String>().apply {
-        set(ComposeProperties.macNotarizationPassword(providers))
+        set(PinpitProperties.macNotarizationPassword(providers))
     }
 
     @get:Input
     @get:Optional
     val ascProvider: Property<String?> = objects.nullableProperty<String>().apply {
-        set(ComposeProperties.macNotarizationAscProvider(providers))
+        set(PinpitProperties.macNotarizationAscProvider(providers))
     }
 }

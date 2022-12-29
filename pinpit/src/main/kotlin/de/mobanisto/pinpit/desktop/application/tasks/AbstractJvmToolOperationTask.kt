@@ -5,7 +5,7 @@
 
 package de.mobanisto.pinpit.desktop.application.tasks
 
-import de.mobanisto.pinpit.desktop.application.internal.ComposeProperties
+import de.mobanisto.pinpit.desktop.application.internal.PinpitProperties
 import de.mobanisto.pinpit.desktop.application.internal.ioFile
 import de.mobanisto.pinpit.desktop.application.internal.jvmToolFile
 import de.mobanisto.pinpit.desktop.application.internal.notNullProperty
@@ -77,7 +77,7 @@ abstract class AbstractJvmToolOperationTask(private val toolName: String) : Abst
                 environment = jvmToolEnvironment()
             ).also { checkResult(it) }
         } finally {
-            if (!ComposeProperties.preserveWorkingDir(providers).get()) {
+            if (!PinpitProperties.preserveWorkingDir(providers).get()) {
                 fileOperations.delete(workingDir)
             }
         }

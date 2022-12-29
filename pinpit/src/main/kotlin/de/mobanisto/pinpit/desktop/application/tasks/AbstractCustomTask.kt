@@ -5,7 +5,7 @@
 
 package de.mobanisto.pinpit.desktop.application.tasks
 
-import de.mobanisto.pinpit.desktop.application.internal.ComposeProperties
+import de.mobanisto.pinpit.desktop.application.internal.PinpitProperties
 import de.mobanisto.pinpit.desktop.application.internal.notNullProperty
 import de.mobanisto.pinpit.desktop.tasks.AbstractComposeDesktopTask
 import org.gradle.api.file.Directory
@@ -56,7 +56,7 @@ abstract class AbstractCustomTask() : AbstractComposeDesktopTask() {
         try {
             runTask().also { checkResult() }
         } finally {
-            if (!ComposeProperties.preserveWorkingDir(providers).get()) {
+            if (!PinpitProperties.preserveWorkingDir(providers).get()) {
                 fileOperations.delete(workingDir)
             }
         }

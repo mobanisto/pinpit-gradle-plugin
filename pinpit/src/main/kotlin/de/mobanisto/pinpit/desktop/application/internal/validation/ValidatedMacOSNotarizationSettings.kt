@@ -6,7 +6,7 @@
 package de.mobanisto.pinpit.desktop.application.internal.validation
 
 import de.mobanisto.pinpit.desktop.application.dsl.MacOSNotarizationSettings
-import de.mobanisto.pinpit.desktop.application.internal.ComposeProperties
+import de.mobanisto.pinpit.desktop.application.internal.PinpitProperties
 import org.gradle.api.provider.Provider
 
 internal data class ValidatedMacOSNotarizationSettings(
@@ -43,11 +43,11 @@ private const val ERR_NOTARIZATION_SETTINGS_ARE_NOT_PROVIDED =
     "$ERR_PREFIX notarization settings are not provided"
 private val ERR_APPLE_ID_IS_EMPTY =
     """|$ERR_PREFIX appleID is null or empty. To specify:
-               |  * Use '${ComposeProperties.MAC_NOTARIZATION_APPLE_ID}' Gradle property;
+               |  * Use '${PinpitProperties.MAC_NOTARIZATION_APPLE_ID}' Gradle property;
                |  * Or use 'nativeDistributions.macOS.notarization.appleID' DSL property;
             """.trimMargin()
 private val ERR_PASSWORD_IS_EMPTY =
     """|$ERR_PREFIX password is null or empty. To specify:
-               |  * Use '${ComposeProperties.MAC_NOTARIZATION_PASSWORD}' Gradle property;
+               |  * Use '${PinpitProperties.MAC_NOTARIZATION_PASSWORD}' Gradle property;
                |  * Or use 'nativeDistributions.macOS.notarization.password' DSL property;
             """.trimMargin()
