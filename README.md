@@ -253,7 +253,8 @@ or build the MSI for Windows:
 ## Platform compatibility
 
 It's currently possible to build Linux and Windows packages from a Linux
-host system. All other combinations do not work yet.
+host system. Also, Windows packages can be built on Windows.
+All other combinations do not work yet.
 
 One building block for bundling packages for any platform is creating
 a JDK runtime image to ship with the application.
@@ -266,8 +267,9 @@ tools (i.e. `dpkg`), but it is planned to replace those with pure
 JVM-based archiving tools in a future release so that building Debian
 packages will become possible for all host systems.
 
-Assembling MSI installers uses the Wix toolchain and uses Wine to run that
-on a Linux host. For this to work, you need to have the current stable
+Assembling MSI installers uses the Wix toolchain. On Windows, this runs
+natively and on Linux hosts, Wine is used to run it.
+For this to work, you need to have the current stable
 version of Wine installed (from the
 [WineHQ download page](https://wiki.winehq.org/Download), at
 the time of writing version 7.0.1).
@@ -278,16 +280,12 @@ we plan to work on:
 | Build host              | Debian/Ubuntu       | Windows | macOS   |
 |:------------------------|---------------------|---------|---------|
 | Target: Linux (deb)     | yes                 | planned | planned |
-| Target: Windows (MSI)   | yes (Wine required) | planned | no      |
+| Target: Windows (MSI)   | yes (Wine required) | yes     | no      |
 | Target: macOS (PKG/DMG) | planned for Q1 2023 | no      | planned |
 
 Building Debian packages should become possible on Windows and macOS once
 we migrate the packaging code away from `dpkg` towards pure JVM code using
 `commons-compress`.
-
-Building MSI installers on Windows should not be problematic to implement.
-Wix can run natively there and we mainly need to add a condition that uses
-Wine on Unix-based systems and does not on Windows.
 
 Building MSI installers on macOS can work on systems for which Wine is
 available. See https://github.com/mobanisto/pinpit-gradle-plugin/issues/11
