@@ -242,12 +242,12 @@ pinpitUnpackDefaultComposeDesktopJvmApplicationResources - Unpacks the default C
 
 For example you can create the Debian package for Ubuntu Focal using:
 ```
-./gradlew pinpitReleaseDebUbuntuFocalX64
+./gradlew pinpitPackageDefaultDebUbuntuFocalX64
 ```
 
 or build the MSI for Windows:
 ```
-./gradlew pinpitMsiX64
+./gradlew pinpitPackageDefaultMsiX64
 ```
 
 ## Platform compatibility
