@@ -150,7 +150,7 @@ create a specific `.deb` package for:
                 debPackageVersion = versionCode
                 appCategory = "utils"
                 menuGroup = "System;Utility"
-                iconFile.set(project.file("src/main/resources/images/logo_circle.png"))
+                iconFile.set(project.file("src/main/packaging/deb/hello.png"))
                 debPreInst.set(project.file("src/main/packaging/deb/preinst"))
                 debPostInst.set(project.file("src/main/packaging/deb/postinst"))
                 debPreRm.set(project.file("src/main/packaging/deb/prerm"))
