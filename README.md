@@ -219,12 +219,12 @@ pinpitPackageDefault - Builds packages for all systems and architectures.
 pinpitPackageDefaultDebUbuntuBionicX64 - Builds a DEB package for LinuxX64.
 pinpitPackageDefaultDebUbuntuFocalX64 - Builds a DEB package for LinuxX64.
 pinpitPackageDefaultMsiX64 - Builds an MSI package for WindowsX64.
-pinpitPackageDefaultUberJarForCurrentOS - Packages an Uber-Jar for the current OS.
+pinpitPackageDefaultUberJarForLinuxX64 - Packages an Uber-Jar for LinuxX64.
+pinpitPackageDefaultUberJarForWindowsX64 - Packages an Uber-Jar for WindowsX64.
 pinpitPackageRelease - Builds packages for all systems and architectures.
 pinpitPackageReleaseDebUbuntuBionicX64 - Builds a DEB package for LinuxX64.
 pinpitPackageReleaseDebUbuntuFocalX64 - Builds a DEB package for LinuxX64.
 pinpitPackageReleaseMsiX64 - Builds an MSI package for WindowsX64.
-pinpitPackageReleaseUberJarForCurrentOS - Packages an Uber-Jar for the current OS.
 pinpitPrepareAppResourcesLinuxX64 - Merge all app resources for LinuxX64 into a single build directory.
 pinpitPrepareAppResourcesWindowsX64 - Merge all app resources for WindowsX64 into a single build directory.
 pinpitProguardReleaseJarsLinuxX64 - Runs Proguard to minify and obfuscate release jars.

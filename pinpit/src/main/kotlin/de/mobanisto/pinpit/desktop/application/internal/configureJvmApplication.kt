@@ -30,6 +30,7 @@ import de.mobanisto.pinpit.internal.addUnique
 import de.mobanisto.pinpit.internal.uppercaseFirstChar
 import org.gradle.api.DefaultTask
 import org.gradle.api.GradleException
+import org.gradle.api.Task
 import org.gradle.api.file.Directory
 import org.gradle.api.file.DuplicatesStrategy
 import org.gradle.api.file.FileCollection
@@ -61,8 +62,8 @@ internal fun JvmApplicationContext.configureJvmApplication() {
     validatePackageVersions(targets)
     val commonTasks = configureCommonJvmDesktopTasks()
     val targetTasks = TargetTasks()
-    configurePackagingTasks(targetTasks, commonTasks)
-    copy(buildType = app.buildTypes.release).configurePackagingTasks(targetTasks, commonTasks)
+    configurePackagingTasks(targets, targetTasks, commonTasks)
+    copy(buildType = app.buildTypes.release).configurePackagingTasks(targets, targetTasks, commonTasks)
     configureWix()
     configurePeRebrander()
 }
@@ -106,6 +107,7 @@ private fun JvmApplicationContext.configureCommonJvmDesktopTasks(): CommonJvmDes
 }
 
 private fun JvmApplicationContext.configurePackagingTasks(
+    targets: List<Target>,
     targetTasks: TargetTasks,
     commonTasks: CommonJvmDesktopTasks,
 ) {
@@ -118,7 +120,19 @@ private fun JvmApplicationContext.configurePackagingTasks(
     val jdkInfo = jdkInfo(app.nativeDistributions.jvmVendor!!, app.nativeDistributions.jvmVersion!!)
         ?: throw GradleException("Invalid JVM vendor or version")
 
-    val allPackageTasks = mutableListOf<TaskProvider<out CustomPackageTask>>()
+    val allPackageTasks = mutableListOf<TaskProvider<out Task>>()
+
+    targets.forEach { target ->
+        if (buildType == app.buildTypes.default) {
+            tasks.register<Jar>(
+                taskNameAction = "pinpitPackage",
+                taskNameObject = "uberJarFor${target.name}",
+                description = "Packages an Uber-Jar for ${target.name}.",
+            ) {
+                configurePackageUberJar(this, target)
+            }.also { allPackageTasks.add(it) }
+        }
+    }
 
     app.nativeDistributions.windows.msis.forEach { msi ->
         val target = Target(Windows, arch(msi.arch))
@@ -186,14 +200,6 @@ private fun JvmApplicationContext.configurePackagingTasks(
         }
         // TODO: depend on uber jar tasks too?
         // dependsOn(packageForCurrentOS)
-    }
-
-    val packageUberJarForCurrentOS = tasks.register<Jar>(
-        taskNameAction = "pinpitPackage",
-        taskNameObject = "uberJarForCurrentOS",
-        description = "Packages an Uber-Jar for the current OS.",
-    ) {
-        configurePackageUberJarForCurrentOS(this, currentOS)
     }
 
     if (buildType == app.buildTypes.default) {
@@ -627,21 +633,21 @@ private fun JvmApplicationContext.configureRunTask(
     }
 }
 
-private fun JvmApplicationContext.configurePackageUberJarForCurrentOS(jar: Jar, os: OS) {
+private fun JvmApplicationContext.configurePackageUberJar(jar: Jar, target: Target) {
     fun flattenJars(files: FileCollection): FileCollection =
         jar.project.files({
             files.map { if (it.isZipOrJar()) jar.project.zipTree(it) else it }
         })
 
-    jar.useAppRuntimeFiles(currentTarget) { (runtimeJars, _) ->
+    jar.useAppRuntimeFiles(target) { (runtimeJars, _) ->
         from(flattenJars(runtimeJars))
     }
 
     app.mainClass?.let { jar.manifest.attributes["Main-Class"] = it }
     jar.duplicatesStrategy = DuplicatesStrategy.EXCLUDE
-    jar.archiveAppendix.set(currentTarget.id)
+    jar.archiveAppendix.set(target.id)
     jar.archiveBaseName.set(packageNameProvider)
-    jar.archiveVersion.set(packageVersionFor(os))
+    jar.archiveVersion.set(packageVersionFor(target.os))
     jar.destinationDirectory.set(jar.project.layout.buildDirectory.dir("pinpit/jars"))
 
     jar.doLast {

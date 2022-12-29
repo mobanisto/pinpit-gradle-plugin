@@ -18,6 +18,19 @@ internal fun <T> Collection<T>.checkContains(vararg elements: T) {
     }
 }
 
+internal fun <T> Collection<T>.checkContainsNot(vararg elements: T) {
+    val unexpectedElements = elements.toMutableSet()
+    val unexpectedFound = mutableSetOf<T>()
+    forEach {
+        if (unexpectedElements.contains(it)) {
+            unexpectedFound.add(it)
+        }
+    }
+    if (unexpectedFound.isNotEmpty()) {
+        error("Some elements were found in the collection that should not be: [${unexpectedFound.joinToString(", ")}]")
+    }
+}
+
 internal fun BuildResult.checks(fn: (BuildResultChecks) -> Unit) {
     fn(BuildResultChecks(this))
 }

@@ -10,6 +10,7 @@ import de.mobanisto.pinpit.desktop.application.internal.MacUtils
 import de.mobanisto.pinpit.desktop.application.internal.OS.Linux
 import de.mobanisto.pinpit.desktop.application.internal.OS.MacOS
 import de.mobanisto.pinpit.desktop.application.internal.OS.Windows
+import de.mobanisto.pinpit.desktop.application.internal.Target
 import de.mobanisto.pinpit.desktop.application.internal.currentArch
 import de.mobanisto.pinpit.desktop.application.internal.currentOS
 import de.mobanisto.pinpit.desktop.application.internal.currentTarget
@@ -20,6 +21,7 @@ import de.mobanisto.pinpit.test.utils.TestProjects
 import de.mobanisto.pinpit.test.utils.assertEqualTextFiles
 import de.mobanisto.pinpit.test.utils.assertNotEqualTextFiles
 import de.mobanisto.pinpit.test.utils.checkContains
+import de.mobanisto.pinpit.test.utils.checkContainsNot
 import de.mobanisto.pinpit.test.utils.checkExists
 import de.mobanisto.pinpit.test.utils.checks
 import de.mobanisto.pinpit.test.utils.modify
@@ -253,21 +255,32 @@ class DesktopApplicationTest : GradlePluginTestBase() {
     }
 
     @Test
-    fun packageUberJarForCurrentOSJvm() = with(testProject(TestProjects.jvm)) {
-        testPackageUberJarForCurrentOS()
+    fun packageUberJarForWindowsJvm() = with(testProject(TestProjects.jvm)) {
+        testPackageUberJar(Target(Windows, Arch.X64))
     }
 
     @Test
-    fun packageUberJarForCurrentOSMpp() = with(testProject(TestProjects.mpp)) {
-        testPackageUberJarForCurrentOS()
+    fun packageUberJarForLinuxJvm() = with(testProject(TestProjects.jvm)) {
+        testPackageUberJar(Target(Linux, Arch.X64))
     }
 
-    private fun TestProject.testPackageUberJarForCurrentOS() {
-        gradle(":pinpitPackageDefaultUberJarForCurrentOS").build().let { result ->
-            assertEquals(TaskOutcome.SUCCESS, result.task(":pinpitPackageDefaultUberJarForCurrentOS")?.outcome)
+    @Test
+    fun packageUberJarForWindowsMpp() = with(testProject(TestProjects.mpp)) {
+        testPackageUberJar(Target(Windows, Arch.X64))
+    }
 
-            val resultJarFile = file("build/pinpit/jars/TestPackage-${currentTarget.id}-1.0.0.jar")
+    @Test
+    fun packageUberJarForLinuxMpp() = with(testProject(TestProjects.mpp)) {
+        testPackageUberJar(Target(Linux, Arch.X64))
+    }
+
+    private fun TestProject.testPackageUberJar(target: Target) {
+        gradle(":pinpitPackageDefaultUberJarFor${target.name}").build().let { result ->
+            assertEquals(TaskOutcome.SUCCESS, result.task(":pinpitPackageDefaultUberJarFor${target.name}")?.outcome)
+
+            val resultJarFile = file("build/pinpit/jars/TestPackage-${target.id}-1.0.0.jar")
             resultJarFile.checkExists()
+            resultJarFile.copyTo(File("/tmp/" + resultJarFile.name))
 
             JarFile(resultJarFile).use { jar ->
                 val mainClass = jar.manifest.mainAttributes.getValue("Main-Class")
@@ -275,6 +288,13 @@ class DesktopApplicationTest : GradlePluginTestBase() {
 
                 jar.entries().toList().mapTo(HashSet()) { it.name }.apply {
                     checkContains("MainKt.class", "org/jetbrains/skiko/SkiaLayer.class")
+                    if (target.os == Linux) {
+                        checkContains("libskiko-linux-x64.so", "libskiko-linux-x64.so.sha256")
+                        checkContainsNot("skiko-windows-x64.dll", "skiko-windows-x64.dll.sha256")
+                    } else if (target.os == Windows) {
+                        checkContains("skiko-windows-x64.dll", "skiko-windows-x64.dll.sha256")
+                        checkContainsNot("libskiko-linux-x64.so", "libskiko-linux-x64.so.sha256")
+                    }
                 }
             }
         }
