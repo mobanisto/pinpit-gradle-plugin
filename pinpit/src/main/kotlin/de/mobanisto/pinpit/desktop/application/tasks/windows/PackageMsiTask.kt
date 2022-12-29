@@ -126,22 +126,6 @@ abstract class PackageMsiTask @Inject constructor(
 
     private lateinit var jvmRuntimeInfo: JvmRuntimeProperties
 
-    @get:LocalState
-    protected val jpackageResources: Provider<Directory> = project.layout.buildDirectory.dir("pinpit/tmp/resources")
-
-    @get:LocalState
-    protected val skikoDir: Provider<Directory> = project.layout.buildDirectory.dir("pinpit/tmp/skiko")
-
-    @get:Internal
-    private val libsDir: Provider<Directory> = workingDir.map {
-        it.dir("libs")
-    }
-
-    @get:Internal
-    private val packagedResourcesDir: Provider<Directory> = libsDir.map {
-        it.dir("resources")
-    }
-
     @get:Internal
     val appResourcesDir: DirectoryProperty = objects.directoryProperty()
 
@@ -161,96 +145,6 @@ abstract class PackageMsiTask @Inject constructor(
     @get:Optional
     internal val appResourcesDirInputDirHackForVerification: Provider<Directory?>
         get() = provider { appResourcesDir.orNull?.let { if (it.asFile.exists()) it else null } }
-
-    @get:Internal
-    private val libsMappingFile: Provider<RegularFile> = workingDir.map {
-        it.file("libs-mapping.txt")
-    }
-
-    @get:Internal
-    private val libsMapping = FilesMapping()
-
-    private fun invalidateMappedLibs(
-        inputChanges: InputChanges
-    ): Set<File> {
-        val outdatedLibs = HashSet<File>()
-        val libsDirFile = libsDir.ioFile
-
-        fun invalidateAllLibs() {
-            outdatedLibs.addAll(files.files)
-
-            logger.debug("Clearing all files in working dir: $libsDirFile")
-            fileOperations.delete(libsDirFile)
-            libsDirFile.mkdirs()
-        }
-
-        if (inputChanges.isIncremental) {
-            val allChanges = inputChanges.getFileChanges(files).asSequence()
-
-            try {
-                for (change in allChanges) {
-                    libsMapping.remove(change.file)?.let { files ->
-                        files.forEach { fileOperations.delete(it) }
-                    }
-                    if (change.changeType != ChangeType.REMOVED) {
-                        outdatedLibs.add(change.file)
-                    }
-                }
-            } catch (e: Exception) {
-                logger.debug("Could remove outdated libs incrementally: ${e.stacktraceToString()}")
-                invalidateAllLibs()
-            }
-        } else {
-            invalidateAllLibs()
-        }
-
-        return outdatedLibs
-    }
-
-    override fun prepareWorkingDir(inputChanges: InputChanges) {
-        val libsDir = libsDir.ioFile
-        val fileProcessor = SimpleFileCopyingProcessor
-
-        val mangleJarFilesNames = mangleJarFilesNames.get()
-        fun copyFileToLibsDir(sourceFile: File): File {
-            val targetName =
-                if (mangleJarFilesNames && sourceFile.isJarFile) sourceFile.mangledName()
-                else sourceFile.name
-            val targetFile = libsDir.resolve(targetName)
-            fileProcessor.copy(sourceFile, targetFile)
-            return targetFile
-        }
-
-        val outdatedLibs = invalidateMappedLibs(inputChanges)
-        for (sourceFile in outdatedLibs) {
-            assert(sourceFile.exists()) { "Lib file does not exist: $sourceFile" }
-
-            libsMapping[sourceFile] = if (isSkikoFor(target, sourceFile)) {
-                val unpackedFiles = unpackSkikoFor(target, sourceFile, skikoDir.ioFile, fileOperations)
-                unpackedFiles.map { copyFileToLibsDir(it) }
-            } else {
-                listOf(copyFileToLibsDir(sourceFile))
-            }
-        }
-
-        // todo: incremental copy
-        cleanDirs(packagedResourcesDir)
-        val destResourcesDir = packagedResourcesDir.ioFile
-        val appResourcesDir = appResourcesDir.ioFileOrNull
-        if (appResourcesDir != null) {
-            for (file in appResourcesDir.walk()) {
-                val relPath = file.relativeTo(appResourcesDir).path
-                val destFile = destResourcesDir.resolve(relPath)
-                if (file.isDirectory) {
-                    fileOperations.mkdir(destFile)
-                } else {
-                    file.copyTo(destFile)
-                }
-            }
-        }
-
-        cleanDirs(jpackageResources)
-    }
 
     @OptIn(ExperimentalStdlibApi::class)
     override fun createPackage() {
@@ -363,22 +257,5 @@ abstract class PackageMsiTask @Inject constructor(
 
     override fun initState() {
         jvmRuntimeInfo = JvmRuntimeProperties.readFromFile(javaRuntimePropertiesFile.ioFile)
-
-        val mappingFile = libsMappingFile.ioFile
-        if (mappingFile.exists()) {
-            try {
-                libsMapping.loadFrom(mappingFile)
-            } catch (e: Exception) {
-                fileOperations.delete(mappingFile)
-                throw e
-            }
-            logger.debug("Loaded libs mapping from $mappingFile")
-        }
-    }
-
-    override fun saveStateAfterFinish() {
-        val mappingFile = libsMappingFile.ioFile
-        libsMapping.saveTo(mappingFile)
-        logger.debug("Saved libs mapping to $mappingFile")
     }
 }
