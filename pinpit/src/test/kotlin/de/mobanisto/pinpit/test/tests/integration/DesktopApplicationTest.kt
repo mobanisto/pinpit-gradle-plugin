@@ -5,8 +5,11 @@
 
 package de.mobanisto.pinpit.test.tests.integration
 
+import de.mobanisto.pinpit.desktop.application.internal.Arch
 import de.mobanisto.pinpit.desktop.application.internal.MacUtils
-import de.mobanisto.pinpit.desktop.application.internal.OS
+import de.mobanisto.pinpit.desktop.application.internal.OS.Linux
+import de.mobanisto.pinpit.desktop.application.internal.OS.MacOS
+import de.mobanisto.pinpit.desktop.application.internal.OS.Windows
 import de.mobanisto.pinpit.desktop.application.internal.currentArch
 import de.mobanisto.pinpit.desktop.application.internal.currentOS
 import de.mobanisto.pinpit.desktop.application.internal.currentTarget
@@ -23,6 +26,7 @@ import de.mobanisto.pinpit.test.utils.modify
 import de.mobanisto.pinpit.test.utils.runProcess
 import de.mobanisto.pinpit.validation.deb.DebContentBuilder
 import de.mobanisto.pinpit.validation.deb.DebContentUtils
+import de.mobanisto.pinpit.validation.deb.NativeDebPackager
 import org.gradle.internal.impldep.org.testng.Assert
 import org.gradle.testkit.runner.TaskOutcome
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -30,7 +34,9 @@ import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Assumptions
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.io.TempDir
 import java.io.File
+import java.nio.file.Path
 import java.util.*
 import java.util.jar.JarFile
 
@@ -238,8 +244,12 @@ class DesktopApplicationTest : GradlePluginTestBase() {
     }
 
     @Test
-    fun packageDebsAndCompareContent() = with(testProject(TestProjects.jvm)) {
-        testPackageDebsAndCompareContent()
+    fun packageDebAndCompareContentWithNativePackaging(@TempDir dirNativePackaging: Path) {
+        Assumptions.assumeTrue(currentOS == Linux)
+        Assumptions.assumeTrue(currentArch == Arch.X64)
+        with(testProject(TestProjects.jvm)) {
+            testPackageDebsAndCompareContent(dirNativePackaging)
+        }
     }
 
     @Test
@@ -274,7 +284,8 @@ class DesktopApplicationTest : GradlePluginTestBase() {
         gradle(":pinpitPackageDefaultDebUbuntuFocalX64").build().let { result ->
             assertEquals(TaskOutcome.SUCCESS, result.task(":pinpitPackageDefaultDebUbuntuFocalX64")?.outcome)
 
-            val resultFile = file("build/pinpit/binaries/main-default/linux/x64/deb/test-package-ubuntu-20.04-x64-1.0.0.deb")
+            val resultFile =
+                file("build/pinpit/binaries/main-default/linux/x64/deb/test-package-ubuntu-20.04-x64-1.0.0.deb")
             resultFile.checkExists()
 
             // TODO: add some in-depth validation
@@ -293,17 +304,47 @@ class DesktopApplicationTest : GradlePluginTestBase() {
         }
     }
 
-    private fun TestProject.testPackageDebsAndCompareContent() {
-        val result = gradle(":pinpitPackageDeb", ":pinpitPackageCustomDeb").build()
+    private fun TestProject.testPackageDebsAndCompareContent(dirNativePackaging: Path) {
+        val result = gradle(":pinpitPackageDefaultDebUbuntuFocalX64").build()
 
-        val packageDirStock = file("build/pinpit/binaries/main/deb")
-        val packageDirCustom = file("build/pinpit/binaries/main/custom-deb")
-        val packageDirs = listOf(packageDirStock, packageDirCustom)
+        val outputDirNativePackaging = dirNativePackaging.resolve("output")
+        val workingDir = dirNativePackaging.resolve("working")
+
+        val dirBuild = file("build").toPath()
+        val dirBinaries = dirBuild.resolve("pinpit/binaries/main-default/linux/x64/")
+
+        val packaging = file("src/main/packaging").toPath()
+        val appImage = dirBinaries.resolve("appimage/TestPackage")
+        val packager = NativeDebPackager(
+            appImage,
+            outputDirNativePackaging,
+            workingDir,
+            "TestPackage",
+            "test-package",
+            "1.0.0",
+            currentArch.id,
+            "utils",
+            "Test Vendor",
+            "example@example.com",
+            "Test description",
+            listOf("libc6", "libexpat1", "libgcc-s1", "libpcre3", "libuuid1", "xdg-utils", "zlib1g", "libnotify4"),
+            "ubuntu-20.04",
+            packaging.resolve("deb/copyright"),
+            packaging.resolve("deb/launcher.desktop"),
+            packaging.resolve("deb/preinst"),
+            packaging.resolve("deb/postinst"),
+            packaging.resolve("deb/prerm"),
+            packaging.resolve("deb/postrm"),
+        )
+        packager.createPackage()
+
+        val outputDirPinpitPackaging = dirBinaries.resolve("deb")
+        val packageDirs = listOf(outputDirPinpitPackaging, outputDirNativePackaging)
 
         val debs = mutableListOf<File>()
 
         for (packageDir in packageDirs) {
-            val packageDirFiles = packageDir.listFiles() ?: arrayOf()
+            val packageDirFiles = packageDir.toFile().listFiles() ?: arrayOf()
             check(packageDirFiles.size == 1) {
                 "Expected single package in $packageDir, got [${packageDirFiles.joinToString(", ") { it.name }}]"
             }
@@ -317,8 +358,7 @@ class DesktopApplicationTest : GradlePluginTestBase() {
             }
             println("got package file at ${packageFile}")
         }
-        assertEquals(TaskOutcome.SUCCESS, result.task(":pinpitPackageDeb")?.outcome)
-        assertEquals(TaskOutcome.SUCCESS, result.task(":pinpitPackageCustomDeb")?.outcome)
+        assertEquals(TaskOutcome.SUCCESS, result.task(":pinpitPackageDefaultDebUbuntuFocalX64")?.outcome)
 
         check(debs.size == 2)
         val debContent = debs.map { file ->
@@ -340,15 +380,15 @@ class DesktopApplicationTest : GradlePluginTestBase() {
             for (entry in comparison.entries) {
                 println("  Differences in ${entry.key}:")
                 val tarComparison = entry.value
-                tarComparison.onlyIn1.forEach { println("    only in stock deb:  $it") }
-                tarComparison.onlyIn2.forEach { println("    only in custom deb: $it") }
-                tarComparison.different.forEach { println("    both but different (stock):  ${it.first}") }
-                tarComparison.different.forEach { println("    both but different (custom): ${it.second}") }
+                tarComparison.onlyIn1.forEach { println("    only in pinpit deb:  $it") }
+                tarComparison.onlyIn2.forEach { println("    only in native deb: $it") }
+                tarComparison.different.forEach { println("    both but different (pinpit):  ${it.first}") }
+                tarComparison.different.forEach { println("    both but different (native): ${it.second}") }
             }
             println("Showing files with differences:")
             DebContentUtils.printDiff(debs[0], debs[1], comparison)
         }
-        check(allClear) { "Differences found in stock and custom deb" }
+        check(allClear) { "Differences found in pinpit and native deb" }
     }
 
     @Test
@@ -377,7 +417,7 @@ class DesktopApplicationTest : GradlePluginTestBase() {
                 "Copyright (C) CURRENT_YEAR"
             )
 
-        Assumptions.assumeTrue(currentOS == OS.MacOS)
+        Assumptions.assumeTrue(currentOS == MacOS)
 
         with(testProject(TestProjects.macOptions)) {
             gradle(":runDistributable").build().checks { check ->
@@ -395,7 +435,7 @@ class DesktopApplicationTest : GradlePluginTestBase() {
 
     @Test
     fun macSign() {
-        Assumptions.assumeTrue(currentOS == OS.MacOS)
+        Assumptions.assumeTrue(currentOS == MacOS)
 
         fun security(vararg args: Any): ProcessRunResult {
             val args = args.map {
@@ -533,9 +573,9 @@ class DesktopApplicationTest : GradlePluginTestBase() {
                     error("Invalid skiko path: $skikoDir")
                 }
                 val filesToFind = when (currentOS) {
-                    OS.Linux -> listOf("libskiko-linux-${currentArch.id}.so")
-                    OS.Windows -> listOf("skiko-windows-${currentArch.id}.dll", "icudtl.dat")
-                    OS.MacOS -> listOf("libskiko-macos-${currentArch.id}.dylib")
+                    Linux -> listOf("libskiko-linux-${currentArch.id}.so")
+                    Windows -> listOf("skiko-windows-${currentArch.id}.dll", "icudtl.dat")
+                    MacOS -> listOf("libskiko-macos-${currentArch.id}.dylib")
                 }
                 for (fileName in filesToFind) {
                     skikoDir.resolve(fileName).checkExists()
