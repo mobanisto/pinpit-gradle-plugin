@@ -203,33 +203,41 @@ This will add a set of tasks to your build:
 ```
 Pinpit tasks
 ------------
-pinpitCheckRuntimeLinuxX64
-pinpitCheckRuntimeWindowsX64
-pinpitDebUbuntuBionicX64
-pinpitDebUbuntuFocalX64
-pinpitDistributableLinuxX64
-pinpitDistributableWindowsX64
-pinpitDownloadLinuxX64
-pinpitDownloadWindowsX64
-pinpitMsiX64
-pinpitPackage
-pinpitPackageReleaseUberJarForCurrentOS
-pinpitPackageUberJarForCurrentOS
-pinpitPrepareAppResources
-pinpitProguardReleaseJarsLinuxX64
-pinpitProguardReleaseJarsWindowsX64
-pinpitReleaseDebUbuntuBionicX64
-pinpitReleaseDebUbuntuFocalX64
-pinpitReleaseMsiX64
-pinpitRun
-pinpitRunDistributableLinuxX64
-pinpitRunDistributableWindowsX64
-pinpitRunRelease
-pinpitRuntimeImageLinuxX64
-pinpitRuntimeImageWindowsX64
-pinpitSuggestRuntimeModulesLinuxX64
-pinpitSuggestRuntimeModulesWindowsX64
-pinpitUnpackDefaultComposeDesktopJvmApplicationResources
+pinpitCheckRuntimeLinuxX64 - Checks that the JDK used for building is compatible with the distribution JVM.
+pinpitCheckRuntimeWindowsX64 - Checks that the JDK used for building is compatible with the distribution JVM.
+pinpitCreateDefaultDistributableLinuxX64 - Creates a directory for LinuxX64 containing all files to be distributed including launcher, app and runtime image.
+pinpitCreateDefaultDistributableWindowsX64 - Creates a directory for WindowsX64 containing all files to be distributed including launcher, app and runtime image.
+pinpitCreateDefaultRuntimeImageLinuxX64 - Creates a runtime image from the JVM for LinuxX64 using jlink.
+pinpitCreateDefaultRuntimeImageWindowsX64 - Creates a runtime image from the JVM for WindowsX64 using jlink.
+pinpitCreateReleaseDistributableLinuxX64 - Creates a directory for LinuxX64 containing all files to be distributed including launcher, app and runtime image.
+pinpitCreateReleaseDistributableWindowsX64 - Creates a directory for WindowsX64 containing all files to be distributed including launcher, app and runtime image.
+pinpitCreateReleaseRuntimeImageLinuxX64 - Creates a runtime image from the JVM for LinuxX64 using jlink.
+pinpitCreateReleaseRuntimeImageWindowsX64 - Creates a runtime image from the JVM for WindowsX64 using jlink.
+pinpitDownloadJdkLinuxX64 - Downloads the JDK for LinuxX64 that is used to derive a runtime to distribute with the app.
+pinpitDownloadJdkWindowsX64 - Downloads the JDK for WindowsX64 that is used to derive a runtime to distribute with the app.
+pinpitPackageDefault - Builds packages for all systems and architectures.
+pinpitPackageDefaultDebUbuntuBionicX64 - Builds a DEB package for LinuxX64.
+pinpitPackageDefaultDebUbuntuFocalX64 - Builds a DEB package for LinuxX64.
+pinpitPackageDefaultMsiX64 - Builds an MSI package for WindowsX64.
+pinpitPackageDefaultUberJarForCurrentOS - Packages an Uber-Jar for the current OS.
+pinpitPackageRelease - Builds packages for all systems and architectures.
+pinpitPackageReleaseDebUbuntuBionicX64 - Builds a DEB package for LinuxX64.
+pinpitPackageReleaseDebUbuntuFocalX64 - Builds a DEB package for LinuxX64.
+pinpitPackageReleaseMsiX64 - Builds an MSI package for WindowsX64.
+pinpitPackageReleaseUberJarForCurrentOS - Packages an Uber-Jar for the current OS.
+pinpitPrepareAppResourcesLinuxX64 - Merge all app resources for LinuxX64 into a single build directory.
+pinpitPrepareAppResourcesWindowsX64 - Merge all app resources for WindowsX64 into a single build directory.
+pinpitProguardReleaseJarsLinuxX64 - Runs Proguard to minify and obfuscate release jars.
+pinpitProguardReleaseJarsWindowsX64 - Runs Proguard to minify and obfuscate release jars.
+pinpitRun - Runs the application.
+pinpitRunDefaultDistributableLinuxX64 - Runs the app from the created distributable directory for LinuxX64.
+pinpitRunDefaultDistributableWindowsX64 - Runs the app from the created distributable directory for WindowsX64.
+pinpitRunReleaseDistributableLinuxX64 - Runs the app from the created distributable directory for LinuxX64.
+pinpitRunReleaseDistributableWindowsX64 - Runs the app from the created distributable directory for WindowsX64.
+pinpitSuggestDebDependencies - Suggests Debian package dependencies to use for the current OS using dpkg.
+pinpitSuggestRuntimeModulesLinuxX64 - Suggests JVM modules to include for the distribution using jdeps.
+pinpitSuggestRuntimeModulesWindowsX64 - Suggests JVM modules to include for the distribution using jdeps.
+pinpitUnpackDefaultComposeDesktopJvmApplicationResources - Unpacks the default Compose resources such as launcher icons.
 ```
 
 For example you can create the Debian package for Ubuntu Focal using:
