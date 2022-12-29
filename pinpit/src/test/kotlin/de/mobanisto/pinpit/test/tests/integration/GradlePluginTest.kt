@@ -27,25 +27,4 @@ class GradlePluginTest : GradlePluginTestBase() {
                 check.taskOutcome(":compileKotlinJs", TaskOutcome.SUCCESS)
             }
         }
-
-    private fun testConfigureDesktopPreivewImpl(port: Int) {
-        check(port > 0) { "Invalid port: $port" }
-        with(testProject(TestProjects.jvmPreview)) {
-            val portProperty = "-Pcompose.desktop.preview.ide.port=$port"
-            val previewTargetProperty = "-Pcompose.desktop.preview.target=PreviewKt.ExamplePreview"
-            val jvmTask = ":jvm:configureDesktopPreview"
-            gradle(jvmTask, portProperty, previewTargetProperty)
-                .build()
-                .checks { check ->
-                    check.taskOutcome(jvmTask, TaskOutcome.SUCCESS)
-                }
-
-            val mppTask = ":mpp:configureDesktopPreviewDesktop"
-            gradle(mppTask, portProperty, previewTargetProperty)
-                .build()
-                .checks { check ->
-                    check.taskOutcome(mppTask, TaskOutcome.SUCCESS)
-                }
-        }
-    }
 }
