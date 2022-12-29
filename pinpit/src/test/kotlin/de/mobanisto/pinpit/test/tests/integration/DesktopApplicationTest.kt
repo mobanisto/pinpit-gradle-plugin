@@ -280,7 +280,6 @@ class DesktopApplicationTest : GradlePluginTestBase() {
 
             val resultJarFile = file("build/pinpit/jars/TestPackage-${target.id}-1.0.0.jar")
             resultJarFile.checkExists()
-            resultJarFile.copyTo(File("/tmp/" + resultJarFile.name))
 
             JarFile(resultJarFile).use { jar ->
                 val mainClass = jar.manifest.mainAttributes.getValue("Main-Class")
