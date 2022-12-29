@@ -8,13 +8,13 @@ package de.mobanisto.pinpit.desktop.application.tasks
 import de.mobanisto.pinpit.desktop.application.dsl.MacOSNotarizationSettings
 import de.mobanisto.pinpit.desktop.application.internal.nullableProperty
 import de.mobanisto.pinpit.desktop.application.internal.validation.validate
-import de.mobanisto.pinpit.desktop.tasks.AbstractComposeDesktopTask
+import de.mobanisto.pinpit.desktop.tasks.AbstractPinpitTask
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.Nested
 import org.gradle.api.tasks.Optional
 
-abstract class AbstractNotarizationTask : AbstractComposeDesktopTask() {
+abstract class AbstractNotarizationTask : AbstractPinpitTask() {
     @get:Input
     @get:Optional
     internal val nonValidatedBundleID: Property<String?> = objects.nullableProperty()

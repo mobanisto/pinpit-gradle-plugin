@@ -7,7 +7,7 @@ package de.mobanisto.pinpit.desktop.application.tasks
 
 import de.mobanisto.pinpit.desktop.application.internal.ioFile
 import de.mobanisto.pinpit.desktop.application.internal.notNullProperty
-import de.mobanisto.pinpit.desktop.tasks.AbstractComposeDesktopTask
+import de.mobanisto.pinpit.desktop.tasks.AbstractPinpitTask
 import org.gradle.api.file.Directory
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.provider.Property
@@ -19,7 +19,7 @@ import org.gradle.api.tasks.OutputDirectory
 import org.gradle.api.tasks.TaskAction
 import java.io.File
 
-abstract class AbstractNativeMacApplicationPackageTask : AbstractComposeDesktopTask() {
+abstract class AbstractNativeMacApplicationPackageTask : AbstractPinpitTask() {
     @get:Input
     val packageName: Property<String> = objects.notNullProperty()
 

@@ -12,7 +12,7 @@ import de.mobanisto.pinpit.desktop.application.internal.files.normalizedPath
 import de.mobanisto.pinpit.desktop.application.internal.ioFile
 import de.mobanisto.pinpit.desktop.application.internal.jvmToolFile
 import de.mobanisto.pinpit.desktop.application.internal.notNullProperty
-import de.mobanisto.pinpit.desktop.tasks.AbstractComposeDesktopTask
+import de.mobanisto.pinpit.desktop.tasks.AbstractPinpitTask
 import org.gradle.api.file.ConfigurableFileCollection
 import org.gradle.api.file.Directory
 import org.gradle.api.file.RegularFileProperty
@@ -29,7 +29,7 @@ import org.gradle.api.tasks.PathSensitivity
 import org.gradle.api.tasks.TaskAction
 import java.nio.file.Path
 
-abstract class AbstractSuggestModulesTask : AbstractComposeDesktopTask() {
+abstract class AbstractSuggestModulesTask : AbstractPinpitTask() {
     @get:Input
     val javaHome: Property<String> = objects.notNullProperty<String>().apply {
         set(providers.systemProperty("java.home"))

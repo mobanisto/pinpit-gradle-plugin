@@ -8,7 +8,7 @@ package de.mobanisto.pinpit.desktop.application.tasks.linux
 import de.mobanisto.pinpit.desktop.application.internal.Arch
 import de.mobanisto.pinpit.desktop.application.internal.DebianUtils
 import de.mobanisto.pinpit.desktop.application.internal.currentArch
-import de.mobanisto.pinpit.desktop.tasks.AbstractComposeDesktopTask
+import de.mobanisto.pinpit.desktop.tasks.AbstractPinpitTask
 import org.gradle.api.GradleException
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.tasks.InputDirectory
@@ -21,7 +21,7 @@ import java.util.regex.Pattern
 import javax.inject.Inject
 
 
-abstract class SuggestDebDependenciesTask @Inject constructor() : AbstractComposeDesktopTask() {
+abstract class SuggestDebDependenciesTask @Inject constructor() : AbstractPinpitTask() {
 
     companion object {
         private val PACKAGE_NAME_REGEX: Pattern = Pattern.compile("^(^\\S+):")

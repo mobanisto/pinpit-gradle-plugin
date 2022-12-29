@@ -4,7 +4,7 @@ import de.mobanisto.pinpit.desktop.application.internal.currentOS
 import de.mobanisto.pinpit.desktop.application.internal.isUnix
 import de.mobanisto.pinpit.desktop.application.internal.jdkInfo
 import de.mobanisto.pinpit.desktop.application.internal.notNullProperty
-import de.mobanisto.pinpit.desktop.tasks.AbstractComposeDesktopTask
+import de.mobanisto.pinpit.desktop.tasks.AbstractPinpitTask
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry
@@ -25,7 +25,7 @@ import javax.inject.Inject
 import kotlin.io.path.exists
 import kotlin.io.path.inputStream
 
-abstract class DownloadJdkTask @Inject constructor() : AbstractComposeDesktopTask() {
+abstract class DownloadJdkTask @Inject constructor() : AbstractPinpitTask() {
 
     @Internal
     val jvmVendor: Property<String> = objects.notNullProperty()

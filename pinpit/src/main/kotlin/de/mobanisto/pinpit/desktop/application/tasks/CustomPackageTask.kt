@@ -5,7 +5,7 @@ import de.mobanisto.pinpit.desktop.application.internal.PinpitProperties
 import de.mobanisto.pinpit.desktop.application.internal.Target
 import de.mobanisto.pinpit.desktop.application.internal.notNullProperty
 import de.mobanisto.pinpit.desktop.application.internal.nullableProperty
-import de.mobanisto.pinpit.desktop.tasks.AbstractComposeDesktopTask
+import de.mobanisto.pinpit.desktop.tasks.AbstractPinpitTask
 import org.gradle.api.file.ConfigurableFileCollection
 import org.gradle.api.file.Directory
 import org.gradle.api.file.DirectoryProperty
@@ -29,7 +29,7 @@ import javax.inject.Inject
 abstract class CustomPackageTask @Inject constructor(
     @get:Input val target: Target,
     @get:Input val targetFormat: TargetFormat,
-) : AbstractComposeDesktopTask() {
+) : AbstractPinpitTask() {
     @get:LocalState
     protected val workingDir: Provider<Directory> = project.layout.buildDirectory.dir("pinpit/tmp/$name")
 

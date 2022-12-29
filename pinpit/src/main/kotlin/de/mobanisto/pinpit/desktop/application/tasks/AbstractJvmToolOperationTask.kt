@@ -9,7 +9,7 @@ import de.mobanisto.pinpit.desktop.application.internal.PinpitProperties
 import de.mobanisto.pinpit.desktop.application.internal.ioFile
 import de.mobanisto.pinpit.desktop.application.internal.jvmToolFile
 import de.mobanisto.pinpit.desktop.application.internal.notNullProperty
-import de.mobanisto.pinpit.desktop.tasks.AbstractComposeDesktopTask
+import de.mobanisto.pinpit.desktop.tasks.AbstractPinpitTask
 import org.gradle.api.file.Directory
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.provider.ListProperty
@@ -25,7 +25,7 @@ import org.gradle.process.ExecResult
 import org.gradle.work.InputChanges
 import java.io.File
 
-abstract class AbstractJvmToolOperationTask(private val toolName: String) : AbstractComposeDesktopTask() {
+abstract class AbstractJvmToolOperationTask(private val toolName: String) : AbstractPinpitTask() {
     @get:LocalState
     protected val workingDir: Provider<Directory> = project.layout.buildDirectory.dir("pinpit/tmp/$name")
 

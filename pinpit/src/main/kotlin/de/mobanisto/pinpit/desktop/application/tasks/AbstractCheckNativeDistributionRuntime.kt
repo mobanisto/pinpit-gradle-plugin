@@ -9,7 +9,7 @@ import de.mobanisto.pinpit.desktop.application.internal.JvmRuntimeProperties
 import de.mobanisto.pinpit.desktop.application.internal.executableName
 import de.mobanisto.pinpit.desktop.application.internal.ioFile
 import de.mobanisto.pinpit.desktop.application.internal.notNullProperty
-import de.mobanisto.pinpit.desktop.tasks.AbstractComposeDesktopTask
+import de.mobanisto.pinpit.desktop.tasks.AbstractPinpitTask
 import org.gradle.api.file.Directory
 import org.gradle.api.file.RegularFile
 import org.gradle.api.provider.Property
@@ -30,7 +30,7 @@ import java.nio.file.Path
 internal const val MIN_JAVA_RUNTIME_VERSION = 11
 
 @CacheableTask
-abstract class AbstractCheckNativeDistributionRuntime : AbstractComposeDesktopTask() {
+abstract class AbstractCheckNativeDistributionRuntime : AbstractPinpitTask() {
     @get:PathSensitive(PathSensitivity.ABSOLUTE)
     @get:InputDirectory
     val javaHome: Property<String> = objects.notNullProperty()

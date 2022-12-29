@@ -5,8 +5,8 @@
 
 package de.mobanisto.pinpit.desktop.tasks
 
-import de.mobanisto.pinpit.desktop.application.internal.ioFile
 import de.mobanisto.pinpit.PinpitBuildConfig
+import de.mobanisto.pinpit.desktop.application.internal.ioFile
 import org.gradle.api.file.Directory
 import org.gradle.api.file.FileSystemLocation
 import org.gradle.api.file.RegularFile
@@ -17,7 +17,7 @@ import org.gradle.api.tasks.TaskAction
 
 private const val DEFAULT_COMPOSE_PROGUARD_RULES_FILE_NAME = "default-compose-desktop-rules.pro"
 
-abstract class AbstractUnpackDefaultComposeApplicationResourcesTask : AbstractComposeDesktopTask() {
+abstract class AbstractUnpackDefaultComposeApplicationResourcesTask : AbstractPinpitTask() {
     internal class DefaultResourcesProvider(resourcesRootDir: Provider<Directory>) {
         val macIcon: Provider<RegularFile> = resourcesRootDir.map { it.file("default-icon-mac.icns") }
         val windowsIcon: Provider<RegularFile> = resourcesRootDir.map { it.file("default-icon-windows.ico") }

@@ -26,7 +26,7 @@ import org.gradle.process.ExecOperations
 import java.io.File
 import javax.inject.Inject
 
-abstract class AbstractComposeDesktopTask : DefaultTask() {
+abstract class AbstractPinpitTask : DefaultTask() {
     @get:Inject
     protected abstract val objects: ObjectFactory
 

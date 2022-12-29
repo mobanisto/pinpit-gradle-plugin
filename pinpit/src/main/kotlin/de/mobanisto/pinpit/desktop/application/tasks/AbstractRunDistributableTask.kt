@@ -9,7 +9,7 @@ import de.mobanisto.pinpit.desktop.application.internal.OS
 import de.mobanisto.pinpit.desktop.application.internal.currentOS
 import de.mobanisto.pinpit.desktop.application.internal.executableName
 import de.mobanisto.pinpit.desktop.application.internal.ioFile
-import de.mobanisto.pinpit.desktop.tasks.AbstractComposeDesktopTask
+import de.mobanisto.pinpit.desktop.tasks.AbstractPinpitTask
 import org.gradle.api.file.Directory
 import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.Input
@@ -23,7 +23,7 @@ import javax.inject.Inject
 // calculate appImageDir after the evaluation of createApplicationImage
 abstract class AbstractRunDistributableTask @Inject constructor(
     createApplicationImage: TaskProvider<AppImageTask>
-) : AbstractComposeDesktopTask() {
+) : AbstractPinpitTask() {
     @get:InputDirectory
     internal val appImageRootDir: Provider<Directory> = createApplicationImage.flatMap { it.destinationDir }
 
