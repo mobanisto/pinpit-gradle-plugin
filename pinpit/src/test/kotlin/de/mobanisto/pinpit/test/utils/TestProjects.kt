@@ -8,6 +8,7 @@ package de.mobanisto.pinpit.test.utils
 object TestProjects {
     const val jvm = "application/jvm"
     const val mpp = "application/mpp"
+    const val mpp2 = "application/mpp2"
     const val proguard = "application/proguard"
     const val androidxCompiler = "application/androidx-compiler"
     const val jvmKotlinDsl = "application/jvmKotlinDsl"
