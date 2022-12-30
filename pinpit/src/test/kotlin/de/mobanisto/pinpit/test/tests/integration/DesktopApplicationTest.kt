@@ -75,21 +75,6 @@ class DesktopApplicationTest : GradlePluginTestBase() {
     }
 
     @Test
-    fun runMpp() = with(testProject(TestProjects.mpp)) {
-        val targetName = currentTarget.name
-        val logLine = "Kotlin MPP app is running!"
-        gradle("pinpitRun").build().checks { check ->
-            check.taskOutcome(":pinpitRun", TaskOutcome.SUCCESS)
-            check.logContains(logLine)
-        }
-        gradle("pinpitRunDefaultDistributable$targetName").build().checks { check ->
-            check.taskOutcome(":pinpitCreateDefaultDistributable$targetName", TaskOutcome.SUCCESS)
-            check.taskOutcome(":pinpitRunDefaultDistributable$targetName", TaskOutcome.SUCCESS)
-            check.logContains(logLine)
-        }
-    }
-
-    @Test
     fun androidxCompiler() = with(testProject(TestProjects.androidxCompiler, defaultAndroidxCompilerEnvironment)) {
         val targetName = currentTarget.name
         gradle(":pinpitRunDefaultDistributable$targetName").build().checks { check ->
@@ -183,11 +168,6 @@ class DesktopApplicationTest : GradlePluginTestBase() {
         }
     }
 
-    @Test
-    fun packageMpp() = with(testProject(TestProjects.mpp)) {
-        testPackageJvmDistributions()
-    }
-
     private fun TestProject.testPackageJvmDistributions() {
         testPackageDebUbuntuFocal()
         testPackageMsi()
@@ -261,16 +241,6 @@ class DesktopApplicationTest : GradlePluginTestBase() {
 
     @Test
     fun packageUberJarForLinuxJvm() = with(testProject(TestProjects.jvm)) {
-        testPackageUberJar(Target(Linux, Arch.X64))
-    }
-
-    @Test
-    fun packageUberJarForWindowsMpp() = with(testProject(TestProjects.mpp)) {
-        testPackageUberJar(Target(Windows, Arch.X64))
-    }
-
-    @Test
-    fun packageUberJarForLinuxMpp() = with(testProject(TestProjects.mpp)) {
         testPackageUberJar(Target(Linux, Arch.X64))
     }
 
