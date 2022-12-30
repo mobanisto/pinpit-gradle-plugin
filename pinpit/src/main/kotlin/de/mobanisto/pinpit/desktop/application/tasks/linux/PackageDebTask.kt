@@ -9,6 +9,7 @@ import de.mobanisto.pinpit.desktop.application.dsl.TargetFormat
 import de.mobanisto.pinpit.desktop.application.internal.DebianUtils
 import de.mobanisto.pinpit.desktop.application.internal.JvmRuntimeProperties
 import de.mobanisto.pinpit.desktop.application.internal.Target
+import de.mobanisto.pinpit.desktop.application.internal.currentOS
 import de.mobanisto.pinpit.desktop.application.internal.dir
 import de.mobanisto.pinpit.desktop.application.internal.files.asPath
 import de.mobanisto.pinpit.desktop.application.internal.files.findOutputFileOrDir
@@ -18,6 +19,7 @@ import de.mobanisto.pinpit.desktop.application.internal.files.syncDir
 import de.mobanisto.pinpit.desktop.application.internal.files.writeLn
 import de.mobanisto.pinpit.desktop.application.internal.ioFile
 import de.mobanisto.pinpit.desktop.application.internal.ioFileOrNull
+import de.mobanisto.pinpit.desktop.application.internal.isUnix
 import de.mobanisto.pinpit.desktop.application.internal.nullableProperty
 import de.mobanisto.pinpit.desktop.application.internal.provider
 import de.mobanisto.pinpit.desktop.application.tasks.CustomPackageTask
@@ -40,10 +42,10 @@ import java.nio.file.Files
 import java.nio.file.Files.createDirectories
 import java.nio.file.Path
 import java.nio.file.Paths
+import java.nio.file.attribute.FileAttribute
 import java.nio.file.attribute.PosixFilePermission
 import java.nio.file.attribute.PosixFilePermissions.asFileAttribute
 import javax.inject.Inject
-import kotlin.io.path.createDirectories
 
 
 abstract class PackageDebTask @Inject constructor(
@@ -202,7 +204,7 @@ abstract class PackageDebTask @Inject constructor(
         val dirBin = dirPackage.dir("bin")
         val dirLib = dirPackage.dir("lib")
         val dirShareDoc = dirPackage.dir("share/doc/")
-        createDirectories(dirShareDoc.asFile.toPath(), asFileAttribute(posixExecutable))
+        dirShareDoc.asFile.toPath().createDirectories(asFileAttribute(posixExecutable))
         linuxDebCopyright.copy(dirShareDoc.file("copyright"), posixRegular)
         linuxDebLauncher.copy(dirLib.file("${linuxPackageName.get()}-${packageName.get()}.desktop"), posixRegular)
 
@@ -223,11 +225,21 @@ abstract class PackageDebTask @Inject constructor(
         linuxDebPostRm.copy(dirDebian.file("postrm"), posixExecutable)
     }
 
+    private fun Path.createDirectories(vararg attributes: FileAttribute<*>) {
+        if (currentOS.isUnix()) {
+            createDirectories(this, *attributes)
+        } else {
+            createDirectories(this)
+        }
+    }
+
     private fun RegularFileProperty.copy(target: RegularFile, permissions: Set<PosixFilePermission>) {
         if (ioFileOrNull == null) return
         target.asPath().parent.createDirectories(asFileAttribute(posixExecutable))
         Files.copy(asPath(), target.asPath())
-        Files.setPosixFilePermissions(target.asPath(), permissions)
+        if (currentOS.isUnix()) {
+            Files.setPosixFilePermissions(target.asPath(), permissions)
+        }
     }
 
     private fun createControlFile(fileControl: RegularFile, appImage: Directory) {

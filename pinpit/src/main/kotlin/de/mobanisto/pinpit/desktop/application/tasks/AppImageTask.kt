@@ -483,14 +483,18 @@ abstract class AppImageTask @Inject constructor(
         val dirApp = dirLib.resolve("app")
 
         val resAppLauncher = "classes/jdk/jpackage/internal/resources/jpackageapplauncher"
-        val launcher = dirBin.resolve("${packageName.get()}")
+        val launcher = dirBin.resolve(packageName.get())
         extractZip(jpackageJMods, resAppLauncher, launcher)
-        Files.setPosixFilePermissions(launcher, posixExecutable)
+        if (currentOS.isUnix()) {
+            Files.setPosixFilePermissions(launcher, posixExecutable)
+        }
         if (jdkVersion.get() >= 17) {
             val resAppLauncherAux = "classes/jdk/jpackage/internal/resources/libjpackageapplauncheraux.so"
             val launcherLib = dirLib.resolve("libapplauncher.so")
             extractZip(jpackageJMods, resAppLauncherAux, launcherLib)
-            Files.setPosixFilePermissions(launcherLib, posixExecutable)
+            if (currentOS.isUnix()) {
+                Files.setPosixFilePermissions(launcherLib, posixExecutable)
+            }
         }
         syncDir(runtimeImage.asPath(), dirRuntime)
         syncDir(libsDir.get().asPath(), dirApp)
