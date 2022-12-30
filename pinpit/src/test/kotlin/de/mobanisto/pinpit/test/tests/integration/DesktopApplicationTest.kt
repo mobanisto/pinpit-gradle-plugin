@@ -14,14 +14,16 @@ import de.mobanisto.pinpit.desktop.application.internal.Target
 import de.mobanisto.pinpit.desktop.application.internal.currentArch
 import de.mobanisto.pinpit.desktop.application.internal.currentOS
 import de.mobanisto.pinpit.desktop.application.internal.currentTarget
+import de.mobanisto.pinpit.test.tests.integration.TestUtils.testPackageDebUbuntuFocal
+import de.mobanisto.pinpit.test.tests.integration.TestUtils.testPackageJvmDistributions
+import de.mobanisto.pinpit.test.tests.integration.TestUtils.testPackageMsi
+import de.mobanisto.pinpit.test.tests.integration.TestUtils.testPackageUberJar
 import de.mobanisto.pinpit.test.utils.GradlePluginTestBase
 import de.mobanisto.pinpit.test.utils.ProcessRunResult
 import de.mobanisto.pinpit.test.utils.TestProject
 import de.mobanisto.pinpit.test.utils.TestProjects
 import de.mobanisto.pinpit.test.utils.assertEqualTextFiles
 import de.mobanisto.pinpit.test.utils.assertNotEqualTextFiles
-import de.mobanisto.pinpit.test.utils.checkContains
-import de.mobanisto.pinpit.test.utils.checkContainsNot
 import de.mobanisto.pinpit.test.utils.checkExists
 import de.mobanisto.pinpit.test.utils.checks
 import de.mobanisto.pinpit.test.utils.modify
@@ -40,7 +42,6 @@ import org.junit.jupiter.api.io.TempDir
 import java.io.File
 import java.nio.file.Path
 import java.util.*
-import java.util.jar.JarFile
 
 class DesktopApplicationTest : GradlePluginTestBase() {
     @Test
@@ -168,11 +169,6 @@ class DesktopApplicationTest : GradlePluginTestBase() {
         }
     }
 
-    private fun TestProject.testPackageJvmDistributions() {
-        testPackageDebUbuntuFocal()
-        testPackageMsi()
-    }
-
     @Test
     fun jdk16() = with(customJdkProject(16, "16.0.2+7")) {
         testPackageJvmDistributions()
@@ -242,55 +238,6 @@ class DesktopApplicationTest : GradlePluginTestBase() {
     @Test
     fun packageUberJarForLinuxJvm() = with(testProject(TestProjects.jvm)) {
         testPackageUberJar(Target(Linux, Arch.X64))
-    }
-
-    private fun TestProject.testPackageUberJar(target: Target) {
-        gradle(":pinpitPackageDefaultUberJarFor${target.name}").build().let { result ->
-            assertEquals(TaskOutcome.SUCCESS, result.task(":pinpitPackageDefaultUberJarFor${target.name}")?.outcome)
-
-            val resultJarFile = file("build/pinpit/jars/TestPackage-${target.id}-1.0.0.jar")
-            resultJarFile.checkExists()
-
-            JarFile(resultJarFile).use { jar ->
-                val mainClass = jar.manifest.mainAttributes.getValue("Main-Class")
-                assertEquals("MainKt", mainClass, "Unexpected main class")
-
-                jar.entries().toList().mapTo(HashSet()) { it.name }.apply {
-                    checkContains("MainKt.class", "org/jetbrains/skiko/SkiaLayer.class")
-                    if (target.os == Linux) {
-                        checkContains("libskiko-linux-x64.so", "libskiko-linux-x64.so.sha256")
-                        checkContainsNot("skiko-windows-x64.dll", "skiko-windows-x64.dll.sha256")
-                    } else if (target.os == Windows) {
-                        checkContains("skiko-windows-x64.dll", "skiko-windows-x64.dll.sha256")
-                        checkContainsNot("libskiko-linux-x64.so", "libskiko-linux-x64.so.sha256")
-                    }
-                }
-            }
-        }
-    }
-
-    private fun TestProject.testPackageDebUbuntuFocal() {
-        gradle(":pinpitPackageDefaultDebUbuntuFocalX64").build().let { result ->
-            assertEquals(TaskOutcome.SUCCESS, result.task(":pinpitPackageDefaultDebUbuntuFocalX64")?.outcome)
-
-            val resultFile =
-                file("build/pinpit/binaries/main-default/linux/x64/deb/test-package-ubuntu-20.04-x64-1.0.0.deb")
-            resultFile.checkExists()
-
-            // TODO: add some in-depth validation
-            /*resultFile.inputStream().use { fis ->
-                ValidateDeb.validate(fis)
-            }*/
-        }
-    }
-
-    private fun TestProject.testPackageMsi() {
-        gradle(":pinpitPackageDefaultMsiX64").build().let { result ->
-            assertEquals(TaskOutcome.SUCCESS, result.task(":pinpitPackageDefaultMsiX64")?.outcome)
-
-            val resultFile = file("build/pinpit/binaries/main-default/windows/x64/msi/TestPackage-x64-1.0.0.msi")
-            resultFile.checkExists()
-        }
     }
 
     private fun TestProject.testPackageDebsAndCompareContent(dirNativePackaging: Path) {

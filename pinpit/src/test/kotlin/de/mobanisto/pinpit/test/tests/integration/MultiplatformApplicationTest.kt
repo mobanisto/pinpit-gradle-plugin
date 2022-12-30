@@ -5,8 +5,15 @@
 
 package de.mobanisto.pinpit.test.tests.integration
 
+import de.mobanisto.pinpit.desktop.application.internal.Arch
+import de.mobanisto.pinpit.desktop.application.internal.OS.Linux
+import de.mobanisto.pinpit.desktop.application.internal.OS.Windows
+import de.mobanisto.pinpit.desktop.application.internal.Target
 import de.mobanisto.pinpit.desktop.application.internal.currentTarget
+import de.mobanisto.pinpit.test.tests.integration.TestUtils.testPackageJvmDistributions
+import de.mobanisto.pinpit.test.tests.integration.TestUtils.testPackageUberJar
 import de.mobanisto.pinpit.test.utils.GradlePluginTestBase
+import de.mobanisto.pinpit.test.utils.Subproject
 import de.mobanisto.pinpit.test.utils.TestProjects
 import de.mobanisto.pinpit.test.utils.checks
 import org.gradle.testkit.runner.TaskOutcome
@@ -45,4 +52,22 @@ class MultiplatformApplicationTest : GradlePluginTestBase() {
         testPackageUberJar(Target(Linux, Arch.X64))
     }
     */
+
+    @Test
+    fun packageMpp2() =
+        with(testProject(TestProjects.mpp2, pinpitSubproject = Subproject("desktop", "simple-desktop"))) {
+            testPackageJvmDistributions()
+        }
+
+    @Test
+    fun packageUberJarForWindowsMpp2() =
+        with(testProject(TestProjects.mpp2, pinpitSubproject = Subproject("desktop", "simple-desktop"))) {
+            testPackageUberJar(Target(Windows, Arch.X64))
+        }
+
+    @Test
+    fun packageUberJarForLinuxMpp2() =
+        with(testProject(TestProjects.mpp2, pinpitSubproject = Subproject("desktop", "simple-desktop"))) {
+            testPackageUberJar(Target(Linux, Arch.X64))
+        }
 }

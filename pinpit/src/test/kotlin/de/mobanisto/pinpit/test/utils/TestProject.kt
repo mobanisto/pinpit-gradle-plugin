@@ -39,9 +39,12 @@ data class TestEnvironment(
     }
 }
 
+data class Subproject(val dir: String, val name: String)
+
 class TestProject(
     private val name: String,
-    private val testEnvironment: TestEnvironment
+    private val testEnvironment: TestEnvironment,
+    val pinpitSubproject: Subproject? = null,
 ) {
     private val testProjectsRootDir = File("src/test/test-projects")
     private val additionalArgs = listOf(
@@ -61,7 +64,9 @@ class TestProject(
             target.parentFile.mkdirs()
             orig.copyTo(target)
 
-            if (orig.name.endsWith(".gradle") || orig.name.endsWith(".gradle.kts")) {
+            if (orig.name.endsWith(".gradle")|| orig.name.endsWith(".gradle.kts")
+                || orig.name == "gradle.properties"
+            ) {
                 testEnvironment.replacePlaceholdersInFile(target)
             }
         }
