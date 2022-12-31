@@ -22,6 +22,7 @@ import de.mobanisto.pinpit.desktop.application.internal.files.findRelative
 import de.mobanisto.pinpit.desktop.application.internal.files.isJarFile
 import de.mobanisto.pinpit.desktop.application.internal.files.mangledName
 import de.mobanisto.pinpit.desktop.application.internal.files.posixExecutable
+import de.mobanisto.pinpit.desktop.application.internal.files.posixRegular
 import de.mobanisto.pinpit.desktop.application.internal.files.syncDir
 import de.mobanisto.pinpit.desktop.application.internal.files.writeLn
 import de.mobanisto.pinpit.desktop.application.internal.ioFile
@@ -501,9 +502,15 @@ abstract class AppImageTask @Inject constructor(
 
         val icon = dirLib.resolve("${packageName.get()}.png")
         iconFile.asPath().copyTo(icon)
+        if (currentOS.isUnix()) {
+            Files.setPosixFilePermissions(icon, posixRegular)
+        }
 
         val fileConfig = dirApp.resolve("${packageName.get()}.cfg")
         createConfig(fileConfig)
+        if (currentOS.isUnix()) {
+            Files.setPosixFilePermissions(fileConfig, posixRegular)
+        }
     }
 
     private fun packageWindows(dirAppImage: Path, jpackageJMods: Path) {
