@@ -38,7 +38,6 @@ import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Assumptions
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.io.TempDir
 import java.io.File
 import java.nio.file.Path
 import java.util.*
@@ -222,10 +221,11 @@ class DesktopApplicationTest : GradlePluginTestBase() {
     }
 
     @Test
-    fun packageDebAndCompareContentWithNativePackaging(@TempDir dirNativePackaging: Path) {
+    fun packageDebAndCompareContentWithNativePackaging() {
         Assumptions.assumeTrue(currentOS == Linux)
         Assumptions.assumeTrue(currentArch == Arch.X64)
         with(testProject(TestProjects.jvm)) {
+            val dirNativePackaging = testWorkDir.resolve("native-deb")
             testPackageDebsAndCompareContent(dirNativePackaging)
         }
     }
@@ -359,9 +359,9 @@ class DesktopApplicationTest : GradlePluginTestBase() {
             gradle(":runDistributable").build().checks { check ->
                 check.taskOutcome(":runDistributable", TaskOutcome.SUCCESS)
                 check.logContains("Hello, from Mac OS!")
-                val appDir = testWorkDir.resolve("build/compose/binaries/main/app/TestPackage.app/Contents/")
+                val appDir = file("build/compose/binaries/main/app/TestPackage.app/Contents/")
                 val actualInfoPlist = appDir.resolve("Info.plist").checkExists()
-                val expectedInfoPlist = testWorkDir.resolve("Expected-Info.Plist")
+                val expectedInfoPlist = file("Expected-Info.Plist")
                 val actualInfoPlistNormalized = actualInfoPlist.readText().normalized()
                 val expectedInfoPlistNormalized = expectedInfoPlist.readText().normalized()
                 Assert.assertEquals(actualInfoPlistNormalized, expectedInfoPlistNormalized)
@@ -405,7 +405,7 @@ class DesktopApplicationTest : GradlePluginTestBase() {
 
                 gradle(":createDistributable").build().checks { check ->
                     check.taskOutcome(":createDistributable", TaskOutcome.SUCCESS)
-                    val appDir = testWorkDir.resolve("build/compose/binaries/main/app/TestPackage.app/")
+                    val appDir = file("build/compose/binaries/main/app/TestPackage.app/")
                     val result =
                         runProcess(MacUtils.codesign, args = listOf("--verify", "--verbose", appDir.absolutePath))
                     val actualOutput = result.err.trim()

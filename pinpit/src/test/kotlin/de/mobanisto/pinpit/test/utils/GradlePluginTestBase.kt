@@ -7,13 +7,17 @@ package de.mobanisto.pinpit.test.utils
 
 import org.junit.jupiter.api.io.TempDir
 import java.io.File
+import java.nio.file.Path
 
 abstract class GradlePluginTestBase {
     @TempDir
-    lateinit var testWorkDir: File
+    lateinit var testWorkDir: Path
+
+    private val projectDir: File
+        get() = testWorkDir.resolve("project").toFile()
 
     val defaultTestEnvironment: TestEnvironment
-        get() = TestEnvironment(workingDir = testWorkDir)
+        get() = TestEnvironment(projectDir = projectDir)
 
     val defaultAndroidxCompilerEnvironment: TestEnvironment
         get() = defaultTestEnvironment.copy(
@@ -37,7 +41,7 @@ abstract class GradlePluginTestBase {
         TestProject(
             name,
             testEnvironment = TestEnvironment(
-                workingDir = testWorkDir,
+                projectDir = projectDir,
                 pinpitJvmVersion = jvmVersion
             ),
             pinpitSubproject = pinpitSubproject

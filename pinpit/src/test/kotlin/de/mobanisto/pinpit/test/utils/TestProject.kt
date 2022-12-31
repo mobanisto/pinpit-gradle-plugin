@@ -11,7 +11,7 @@ import java.io.File
 import java.util.*
 
 data class TestEnvironment(
-    val workingDir: File,
+    val projectDir: File,
     val kotlinVersion: String = TestKotlinVersions.Default,
     val composeGradlePluginVersion: String = TestProperties.composeGradlePluginVersion,
     val pinpitGradlePluginVersion: String = TestProperties.pinpitGradlePluginVersion,
@@ -60,7 +60,7 @@ class TestProject(
         for (orig in originalTestRoot.walk()) {
             if (!orig.isFile) continue
 
-            val target = testEnvironment.workingDir.resolve(orig.relativeTo(originalTestRoot))
+            val target = testEnvironment.projectDir.resolve(orig.relativeTo(originalTestRoot))
             target.parentFile.mkdirs()
             orig.copyTo(target)
 
@@ -75,7 +75,7 @@ class TestProject(
     fun gradle(vararg args: String): GradleRunner =
         GradleRunner.create().apply {
             withGradleVersion(TestProperties.gradleVersionForTests)
-            withProjectDir(testEnvironment.workingDir)
+            withProjectDir(testEnvironment.projectDir)
             withArguments(args.toList() + additionalArgs)
             forwardOutput()
         }
@@ -86,7 +86,7 @@ class TestProject(
         gradle(*args).withDebug(true)
 
     fun file(path: String): File =
-        testEnvironment.workingDir.resolve(path)
+        testEnvironment.projectDir.resolve(path)
 
     fun modifyText(path: String, fn: (String) -> String) {
         val file = file(path)
