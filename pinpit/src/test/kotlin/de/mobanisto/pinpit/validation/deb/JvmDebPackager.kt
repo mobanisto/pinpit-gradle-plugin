@@ -28,7 +28,7 @@ import kotlin.io.path.isRegularFile
 import kotlin.io.path.outputStream
 
 /**
- * A class for creating a DEB package using without using native tools.
+ * A class for creating a DEB package without using native tools.
  */
 class JvmDebPackager constructor(
     private val appImage: Path,
