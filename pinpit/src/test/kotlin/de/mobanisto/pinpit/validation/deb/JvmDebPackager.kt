@@ -5,12 +5,14 @@
 
 package de.mobanisto.pinpit.validation.deb
 
+import org.apache.commons.compress.archivers.ar.ArArchiveEntry
 import org.apache.commons.compress.archivers.ar.ArArchiveOutputStream
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry
 import org.apache.commons.compress.archivers.tar.TarArchiveOutputStream
 import org.apache.commons.compress.compressors.xz.XZCompressorOutputStream
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import java.lang.System.currentTimeMillis
 import java.nio.file.FileVisitResult
 import java.nio.file.Files
 import java.nio.file.Files.walkFileTree
@@ -100,6 +102,20 @@ class JvmDebPackager constructor(
 
         deb.outputStream().buffered().use { fos ->
             ArArchiveOutputStream(fos).use { ar ->
+                val debianBinary = "2.0\n".toByteArray()
+                val entryDebianBinary =
+                    ArArchiveEntry(
+                        "debian-binary",
+                        debianBinary.size.toLong(),
+                        0,
+                        0,
+                        "100644".toInt(radix = 8),
+                        currentTimeMillis() / 1000
+                    )
+                ar.putArchiveEntry(entryDebianBinary)
+                ar.write(debianBinary)
+                ar.closeArchiveEntry()
+
                 val entryControl = ar.createArchiveEntry(fileControl, nameControl)
                 ar.putArchiveEntry(entryControl)
                 Files.copy(fileControl, ar)
