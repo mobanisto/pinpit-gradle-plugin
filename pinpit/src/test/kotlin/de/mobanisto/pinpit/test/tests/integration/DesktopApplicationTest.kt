@@ -30,6 +30,7 @@ import de.mobanisto.pinpit.test.utils.modify
 import de.mobanisto.pinpit.test.utils.runProcess
 import de.mobanisto.pinpit.validation.deb.DebContentBuilder
 import de.mobanisto.pinpit.validation.deb.DebContentUtils
+import de.mobanisto.pinpit.validation.deb.JvmDebPackager
 import de.mobanisto.pinpit.validation.deb.NativeDebPackager
 import org.gradle.internal.impldep.org.testng.Assert
 import org.gradle.testkit.runner.TaskOutcome
@@ -225,8 +226,7 @@ class DesktopApplicationTest : GradlePluginTestBase() {
         Assumptions.assumeTrue(currentOS == Linux)
         Assumptions.assumeTrue(currentArch == Arch.X64)
         with(testProject(TestProjects.jvm)) {
-            val dirNativePackaging = testWorkDir.resolve("native-deb")
-            testPackageDebsAndCompareContent(dirNativePackaging)
+            testPackageDebsAndCompareContent()
         }
     }
 
@@ -240,8 +240,62 @@ class DesktopApplicationTest : GradlePluginTestBase() {
         testPackageUberJar(Target(Linux, Arch.X64))
     }
 
-    private fun TestProject.testPackageDebsAndCompareContent(dirNativePackaging: Path) {
-        val result = gradle(":pinpitPackageDefaultDebUbuntuFocalX64").build()
+    private fun TestProject.testPackageDebsAndCompareContent() {
+        val packagingTask = ":pinpitPackageDefaultDebUbuntuFocalX64"
+        gradle(packagingTask).build().checks { check ->
+            check.taskOutcome(packagingTask, TaskOutcome.SUCCESS)
+        }
+
+        val dirBuild = file("build").toPath()
+        val dirBinaries = dirBuild.resolve("pinpit/binaries/main-default/linux/x64/")
+
+        val outputDirNativePackaging = packageDebNative()
+        val outputDirJvmPackaging = packageDebJvm()
+
+        val outputDirPinpitPackaging = dirBinaries.resolve("deb")
+
+        checkDebExpectations(listOf(outputDirPinpitPackaging, outputDirNativePackaging), listOf("pinpit", "native"))
+        checkDebExpectations(listOf(outputDirPinpitPackaging, outputDirJvmPackaging), listOf("pinpit", "jvm"))
+    }
+
+    private fun TestProject.packageDebJvm(): Path {
+        val dirNativePackaging = testWorkDir.resolve("jvm-deb")
+
+        val outputDirJvmPackaging = dirNativePackaging.resolve("output")
+        val workingDir = dirNativePackaging.resolve("working")
+
+        val dirBuild = file("build").toPath()
+        val dirBinaries = dirBuild.resolve("pinpit/binaries/main-default/linux/x64/")
+
+        val packaging = file("src/main/packaging").toPath()
+        val appImage = dirBinaries.resolve("appimage/TestPackage")
+        val packager = JvmDebPackager(
+            appImage,
+            outputDirJvmPackaging,
+            workingDir,
+            "TestPackage",
+            "test-package",
+            "1.0.0",
+            currentArch.id,
+            "utils",
+            "Test Vendor",
+            "example@example.com",
+            "Test description",
+            listOf("libc6", "libexpat1", "libgcc-s1", "libpcre3", "libuuid1", "xdg-utils", "zlib1g", "libnotify4"),
+            "ubuntu-20.04",
+            packaging.resolve("deb/copyright"),
+            packaging.resolve("deb/launcher.desktop"),
+            packaging.resolve("deb/preinst"),
+            packaging.resolve("deb/postinst"),
+            packaging.resolve("deb/prerm"),
+            packaging.resolve("deb/postrm"),
+        )
+        packager.createPackage()
+        return outputDirJvmPackaging
+    }
+
+    private fun TestProject.packageDebNative(): Path {
+        val dirNativePackaging = testWorkDir.resolve("native-deb")
 
         val outputDirNativePackaging = dirNativePackaging.resolve("output")
         val workingDir = dirNativePackaging.resolve("working")
@@ -273,10 +327,10 @@ class DesktopApplicationTest : GradlePluginTestBase() {
             packaging.resolve("deb/postrm"),
         )
         packager.createPackage()
+        return outputDirNativePackaging
+    }
 
-        val outputDirPinpitPackaging = dirBinaries.resolve("deb")
-        val packageDirs = listOf(outputDirPinpitPackaging, outputDirNativePackaging)
-
+    private fun checkDebExpectations(packageDirs: List<Path>, names: List<String>) {
         val debs = mutableListOf<File>()
 
         for (packageDir in packageDirs) {
@@ -294,7 +348,6 @@ class DesktopApplicationTest : GradlePluginTestBase() {
             }
             println("got package file at $packageFile")
         }
-        assertEquals(TaskOutcome.SUCCESS, result.task(":pinpitPackageDefaultDebUbuntuFocalX64")?.outcome)
 
         check(debs.size == 2)
         val debContent = debs.map { file ->
@@ -315,27 +368,30 @@ class DesktopApplicationTest : GradlePluginTestBase() {
         allClear = allClear && arComparison.onlyIn1.isEmpty() && arComparison.onlyIn2.isEmpty()
                 && arComparison.different.isEmpty()
 
+        val name1 = names[0]
+        val name2 = names[1]
+
         if (!allClear) {
             println("Found differences among deb files produced")
             for (entry in comparison.tarComparisonResult.entries) {
                 println("  Differences in ${entry.key}:")
                 val tarComparison = entry.value
-                tarComparison.onlyIn1.forEach { println("    only in pinpit deb:  $it") }
-                tarComparison.onlyIn2.forEach { println("    only in native deb: $it") }
-                tarComparison.different.forEach { println("    both but different (pinpit):  ${it.first}") }
-                tarComparison.different.forEach { println("    both but different (native): ${it.second}") }
+                tarComparison.onlyIn1.forEach { println("    only in $name1 deb:  $it") }
+                tarComparison.onlyIn2.forEach { println("    only in $name2 deb: $it") }
+                tarComparison.different.forEach { println("    both but different ($name1):  ${it.first}") }
+                tarComparison.different.forEach { println("    both but different ($name2): ${it.second}") }
             }
 
             println("  Differences in top level archive:")
-            arComparison.onlyIn1.forEach { println("    only in pinpit deb:  $it") }
-            arComparison.onlyIn2.forEach { println("    only in native deb: $it") }
-            arComparison.different.forEach { println("    both but different (pinpit):  ${it.first}") }
-            arComparison.different.forEach { println("    both but different (native): ${it.second}") }
+            arComparison.onlyIn1.forEach { println("    only in $name1 deb:  $it") }
+            arComparison.onlyIn2.forEach { println("    only in $name2 deb: $it") }
+            arComparison.different.forEach { println("    both but different ($name1):  ${it.first}") }
+            arComparison.different.forEach { println("    both but different ($name2): ${it.second}") }
 
             println("Showing files with differences:")
             DebContentUtils.printDiff(debs[0], debs[1], comparison.tarComparisonResult)
         }
-        check(allClear) { "Differences found in pinpit and native deb" }
+        check(allClear) { "Differences found in $name1 and $name2 deb" }
     }
 
     @Test
