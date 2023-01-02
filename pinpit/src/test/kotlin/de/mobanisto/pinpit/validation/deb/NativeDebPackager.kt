@@ -36,7 +36,7 @@ class NativeDebPackager constructor(
     debPreRm: Path?,
     debPostRm: Path?,
 ) : AbstractDebPackager(
-    appImage,
+    workingDir,
     packageName,
     linuxPackageName,
     packageVersion,
