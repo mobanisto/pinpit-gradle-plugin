@@ -83,7 +83,7 @@ abstract class AbstractDebPackager constructor(
         setPosixFilePermissions(target, permissions)
     }
 
-    internal fun createControlFile(fileControl: Path, appImage: Path) {
+    private fun createControlFile(fileControl: Path, appImage: Path) {
         // Determine installed size as in jdk.jpackage.internal.LinuxDebBundler#createReplacementData()
         val sizeInBytes = sizeInBytes(appImage)
         val installedSize = (sizeInBytes shr 10).toString()
@@ -112,7 +112,7 @@ abstract class AbstractDebPackager constructor(
     }
 
     // Same algorithm as jdk.jpackage.internal.PathGroup.Facade#sizeInBytes()
-    internal fun sizeInBytes(dir: Path): Long {
+    private fun sizeInBytes(dir: Path): Long {
         var sum: Long = 0
         Files.walk(dir).use { stream ->
             sum += stream.filter { p -> Files.isRegularFile(p) }
@@ -121,12 +121,12 @@ abstract class AbstractDebPackager constructor(
         return sum
     }
 
-    internal fun Writer.writeLn(s: String? = null) {
+    private fun Writer.writeLn(s: String? = null) {
         s?.let { write(it) }
         write("\n")
     }
 
-    internal fun syncDir(source: Path, target: Path, takeFile: (file: Path) -> Boolean = { _ -> true }) {
+    private fun syncDir(source: Path, target: Path, takeFile: (file: Path) -> Boolean = { _ -> true }) {
         Files.walkFileTree(source, object : SimpleFileVisitor<Path>() {
             override fun visitFile(file: Path, attrs: BasicFileAttributes): FileVisitResult {
                 val relative = source.relativize(file)
