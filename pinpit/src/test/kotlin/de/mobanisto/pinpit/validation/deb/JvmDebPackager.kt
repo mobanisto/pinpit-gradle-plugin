@@ -98,7 +98,7 @@ class JvmDebPackager constructor(
         packageControl(fileControl, debFileTree)
         packageData(fileData, debFileTree)
 
-        deb.outputStream().use { fos ->
+        deb.outputStream().buffered().use { fos ->
             ArArchiveOutputStream(fos).use { ar ->
                 val entryControl = ar.createArchiveEntry(fileControl, nameControl)
                 ar.putArchiveEntry(entryControl)
@@ -166,7 +166,7 @@ class JvmDebPackager constructor(
     }
 
     private fun packageTarXz(outputFile: Path, fn: TarArchiveOutputStream.() -> Unit) {
-        outputFile.outputStream().use { fos ->
+        outputFile.outputStream().buffered().use { fos ->
             XZCompressorOutputStream(fos).use { xz ->
                 TarArchiveOutputStream(xz).use { tar ->
                     tar.fn()
