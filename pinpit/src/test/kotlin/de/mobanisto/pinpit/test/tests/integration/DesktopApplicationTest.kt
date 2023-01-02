@@ -292,7 +292,7 @@ class DesktopApplicationTest : GradlePluginTestBase() {
             check(isTestPackage && isDeb) {
                 "Expected contain testpackage*.deb or test-package*.deb package in $packageDir, got '${packageFile.name}'"
             }
-            println("got package file at ${packageFile}")
+            println("got package file at $packageFile")
         }
         assertEquals(TaskOutcome.SUCCESS, result.task(":pinpitPackageDefaultDebUbuntuFocalX64")?.outcome)
 
@@ -306,14 +306,18 @@ class DesktopApplicationTest : GradlePluginTestBase() {
         val deb2 = debContent[1]
         val comparison = DebContentUtils.compare(deb1, deb2)
         var allClear = true
-        for (entry in comparison.entries) {
+        for (entry in comparison.tarComparisonResult.entries) {
             val tarComparison = entry.value
             allClear = allClear && tarComparison.onlyIn1.isEmpty() && tarComparison.onlyIn2.isEmpty()
                     && tarComparison.different.isEmpty()
         }
+        val arComparison = comparison.arComparisonResult
+        allClear = allClear && arComparison.onlyIn1.isEmpty() && arComparison.onlyIn2.isEmpty()
+                && arComparison.different.isEmpty()
+
         if (!allClear) {
             println("Found differences among deb files produced")
-            for (entry in comparison.entries) {
+            for (entry in comparison.tarComparisonResult.entries) {
                 println("  Differences in ${entry.key}:")
                 val tarComparison = entry.value
                 tarComparison.onlyIn1.forEach { println("    only in pinpit deb:  $it") }
@@ -321,8 +325,15 @@ class DesktopApplicationTest : GradlePluginTestBase() {
                 tarComparison.different.forEach { println("    both but different (pinpit):  ${it.first}") }
                 tarComparison.different.forEach { println("    both but different (native): ${it.second}") }
             }
+
+            println("  Differences in top level archive:")
+            arComparison.onlyIn1.forEach { println("    only in pinpit deb:  $it") }
+            arComparison.onlyIn2.forEach { println("    only in native deb: $it") }
+            arComparison.different.forEach { println("    both but different (pinpit):  ${it.first}") }
+            arComparison.different.forEach { println("    both but different (native): ${it.second}") }
+
             println("Showing files with differences:")
-            DebContentUtils.printDiff(debs[0], debs[1], comparison)
+            DebContentUtils.printDiff(debs[0], debs[1], comparison.tarComparisonResult)
         }
         check(allClear) { "Differences found in pinpit and native deb" }
     }
