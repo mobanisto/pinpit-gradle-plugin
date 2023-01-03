@@ -142,26 +142,28 @@ class DebContentBuilder {
     }
 
     private fun getFile(packageFile: File, tarFile: String, path: String): ByteArray? {
-        val fis = FileInputStream(packageFile)
-        val ais = ArArchiveInputStream(fis)
+        FileInputStream(packageFile).use { fis ->
+            ArArchiveInputStream(fis).use { ais ->
 
-        while (true) {
-            val entry1: ArArchiveEntry = ais.nextArEntry ?: break
-            val name1 = entry1.name
-
-            if (name1 == tarFile) {
-                val xz = XZCompressorInputStream(ais)
-                val tis = TarArchiveInputStream(xz)
                 while (true) {
-                    val entry2 = tis.nextTarEntry ?: break
-                    if (entry2.isDirectory) continue
-                    val name2 = entry2.name
-                    if (name2 == path) {
-                        return tis.readBytes()
+                    val entry1: ArArchiveEntry = ais.nextArEntry ?: break
+                    val name1 = entry1.name
+
+                    if (name1 == tarFile) {
+                        val xz = XZCompressorInputStream(ais)
+                        val tis = TarArchiveInputStream(xz)
+                        while (true) {
+                            val entry2 = tis.nextTarEntry ?: break
+                            if (entry2.isDirectory) continue
+                            val name2 = entry2.name
+                            if (name2 == path) {
+                                return tis.readBytes()
+                            }
+                        }
                     }
                 }
+                return null
             }
         }
-        return null
     }
 }
