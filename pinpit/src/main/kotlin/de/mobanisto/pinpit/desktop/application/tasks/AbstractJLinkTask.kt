@@ -6,8 +6,10 @@
 package de.mobanisto.pinpit.desktop.application.tasks
 
 import de.mobanisto.pinpit.desktop.application.internal.JvmRuntimeProperties
+import de.mobanisto.pinpit.desktop.application.internal.OS.Windows
 import de.mobanisto.pinpit.desktop.application.internal.RuntimeCompressionLevel
 import de.mobanisto.pinpit.desktop.application.internal.cliArg
+import de.mobanisto.pinpit.desktop.application.internal.currentOS
 import de.mobanisto.pinpit.desktop.application.internal.ioFile
 import de.mobanisto.pinpit.desktop.application.internal.notNullProperty
 import de.mobanisto.pinpit.desktop.application.internal.nullableProperty
@@ -61,7 +63,8 @@ abstract class AbstractJLinkTask : AbstractJvmToolOperationTask("jlink") {
             cliArg("--add-modules", m)
         }
 
-        cliArg("--module-path", jdk.get().resolve("jmods"))
+        val jmods = jdk.get().resolve("jmods")
+        cliArg("--module-path", jmods)
 
         cliArg("--strip-debug", stripDebug)
         cliArg("--no-header-files", noHeaderFiles)

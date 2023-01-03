@@ -9,6 +9,7 @@ import de.mobanisto.pinpit.desktop.application.internal.files.normalizedPath
 import org.gradle.api.file.FileSystemLocation
 import org.gradle.api.provider.Provider
 import java.io.File
+import java.nio.file.Path
 
 internal fun <T : Any?> MutableCollection<String>.cliArg(
     name: String,
@@ -40,6 +41,7 @@ private fun <T : Any?> defaultToString(): (T) -> String =
         val asString = when (it) {
             is FileSystemLocation -> it.asFile.normalizedPath()
             is File -> it.normalizedPath()
+            is Path -> it.toFile().normalizedPath()
             else -> it.toString()
         }
         "\"$asString\""
