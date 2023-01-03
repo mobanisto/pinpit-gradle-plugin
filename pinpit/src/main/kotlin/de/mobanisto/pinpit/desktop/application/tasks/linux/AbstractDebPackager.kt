@@ -5,14 +5,14 @@
 
 package de.mobanisto.pinpit.desktop.application.tasks.linux
 
+import de.mobanisto.pinpit.desktop.application.tasks.linux.PosixUtils.createDirectories
+import de.mobanisto.pinpit.desktop.application.tasks.linux.PosixUtils.setPosixFilePermissions
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.io.Writer
 import java.nio.file.FileVisitResult
 import java.nio.file.Files
-import java.nio.file.Files.createDirectories
 import java.nio.file.Files.newBufferedWriter
-import java.nio.file.Files.setPosixFilePermissions
 import java.nio.file.Path
 import java.nio.file.Paths
 import java.nio.file.SimpleFileVisitor
@@ -20,7 +20,6 @@ import java.nio.file.attribute.BasicFileAttributes
 import java.nio.file.attribute.PosixFilePermission
 import java.nio.file.attribute.PosixFilePermissions
 import java.nio.file.attribute.PosixFilePermissions.asFileAttribute
-import kotlin.io.path.createDirectories
 
 abstract class AbstractDebPackager constructor(
     workingDir: Path,
@@ -56,7 +55,7 @@ abstract class AbstractDebPackager constructor(
         val dirBin = dirPackage.resolve("bin")
         val dirLib = dirPackage.resolve("lib")
         val dirShareDoc = dirPackage.resolve("share/doc/")
-        createDirectories(dirShareDoc, asFileAttribute(posixExecutable))
+        dirShareDoc.createDirectories(asFileAttribute(posixExecutable))
         debCopyright?.copy(dirShareDoc.resolve("copyright"), posixRegular)
         debLauncher?.copy(dirLib.resolve("$linuxPackageName-$packageName.desktop"), posixRegular)
 
@@ -80,7 +79,7 @@ abstract class AbstractDebPackager constructor(
     private fun Path.copy(target: Path, permissions: Set<PosixFilePermission>) {
         target.parent.createDirectories(asFileAttribute(posixExecutable))
         Files.copy(this, target)
-        setPosixFilePermissions(target, permissions)
+        target.setPosixFilePermissions(permissions)
     }
 
     private fun createControlFile(fileControl: Path, appImage: Path) {
@@ -134,11 +133,11 @@ abstract class AbstractDebPackager constructor(
                     return FileVisitResult.CONTINUE
                 }
                 val pathTarget = target.resolve(relative)
-                createDirectories(pathTarget.parent, asFileAttribute(posixExecutable))
+                pathTarget.parent.createDirectories(asFileAttribute(posixExecutable))
                 if (Files.isExecutable(file)) {
-                    setPosixFilePermissions(file, posixExecutable)
+                    file.setPosixFilePermissions(posixExecutable)
                 } else {
-                    setPosixFilePermissions(file, posixRegular)
+                    file.setPosixFilePermissions(posixRegular)
                 }
                 Files.copy(file, pathTarget)
                 return FileVisitResult.CONTINUE

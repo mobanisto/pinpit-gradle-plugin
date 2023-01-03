@@ -5,6 +5,7 @@
 
 package de.mobanisto.pinpit.desktop.application.tasks.linux
 
+import de.mobanisto.pinpit.desktop.application.tasks.linux.PosixUtils.createDirectories
 import org.apache.commons.compress.archivers.ar.ArArchiveEntry
 import org.apache.commons.compress.archivers.ar.ArArchiveOutputStream
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry
@@ -22,7 +23,6 @@ import java.nio.file.SimpleFileVisitor
 import java.nio.file.StandardCopyOption
 import java.nio.file.attribute.BasicFileAttributes
 import java.nio.file.attribute.PosixFilePermissions.asFileAttribute
-import kotlin.io.path.createDirectories
 import kotlin.io.path.isExecutable
 import kotlin.io.path.isRegularFile
 import kotlin.io.path.outputStream
