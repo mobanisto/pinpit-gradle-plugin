@@ -32,4 +32,3 @@ abstract class JvmApplication {
     abstract val buildTypes: JvmApplicationBuildTypes
     abstract fun buildTypes(fn: Action<JvmApplicationBuildTypes>)
 }
-

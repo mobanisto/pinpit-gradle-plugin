@@ -461,9 +461,11 @@ private fun JvmApplicationContext.configureAppImageTask(
         packageTask.packageVersion.set(packageVersionFor(packageTask.target.os))
     }
 
-    packageTask.destinationDir.set(app.nativeDistributions.outputBaseDir.map {
-        it.dir("$appDirName/${packageTask.target.os.id}/${packageTask.target.arch.id}/appimage")
-    })
+    packageTask.destinationDir.set(
+        app.nativeDistributions.outputBaseDir.map {
+            it.dir("$appDirName/${packageTask.target.os.id}/${packageTask.target.arch.id}/appimage")
+        }
+    )
     packageTask.javaHome.set(app.javaHomeProvider)
 
     if (runProguard != null) {
@@ -495,9 +497,11 @@ internal fun JvmApplicationContext.configurePlatformSettings(
     deb: DebianPlatformSettings,
     unpackDefaultResources: TaskProvider<AbstractUnpackDefaultComposeApplicationResourcesTask>
 ) {
-    packageTask.destinationDir.set(app.nativeDistributions.outputBaseDir.map {
-        it.dir("$appDirName/${packageTask.target.os.id}/${packageTask.target.arch.id}/deb")
-    })
+    packageTask.destinationDir.set(
+        app.nativeDistributions.outputBaseDir.map {
+            it.dir("$appDirName/${packageTask.target.os.id}/${packageTask.target.arch.id}/deb")
+        }
+    )
     packageTask.dependsOn(unpackDefaultResources)
     app.nativeDistributions.linux.also { linux ->
         packageTask.linuxShortcut.set(provider { linux.shortcut })
@@ -524,9 +528,11 @@ internal fun JvmApplicationContext.configurePlatformSettings(
     msi: MsiPlatformSettings,
     unpackDefaultResources: TaskProvider<AbstractUnpackDefaultComposeApplicationResourcesTask>
 ) {
-    packageTask.destinationDir.set(app.nativeDistributions.outputBaseDir.map {
-        it.dir("$appDirName/${packageTask.target.os.id}/${packageTask.target.arch.id}/msi")
-    })
+    packageTask.destinationDir.set(
+        app.nativeDistributions.outputBaseDir.map {
+            it.dir("$appDirName/${packageTask.target.os.id}/${packageTask.target.arch.id}/msi")
+        }
+    )
     packageTask.dependsOn(unpackDefaultResources)
     app.nativeDistributions.windows.also { win ->
         packageTask.winConsole.set(provider { win.console })
@@ -647,5 +653,5 @@ private fun JvmApplicationContext.configurePackageUberJar(jar: Jar, target: Targ
 }
 
 private fun File.isZipOrJar() =
-    name.endsWith(".jar", ignoreCase = true)
-            || name.endsWith(".zip", ignoreCase = true)
+    name.endsWith(".jar", ignoreCase = true) ||
+        name.endsWith(".zip", ignoreCase = true)

@@ -29,7 +29,6 @@ abstract class AbstractMacOSPlatformSettings : AbstractBasePlatformSettings() {
     var dmgPackageBuildVersion: String? = null
     var appCategory: String? = null
 
-
     /**
      * An application's unique identifier across Apple's ecosystem.
      *
@@ -50,9 +49,7 @@ abstract class AbstractMacOSPlatformSettings : AbstractBasePlatformSettings() {
     }
 }
 
-abstract class NativeApplicationMacOSPlatformSettings : AbstractMacOSPlatformSettings() {
-
-}
+abstract class NativeApplicationMacOSPlatformSettings : AbstractMacOSPlatformSettings()
 
 abstract class JvmMacOSPlatformSettings : AbstractMacOSPlatformSettings() {
     var dockName: String? = null

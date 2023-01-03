@@ -14,6 +14,7 @@ import de.mobanisto.pinpit.desktop.application.internal.Target
 import de.mobanisto.pinpit.desktop.application.internal.currentArch
 import de.mobanisto.pinpit.desktop.application.internal.currentOS
 import de.mobanisto.pinpit.desktop.application.internal.currentTarget
+import de.mobanisto.pinpit.desktop.application.tasks.linux.JvmDebPackager
 import de.mobanisto.pinpit.test.tests.integration.TestUtils.testPackageDebUbuntuFocal
 import de.mobanisto.pinpit.test.tests.integration.TestUtils.testPackageJvmDistributions
 import de.mobanisto.pinpit.test.tests.integration.TestUtils.testPackageMsi
@@ -30,7 +31,6 @@ import de.mobanisto.pinpit.test.utils.modify
 import de.mobanisto.pinpit.test.utils.runProcess
 import de.mobanisto.pinpit.validation.deb.DebContentBuilder
 import de.mobanisto.pinpit.validation.deb.DebContentUtils
-import de.mobanisto.pinpit.desktop.application.tasks.linux.JvmDebPackager
 import de.mobanisto.pinpit.validation.deb.NativeDebPackager
 import org.gradle.internal.impldep.org.testng.Assert
 import org.gradle.testkit.runner.TaskOutcome
@@ -41,7 +41,7 @@ import org.junit.jupiter.api.Assumptions
 import org.junit.jupiter.api.Test
 import java.io.File
 import java.nio.file.Path
-import java.util.*
+import java.util.Calendar
 import kotlin.io.path.createDirectories
 
 class DesktopApplicationTest : GradlePluginTestBase() {
@@ -104,7 +104,7 @@ class DesktopApplicationTest : GradlePluginTestBase() {
                         }
                     }
                 }
-            """.trimIndent()
+        """.trimIndent()
 
         val actualMainImage = file("main-image.actual.png")
         val expectedMainImage = file("main-image.expected.png")
@@ -346,7 +346,7 @@ class DesktopApplicationTest : GradlePluginTestBase() {
             val packageFile = packageDirFiles.single()
             debs.add(packageFile)
             val isTestPackage = packageFile.name.contains("test-package", ignoreCase = true) ||
-                    packageFile.name.contains("testpackage", ignoreCase = true)
+                packageFile.name.contains("testpackage", ignoreCase = true)
             val isDeb = packageFile.name.endsWith(".deb")
             check(isTestPackage && isDeb) {
                 "Expected contain testpackage*.deb or test-package*.deb package in $packageDir, got '${packageFile.name}'"
@@ -366,12 +366,12 @@ class DesktopApplicationTest : GradlePluginTestBase() {
         var allClear = true
         for (entry in comparison.tarComparisonResult.entries) {
             val tarComparison = entry.value
-            allClear = allClear && tarComparison.onlyIn1.isEmpty() && tarComparison.onlyIn2.isEmpty()
-                    && tarComparison.different.isEmpty()
+            allClear = allClear && tarComparison.onlyIn1.isEmpty() && tarComparison.onlyIn2.isEmpty() &&
+                tarComparison.different.isEmpty()
         }
         val arComparison = comparison.arComparisonResult
-        allClear = allClear && arComparison.onlyIn1.isEmpty() && arComparison.onlyIn2.isEmpty()
-                && arComparison.different.isEmpty()
+        allClear = allClear && arComparison.onlyIn1.isEmpty() &&
+            arComparison.onlyIn2.isEmpty() && arComparison.different.isEmpty()
 
         val name1 = names[0]
         val name2 = names[1]
@@ -649,7 +649,7 @@ class DesktopApplicationTest : GradlePluginTestBase() {
                         }
                     }
                 }
-            """.trimIndent()
+        """.trimIndent()
     }
 
     private fun TestProject.checkDebContent(check: (content: String) -> Unit) {
@@ -664,5 +664,4 @@ class DesktopApplicationTest : GradlePluginTestBase() {
         val content = String(contentBytes)
         check(content)
     }
-
 }

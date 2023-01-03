@@ -6,7 +6,7 @@
 package de.mobanisto.pinpit.desktop.application.dsl
 
 import org.gradle.api.Action
-import java.util.*
+import java.util.EnumSet
 
 abstract class NativeApplicationDistributions : AbstractDistributions() {
     private val supportedFormats = EnumSet.of(TargetFormat.Dmg)

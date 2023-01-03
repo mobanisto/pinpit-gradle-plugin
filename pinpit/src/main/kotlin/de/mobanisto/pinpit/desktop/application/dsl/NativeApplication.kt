@@ -42,7 +42,6 @@ abstract class NativeApplication @Inject constructor(
                 nonNativeTargets.forEach { appendLine("* '${it.name}' is not a native target;") }
                 nonMacOSTargets.forEach { appendLine("* '${it.name}' is not a macOS target;") }
             }
-
         }
     }
 
@@ -51,4 +50,3 @@ abstract class NativeApplication @Inject constructor(
         fn.execute(distributions)
     }
 }
-
