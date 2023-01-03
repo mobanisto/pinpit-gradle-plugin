@@ -5,6 +5,8 @@
 
 package de.mobanisto.pinpit.desktop.application.tasks.linux
 
+import de.mobanisto.pinpit.desktop.application.internal.OS.Windows
+import de.mobanisto.pinpit.desktop.application.internal.currentOS
 import de.mobanisto.pinpit.desktop.application.tasks.linux.PosixUtils.createDirectories
 import de.mobanisto.pinpit.desktop.application.tasks.linux.PosixUtils.setPosixFilePermissions
 import org.slf4j.Logger
@@ -20,6 +22,8 @@ import java.nio.file.attribute.BasicFileAttributes
 import java.nio.file.attribute.PosixFilePermission
 import java.nio.file.attribute.PosixFilePermissions
 import java.nio.file.attribute.PosixFilePermissions.asFileAttribute
+import kotlin.io.path.readText
+import kotlin.io.path.writeText
 
 abstract class AbstractDebPackager constructor(
     workingDir: Path,
@@ -78,8 +82,14 @@ abstract class AbstractDebPackager constructor(
 
     private fun Path.copy(target: Path, permissions: Set<PosixFilePermission>) {
         target.parent.createDirectories(asFileAttribute(posixExecutable))
-        Files.copy(this, target)
-        target.setPosixFilePermissions(permissions)
+        if (currentOS == Windows) {
+            println("replacing newlines in $target")
+            val content = this.readText()
+            target.writeText(content.replace("\\r\\n?".toRegex(), "\n"))
+        } else {
+            Files.copy(this, target)
+            target.setPosixFilePermissions(permissions)
+        }
     }
 
     private fun createControlFile(fileControl: Path, appImage: Path) {
