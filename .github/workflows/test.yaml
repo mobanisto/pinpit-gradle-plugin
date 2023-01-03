@@ -7,8 +7,20 @@ on:
     branches:
       - master
 jobs:
-  build:
+  build-linux:
     runs-on: ubuntu-latest
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+    - name: Setup Java
+      uses: actions/setup-java@v3
+      with:
+        distribution: 'temurin'
+        java-version: '17'
+    - name: Run Gradle tests
+      run: ./gradlew checkJar
+  build-windows:
+    runs-on: windows-latest
     steps:
     - name: Checkout repository
       uses: actions/checkout@v3
