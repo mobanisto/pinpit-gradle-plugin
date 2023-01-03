@@ -20,7 +20,6 @@ import java.nio.file.Files.walkFileTree
 import java.nio.file.Path
 import java.nio.file.Paths
 import java.nio.file.SimpleFileVisitor
-import java.nio.file.StandardCopyOption
 import java.nio.file.attribute.BasicFileAttributes
 import java.nio.file.attribute.PosixFilePermissions.asFileAttribute
 import kotlin.io.path.isExecutable
@@ -124,10 +123,6 @@ class JvmDebPackager constructor(
                 ar.closeArchiveEntry()
             }
         }
-
-        Files.copy(fileControl, Paths.get("/tmp/control.tar.xz"), StandardCopyOption.REPLACE_EXISTING)
-        Files.copy(fileData, Paths.get("/tmp/data.tar.xz"), StandardCopyOption.REPLACE_EXISTING)
-        Files.copy(deb, Paths.get("/tmp/file.deb"), StandardCopyOption.REPLACE_EXISTING)
     }
 
     private fun packageControl(fileControl: Path, debFileTree: Path) {
