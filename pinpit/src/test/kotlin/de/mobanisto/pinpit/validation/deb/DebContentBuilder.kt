@@ -28,7 +28,13 @@ data class ArEntry(
     ArchiveEntry
 
 data class TarEntry(
-    override val name: String, val size: Long, val user: Long, val group: Long, val mode: Int, val hash: String
+    override val name: String,
+    val isDirectory: Boolean,
+    val size: Long,
+    val user: Long,
+    val group: Long,
+    val mode: Int,
+    val hash: String
 ) : ArchiveEntry {
     override fun toString() =
         "TarEntry(name=$name, size=$size, user=$user, group=$group, mode=${Integer.toOctalString(mode)}, hash=$hash)"
@@ -37,6 +43,12 @@ data class TarEntry(
 data class DebAddress(val tar: String, val path: String)
 
 class DebContentBuilder {
+
+    fun buildContent(file: File): DebContent {
+        return file.inputStream().use { fis ->
+            buildContent(fis)
+        }
+    }
 
     fun buildContent(fis: InputStream): DebContent {
         val arEntries = mutableListOf<ArEntry>()
@@ -56,12 +68,20 @@ class DebContentBuilder {
                     val entry2 = tis.nextTarEntry ?: break
                     val name = entry2.name
                     if (entry2.isDirectory) {
-                        tarEntries.add(TarEntry(name, 0, entry2.longUserId, entry2.longGroupId, entry2.mode, ""))
+                        tarEntries.add(TarEntry(name, true, 0, entry2.longUserId, entry2.longGroupId, entry2.mode, ""))
                     } else {
                         val counter = CountingInputStream(tis)
                         val hash = DigestUtils.sha1Hex(counter)
                         tarEntries.add(
-                            TarEntry(name, counter.bytesRead, entry2.longUserId, entry2.longGroupId, entry2.mode, hash)
+                            TarEntry(
+                                name,
+                                false,
+                                counter.bytesRead,
+                                entry2.longUserId,
+                                entry2.longGroupId,
+                                entry2.mode,
+                                hash
+                            )
                         )
                     }
                 }

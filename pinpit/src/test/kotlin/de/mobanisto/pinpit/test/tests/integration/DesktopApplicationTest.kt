@@ -29,6 +29,7 @@ import de.mobanisto.pinpit.test.utils.checkExists
 import de.mobanisto.pinpit.test.utils.checks
 import de.mobanisto.pinpit.test.utils.modify
 import de.mobanisto.pinpit.test.utils.runProcess
+import de.mobanisto.pinpit.validation.deb.DebContent
 import de.mobanisto.pinpit.validation.deb.DebContentBuilder
 import de.mobanisto.pinpit.validation.deb.DebContentUtils
 import de.mobanisto.pinpit.validation.deb.NativeDebPackager
@@ -36,6 +37,7 @@ import org.gradle.internal.impldep.org.testng.Assert
 import org.gradle.testkit.runner.TaskOutcome
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Assumptions
 import org.junit.jupiter.api.Test
@@ -652,6 +654,36 @@ class DesktopApplicationTest : GradlePluginTestBase() {
         """.trimIndent()
     }
 
+    @Test
+    fun debContentHasCorrectPermissions(): Unit = with(testProject(TestProjects.jvm)) {
+        val executables = setOf(
+            "./opt/test-package/bin/TestPackage",
+            "./opt/test-package/lib/libapplauncher.so",
+            "./opt/test-package/lib/runtime/lib/jexec",
+            "./opt/test-package/lib/runtime/lib/jspawnhelper",
+        )
+
+        gradle(":pinpitPackageDefaultDebUbuntuFocalX64").build().checks { check ->
+            check.taskOutcome(":pinpitPackageDefaultDebUbuntuFocalX64", TaskOutcome.SUCCESS)
+            checkDebData { content ->
+                val data = content.tars["data.tar.xz"]
+                assertNotNull(data)
+                data?.entries?.forEach { entry ->
+                    assertEquals(0, entry.group) {
+                        "${entry.name} has group set to 0"
+                    }
+                    assertEquals(0, entry.user) {
+                        "${entry.name} has user set to 0"
+                    }
+                    val permission = if (entry.isDirectory || executables.contains(entry.name)) "755" else "644"
+                    assertEquals(permission.toInt(radix = 8), entry.mode) {
+                        "${entry.name} has mode set to $permission but got ${entry.mode.toString(radix = 8)}"
+                    }
+                }
+            }
+        }
+    }
+
     private fun TestProject.checkDebControlFile(check: (content: String) -> Unit) {
         val packageDir = file("build/pinpit/binaries/main-default/linux/x64/deb")
         val packageDirFiles = packageDir.listFiles() ?: arrayOf()
@@ -662,6 +694,17 @@ class DesktopApplicationTest : GradlePluginTestBase() {
         val contentBytes = DebContentBuilder().getControl(packageFile)
         checkNotNull(contentBytes)
         val content = String(contentBytes)
+        check(content)
+    }
+
+    private fun TestProject.checkDebData(check: (content: DebContent) -> Unit) {
+        val packageDir = file("build/pinpit/binaries/main-default/linux/x64/deb")
+        val packageDirFiles = packageDir.listFiles() ?: arrayOf()
+        check(packageDirFiles.size == 1) {
+            "Expected single package in $packageDir, got [${packageDirFiles.joinToString(", ") { it.name }}]"
+        }
+        val packageFile = packageDirFiles.single()
+        val content = DebContentBuilder().buildContent(packageFile)
         check(content)
     }
 }
