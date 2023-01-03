@@ -613,7 +613,7 @@ class DesktopApplicationTest : GradlePluginTestBase() {
 
         gradle(":pinpitPackageDefaultDebCustomDistroX64").build().checks { check ->
             check.taskOutcome(":pinpitPackageDefaultDebCustomDistroX64", TaskOutcome.SUCCESS)
-            checkDebContent { content ->
+            checkDebControlFile { content ->
                 assertTrue(content.contains(extraPackage))
             }
         }
@@ -627,7 +627,7 @@ class DesktopApplicationTest : GradlePluginTestBase() {
 
         gradle(":pinpitPackageDefaultDebCustomDistroX64").build().checks { check ->
             check.taskOutcome(":pinpitPackageDefaultDebCustomDistroX64", TaskOutcome.SUCCESS)
-            checkDebContent { content ->
+            checkDebControlFile { content ->
                 for (extraPackage in extraPackages) {
                     assertTrue(content.contains(extraPackage))
                 }
@@ -652,7 +652,7 @@ class DesktopApplicationTest : GradlePluginTestBase() {
         """.trimIndent()
     }
 
-    private fun TestProject.checkDebContent(check: (content: String) -> Unit) {
+    private fun TestProject.checkDebControlFile(check: (content: String) -> Unit) {
         val packageDir = file("build/pinpit/binaries/main-default/linux/x64/deb")
         val packageDirFiles = packageDir.listFiles() ?: arrayOf()
         check(packageDirFiles.size == 1) {
