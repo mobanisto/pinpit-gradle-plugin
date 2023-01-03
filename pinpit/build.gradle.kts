@@ -70,21 +70,20 @@ dependencies {
     // include relocated download task to avoid potential runtime conflicts
     embedded("de.undercouch:gradle-download-task:4.1.1")
 
-    embedded("org.tukaani:xz:1.9")
-    embedded("org.apache.commons:commons-compress:1.22")
     embedded("org.jetbrains.kotlinx:kotlinx-serialization-json:${BuildProperties.serializationVersion}")
     embedded("org.jetbrains.kotlinx:kotlinx-serialization-core:${BuildProperties.serializationVersion}")
     embedded("org.jetbrains.kotlinx:kotlinx-serialization-core-jvm:${BuildProperties.serializationVersion}")
+    embedded("org.tukaani:xz:1.9")
     embedded("org.apache.commons:commons-compress:1.22")
 }
 
 val shadow = tasks.named<ShadowJar>("shadowJar") {
-    for (fromPackage in listOf("de.undercouch", "org.apache.commons.compress")) {
+    for (fromPackage in listOf("de.undercouch", "org.apache.commons.compress", "org.tukaani.xz")) {
         relocate(fromPackage, "de.mobanisto.pinpit.$fromPackage")
     }
     archiveClassifier.set("shadow")
     configurations = listOf(embeddedDependencies)
-    exclude("META-INF/gradle-plugins/de.undercouch.download.properties")
+    exclude("META-INF/gradle-plugins/de.undercouch.download.properties", "META-INF/versions/**")
 }
 
 val jar = tasks.named<Jar>("jar") {
@@ -103,7 +102,7 @@ val javaHomeForTests: String? = when {
     // __COMPOSE_NATIVE_DISTRIBUTIONS_MIN_JAVA_VERSION__
     JavaVersion.current() >= JavaVersion.VERSION_15 -> System.getProperty("java.home")
     else -> System.getenv("JDK_15")
-         ?: System.getenv("JDK_FOR_GRADLE_TESTS")
+        ?: System.getenv("JDK_FOR_GRADLE_TESTS")
 }
 val isWindows = getCurrentOperatingSystem().isWindows
 
@@ -139,7 +138,7 @@ fun checkJarContainsExpectedPackages(jar: ZipFile) {
 
     if (unexpectedClasses.any()) {
         error(buildString {
-            appendLine("Some classes from ${jar.name} are not from 'org.jetbrains.compose' package:")
+            appendLine("Some classes from ${jar.name} are not from 'de.mobanisto.pinpit' package:")
             unexpectedClasses.forEach {
                 appendLine("  * $it")
             }
