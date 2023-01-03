@@ -83,7 +83,6 @@ abstract class AbstractDebPackager constructor(
     private fun Path.copy(target: Path, permissions: Set<PosixFilePermission>) {
         target.parent.createDirectories(asFileAttribute(posixExecutable))
         if (currentOS == Windows) {
-            println("replacing newlines in $target")
             val content = this.readText()
             target.writeText(content.replace("\\r\\n?".toRegex(), "\n"))
         } else {
