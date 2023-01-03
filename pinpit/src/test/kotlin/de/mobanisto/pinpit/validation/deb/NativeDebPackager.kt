@@ -5,6 +5,7 @@
 
 package de.mobanisto.pinpit.validation.deb
 
+import de.mobanisto.pinpit.desktop.application.tasks.linux.AbstractDebPackager
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.nio.file.Path
@@ -17,18 +18,16 @@ import kotlin.io.path.createDirectories
  */
 class NativeDebPackager constructor(
     private val appImage: Path,
-    private val destinationDir: Path,
+    private val destinationDeb: Path,
     workingDir: Path,
     packageName: String,
-    private val linuxPackageName: String,
-    private val packageVersion: String,
-    private val arch: String,
+    linuxPackageName: String,
+     packageVersion: String,
     appCategory: String,
     packageVendor: String,
     debMaintainer: String,
     packageDescription: String,
     depends: List<String>,
-    private val qualifier: String,
     debCopyright: Path?,
     debLauncher: Path?,
     debPreInst: Path?,
@@ -56,8 +55,8 @@ class NativeDebPackager constructor(
     private val logger: Logger = LoggerFactory.getLogger(NativeDebPackager::class.java)
 
     fun createPackage() {
-        logger.info("destination: $destinationDir")
-        destinationDir.createDirectories(asFileAttribute(posixExecutable))
+        logger.info("destination: $destinationDeb")
+        destinationDeb.parent.createDirectories(asFileAttribute(posixExecutable))
 
         logger.info("app image: $appImage")
 
@@ -67,10 +66,9 @@ class NativeDebPackager constructor(
         buildDebFileTree(appImage, debFileTree)
         buildDebianDir(appImage, debFileTree)
 
-        val deb = destinationDir.resolve("$linuxPackageName-$qualifier-$arch-$packageVersion.deb")
         runExternalTool(
             tool = "/usr/bin/fakeroot",
-            args = listOf("/usr/bin/dpkg-deb", "-b", debFileTree.toString(), deb.toString())
+            args = listOf("/usr/bin/dpkg-deb", "-b", debFileTree.toString(), destinationDeb.toString())
         )
     }
 

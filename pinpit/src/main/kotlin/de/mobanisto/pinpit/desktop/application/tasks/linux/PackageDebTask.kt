@@ -9,6 +9,7 @@ import de.mobanisto.pinpit.desktop.application.dsl.TargetFormat
 import de.mobanisto.pinpit.desktop.application.internal.DebianUtils
 import de.mobanisto.pinpit.desktop.application.internal.JvmRuntimeProperties
 import de.mobanisto.pinpit.desktop.application.internal.Target
+import de.mobanisto.pinpit.desktop.application.internal.currentArch
 import de.mobanisto.pinpit.desktop.application.internal.currentOS
 import de.mobanisto.pinpit.desktop.application.internal.dir
 import de.mobanisto.pinpit.desktop.application.internal.files.asPath
@@ -171,9 +172,6 @@ abstract class PackageDebTask @Inject constructor(
     internal val appResourcesDirInputDirHackForVerification: Provider<Directory?>
         get() = provider { appResourcesDir.orNull?.let { if (it.asFile.exists()) it else null } }
 
-    @get:Internal
-    private val debFileTree: Provider<Directory> = workingDir.dir("debFileTree")
-
     override fun createPackage() {
         val destination = destinationDir.get()
         logger.lifecycle("destination: $destination")
@@ -182,100 +180,32 @@ abstract class PackageDebTask @Inject constructor(
         val appImage = appImage.get().dir(packageName).get()
         logger.lifecycle("app image: $appImage")
 
-        val debFileTree = debFileTree.get()
-        logger.lifecycle("building debian file tree at: $debFileTree")
-        debFileTree.asFile.mkdirs()
-
-        fileOperations.delete(debFileTree)
-        buildDebFileTree(appImage, debFileTree)
-        buildDebianDir(appImage, debFileTree)
+        logger.lifecycle("working dir: ${workingDir.get()}")
+        fileOperations.delete(workingDir)
 
         val deb =
             destination.file("${linuxPackageName.get()}-$qualifier-${target.arch.id}-${linuxDebPackageVersion.get()}.deb")
-        runExternalTool(
-            tool = DebianUtils.fakeroot,
-            args = listOf(DebianUtils.dpkgDeb.toString(), "-b", debFileTree.toString(), deb.toString())
+
+        val packager = JvmDebPackager(
+            appImage.asPath(),
+            deb.asPath(),
+            workingDir.asPath(),
+            packageName.get(),
+            linuxPackageName.get()!!,
+            linuxDebPackageVersion.get()!!,
+            linuxAppCategory.get()!!,
+            packageVendor.get()!!,
+            linuxDebMaintainer.get()!!,
+            packageDescription.get(),
+            depends.get(),
+            linuxDebCopyright.orNull?.asPath(),
+            linuxDebLauncher.orNull?.asPath(),
+            linuxDebPreInst.orNull?.asPath(),
+            linuxDebPostInst.orNull?.asPath(),
+            linuxDebPreRm.orNull?.asPath(),
+            linuxDebPostRm.orNull?.asPath(),
         )
-    }
-
-    private fun buildDebFileTree(appImage: Directory, debFileTree: Directory) {
-        val dirOpt = debFileTree.dir("opt")
-        val dirPackage = dirOpt.dir(linuxPackageName.get())
-        val dirBin = dirPackage.dir("bin")
-        val dirLib = dirPackage.dir("lib")
-        val dirShareDoc = dirPackage.dir("share/doc/")
-        dirShareDoc.asFile.toPath().createDirectories(asFileAttribute(posixExecutable))
-        linuxDebCopyright.copy(dirShareDoc.file("copyright"), posixRegular)
-        linuxDebLauncher.copy(dirLib.file("${linuxPackageName.get()}-${packageName.get()}.desktop"), posixRegular)
-
-        syncDir(appImage.dir("bin"), dirBin)
-        syncDir(appImage.dir("lib"), dirLib) {
-            it != Paths.get("app/.jpackage.xml")
-        }
-    }
-
-    private fun buildDebianDir(appImage: Directory, debFileTree: Directory) {
-        val dirDebian = debFileTree.dir("DEBIAN")
-        dirDebian.asPath().createDirectories(asFileAttribute(posixExecutable))
-        val fileControl = dirDebian.file("control")
-        createControlFile(fileControl, appImage)
-        linuxDebPreInst.copy(dirDebian.file("preinst"), posixExecutable)
-        linuxDebPostInst.copy(dirDebian.file("postinst"), posixExecutable)
-        linuxDebPreRm.copy(dirDebian.file("prerm"), posixExecutable)
-        linuxDebPostRm.copy(dirDebian.file("postrm"), posixExecutable)
-    }
-
-    private fun Path.createDirectories(vararg attributes: FileAttribute<*>) {
-        if (currentOS.isUnix()) {
-            createDirectories(this, *attributes)
-        } else {
-            createDirectories(this)
-        }
-    }
-
-    private fun RegularFileProperty.copy(target: RegularFile, permissions: Set<PosixFilePermission>) {
-        if (ioFileOrNull == null) return
-        target.asPath().parent.createDirectories(asFileAttribute(posixExecutable))
-        Files.copy(asPath(), target.asPath())
-        if (currentOS.isUnix()) {
-            Files.setPosixFilePermissions(target.asPath(), permissions)
-        }
-    }
-
-    private fun createControlFile(fileControl: RegularFile, appImage: Directory) {
-        // Determine installed size as in jdk.jpackage.internal.LinuxDebBundler#createReplacementData()
-        val sizeInBytes = sizeInBytes(appImage.asFile.toPath())
-        val installedSize = (sizeInBytes shr 10).toString()
-        logger.lifecycle("size in bytes: $sizeInBytes")
-        logger.lifecycle("installed size: $installedSize")
-
-        val list = mutableListOf<String>().apply {
-            addAll(depends.get())
-        }
-        list.sort()
-
-        fileControl.asFile.bufferedWriter().use { writer ->
-            writer.writeLn("Package: ${linuxPackageName.get()}")
-            writer.writeLn("Version: ${linuxDebPackageVersion.get()}-1")
-            writer.writeLn("Section: ${linuxAppCategory.get()}")
-            writer.writeLn("Maintainer: ${packageVendor.get()} <${linuxDebMaintainer.get()}>")
-            writer.writeLn("Priority: optional")
-            writer.writeLn("Architecture: amd64")
-            writer.writeLn("Provides: ${linuxPackageName.get()}")
-            writer.writeLn("Description: ${packageDescription.get()}")
-            writer.writeLn("Depends: ${list.joinToString(", ")}")
-            writer.writeLn("Installed-Size: $installedSize")
-        }
-    }
-
-    // Same algorithm as jdk.jpackage.internal.PathGroup.Facade#sizeInBytes()
-    open fun sizeInBytes(dir: Path): Long {
-        var sum: Long = 0
-        Files.walk(dir).use { stream ->
-            sum += stream.filter { p -> Files.isRegularFile(p) }
-                .mapToLong { f -> f.toFile().length() }.sum()
-        }
-        return sum
+        packager.createPackage()
     }
 
     override fun checkResult(result: ExecResult) {

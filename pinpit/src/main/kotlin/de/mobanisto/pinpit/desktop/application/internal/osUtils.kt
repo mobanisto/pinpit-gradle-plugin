@@ -78,14 +78,8 @@ internal fun javaExecutable(javaHome: String): String =
     File(javaHome).resolve("bin/${executableName("java")}").absolutePath
 
 internal object DebianUtils {
-    val fakeroot: File by lazy {
-        File("/usr/bin/fakeroot").checkExistingFile()
-    }
     val dpkg: File by lazy {
         File("/usr/bin/dpkg").checkExistingFile()
-    }
-    val dpkgDeb: File by lazy {
-        File("/usr/bin/dpkg-deb").checkExistingFile()
     }
     val ldd: File by lazy {
         File("/usr/bin/ldd").checkExistingFile()

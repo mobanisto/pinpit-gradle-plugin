@@ -30,7 +30,7 @@ import de.mobanisto.pinpit.test.utils.modify
 import de.mobanisto.pinpit.test.utils.runProcess
 import de.mobanisto.pinpit.validation.deb.DebContentBuilder
 import de.mobanisto.pinpit.validation.deb.DebContentUtils
-import de.mobanisto.pinpit.validation.deb.JvmDebPackager
+import de.mobanisto.pinpit.desktop.application.tasks.linux.JvmDebPackager
 import de.mobanisto.pinpit.validation.deb.NativeDebPackager
 import org.gradle.internal.impldep.org.testng.Assert
 import org.gradle.testkit.runner.TaskOutcome
@@ -42,6 +42,7 @@ import org.junit.jupiter.api.Test
 import java.io.File
 import java.nio.file.Path
 import java.util.*
+import kotlin.io.path.createDirectories
 
 class DesktopApplicationTest : GradlePluginTestBase() {
     @Test
@@ -261,8 +262,12 @@ class DesktopApplicationTest : GradlePluginTestBase() {
     private fun TestProject.packageDebJvm(): Path {
         val dirNativePackaging = testWorkDir.resolve("jvm-deb")
 
-        val outputDirJvmPackaging = dirNativePackaging.resolve("output")
+        val outputDir = dirNativePackaging.resolve("output")
         val workingDir = dirNativePackaging.resolve("working")
+        outputDir.createDirectories()
+        workingDir.createDirectories()
+
+        val deb = outputDir.resolve("test-package-ubuntu-20.04-1.0.0.deb")
 
         val dirBuild = file("build").toPath()
         val dirBinaries = dirBuild.resolve("pinpit/binaries/main-default/linux/x64/")
@@ -271,18 +276,16 @@ class DesktopApplicationTest : GradlePluginTestBase() {
         val appImage = dirBinaries.resolve("appimage/TestPackage")
         val packager = JvmDebPackager(
             appImage,
-            outputDirJvmPackaging,
+            deb,
             workingDir,
             "TestPackage",
             "test-package",
             "1.0.0",
-            currentArch.id,
             "utils",
             "Test Vendor",
             "example@example.com",
             "Test description",
             listOf("libc6", "libexpat1", "libgcc-s1", "libpcre3", "libuuid1", "xdg-utils", "zlib1g", "libnotify4"),
-            "ubuntu-20.04",
             packaging.resolve("deb/copyright"),
             packaging.resolve("deb/launcher.desktop"),
             packaging.resolve("deb/preinst"),
@@ -291,14 +294,18 @@ class DesktopApplicationTest : GradlePluginTestBase() {
             packaging.resolve("deb/postrm"),
         )
         packager.createPackage()
-        return outputDirJvmPackaging
+        return outputDir
     }
 
     private fun TestProject.packageDebNative(): Path {
         val dirNativePackaging = testWorkDir.resolve("native-deb")
 
-        val outputDirNativePackaging = dirNativePackaging.resolve("output")
+        val outputDir = dirNativePackaging.resolve("output")
         val workingDir = dirNativePackaging.resolve("working")
+        outputDir.createDirectories()
+        workingDir.createDirectories()
+
+        val deb = outputDir.resolve("test-package-ubuntu-20.04-1.0.0.deb")
 
         val dirBuild = file("build").toPath()
         val dirBinaries = dirBuild.resolve("pinpit/binaries/main-default/linux/x64/")
@@ -307,18 +314,16 @@ class DesktopApplicationTest : GradlePluginTestBase() {
         val appImage = dirBinaries.resolve("appimage/TestPackage")
         val packager = NativeDebPackager(
             appImage,
-            outputDirNativePackaging,
+            deb,
             workingDir,
             "TestPackage",
             "test-package",
             "1.0.0",
-            currentArch.id,
             "utils",
             "Test Vendor",
             "example@example.com",
             "Test description",
             listOf("libc6", "libexpat1", "libgcc-s1", "libpcre3", "libuuid1", "xdg-utils", "zlib1g", "libnotify4"),
-            "ubuntu-20.04",
             packaging.resolve("deb/copyright"),
             packaging.resolve("deb/launcher.desktop"),
             packaging.resolve("deb/preinst"),
@@ -327,7 +332,7 @@ class DesktopApplicationTest : GradlePluginTestBase() {
             packaging.resolve("deb/postrm"),
         )
         packager.createPackage()
-        return outputDirNativePackaging
+        return outputDir
     }
 
     private fun checkDebExpectations(packageDirs: List<Path>, names: List<String>) {

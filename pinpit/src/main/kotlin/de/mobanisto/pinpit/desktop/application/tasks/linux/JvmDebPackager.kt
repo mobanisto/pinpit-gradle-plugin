@@ -3,7 +3,7 @@
  * Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE.txt file.
  */
 
-package de.mobanisto.pinpit.validation.deb
+package de.mobanisto.pinpit.desktop.application.tasks.linux
 
 import org.apache.commons.compress.archivers.ar.ArArchiveEntry
 import org.apache.commons.compress.archivers.ar.ArArchiveOutputStream
@@ -32,18 +32,16 @@ import kotlin.io.path.outputStream
  */
 class JvmDebPackager constructor(
     private val appImage: Path,
-    private val destinationDir: Path,
+    private val destinationDeb: Path,
     workingDir: Path,
     packageName: String,
-    private val linuxPackageName: String,
-    private val packageVersion: String,
-    private val arch: String,
+    linuxPackageName: String,
+    packageVersion: String,
     appCategory: String,
     packageVendor: String,
     debMaintainer: String,
     packageDescription: String,
     depends: List<String>,
-    private val qualifier: String,
     debCopyright: Path?,
     debLauncher: Path?,
     debPreInst: Path?,
@@ -72,8 +70,8 @@ class JvmDebPackager constructor(
     private val debPackageDir: Path = workingDir.resolve("debContent")
 
     fun createPackage() {
-        logger.info("destination: $destinationDir")
-        destinationDir.createDirectories(asFileAttribute(posixExecutable))
+        logger.info("destination: $destinationDeb")
+        destinationDeb.parent.createDirectories(asFileAttribute(posixExecutable))
 
         logger.info("app image: $appImage")
 
@@ -86,8 +84,7 @@ class JvmDebPackager constructor(
         logger.info("building debian archives at: $debPackageDir")
         debPackageDir.createDirectories(asFileAttribute(posixExecutable))
 
-        val deb = destinationDir.resolve("$linuxPackageName-$qualifier-$arch-$packageVersion.deb")
-        packageDeb(deb, debPackageDir, debFileTree)
+        packageDeb(destinationDeb, debPackageDir, debFileTree)
     }
 
     private fun packageDeb(deb: Path, debPackageDir: Path, debFileTree: Path) {

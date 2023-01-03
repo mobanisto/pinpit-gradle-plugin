@@ -50,7 +50,7 @@ dependencies {
     // Use `embedded` helper to include a dependency.
     fun embedded(dep: Any) {
         compileOnly(dep)
-        testCompileOnly(dep)
+        testImplementation(dep)
         embeddedDependencies(dep)
     }
 
@@ -64,14 +64,14 @@ dependencies {
     testImplementation(platform("org.junit:junit-bom:5.7.0"))
     testImplementation("org.junit.jupiter:junit-jupiter")
     testImplementation(kotlin("gradle-plugin-api"))
-    testImplementation("org.tukaani:xz:1.9")
     testImplementation("commons-codec:commons-codec:1.15")
     testImplementation("io.github.java-diff-utils:java-diff-utils:4.12")
-    testImplementation("org.apache.commons:commons-compress:1.22")
 
     // include relocated download task to avoid potential runtime conflicts
     embedded("de.undercouch:gradle-download-task:4.1.1")
 
+    embedded("org.tukaani:xz:1.9")
+    embedded("org.apache.commons:commons-compress:1.22")
     embedded("org.jetbrains.kotlinx:kotlinx-serialization-json:${BuildProperties.serializationVersion}")
     embedded("org.jetbrains.kotlinx:kotlinx-serialization-core:${BuildProperties.serializationVersion}")
     embedded("org.jetbrains.kotlinx:kotlinx-serialization-core-jvm:${BuildProperties.serializationVersion}")

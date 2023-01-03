@@ -3,7 +3,7 @@
  * Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE.txt file.
  */
 
-package de.mobanisto.pinpit.validation.deb
+package de.mobanisto.pinpit.desktop.application.tasks.linux
 
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
