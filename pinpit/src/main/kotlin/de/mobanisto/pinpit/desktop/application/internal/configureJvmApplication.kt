@@ -459,7 +459,6 @@ private fun JvmApplicationContext.configureAppImageTask(
         packageTask.packageCopyright.set(packageTask.provider { executables.copyright })
         packageTask.packageVendor.set(packageTask.provider { executables.vendor })
         packageTask.packageVersion.set(packageVersionFor(packageTask.target.os))
-        packageTask.licenseFile.set(executables.licenseFile)
     }
 
     packageTask.destinationDir.set(app.nativeDistributions.outputBaseDir.map {
@@ -508,7 +507,6 @@ internal fun JvmApplicationContext.configurePlatformSettings(
         packageTask.linuxDebMaintainer.set(provider { linux.debMaintainer })
         packageTask.linuxMenuGroup.set(provider { linux.menuGroup })
         packageTask.linuxPackageName.set(provider { linux.packageName })
-        packageTask.linuxRpmLicenseType.set(provider { linux.rpmLicenseType })
         packageTask.iconFile.set(linux.iconFile.orElse(unpackDefaultResources.flatMap { it.resources.linuxIcon }))
         packageTask.installationPath.set(linux.installationPath)
         packageTask.linuxDebPreInst.set(linux.debPreInst)
@@ -554,13 +552,6 @@ internal fun JvmApplicationContext.configurePlatformSettings(
     when (packageTask.target.os) {
         Linux -> {
             app.nativeDistributions.linux.also { linux ->
-                packageTask.linuxShortcut.set(provider { linux.shortcut })
-                packageTask.linuxAppCategory.set(provider { linux.appCategory })
-                packageTask.linuxAppRelease.set(provider { linux.appRelease })
-                packageTask.linuxDebMaintainer.set(provider { linux.debMaintainer })
-                packageTask.linuxMenuGroup.set(provider { linux.menuGroup })
-                packageTask.linuxPackageName.set(provider { linux.packageName })
-                packageTask.linuxRpmLicenseType.set(provider { linux.rpmLicenseType })
                 packageTask.iconFile.set(linux.iconFile.orElse(unpackDefaultResources.flatMap { it.resources.linuxIcon }))
                 packageTask.installationPath.set(linux.installationPath)
             }

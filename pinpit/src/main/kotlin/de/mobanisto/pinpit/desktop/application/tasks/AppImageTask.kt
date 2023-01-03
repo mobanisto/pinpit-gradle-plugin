@@ -105,11 +105,6 @@ abstract class AppImageTask @Inject constructor(
     @get:InputFile
     @get:Optional
     @get:PathSensitive(PathSensitivity.ABSOLUTE)
-    val licenseFile: RegularFileProperty = objects.fileProperty()
-
-    @get:InputFile
-    @get:Optional
-    @get:PathSensitive(PathSensitivity.ABSOLUTE)
     val iconFile: RegularFileProperty = objects.fileProperty()
 
     @get:Input
@@ -145,34 +140,6 @@ abstract class AppImageTask @Inject constructor(
     @get:Input
     @get:Optional
     val packageVersion: Property<String?> = objects.nullableProperty()
-
-    @get:Input
-    @get:Optional
-    val linuxShortcut: Property<Boolean?> = objects.nullableProperty()
-
-    @get:Input
-    @get:Optional
-    val linuxPackageName: Property<String?> = objects.nullableProperty()
-
-    @get:Input
-    @get:Optional
-    val linuxAppRelease: Property<String?> = objects.nullableProperty()
-
-    @get:Input
-    @get:Optional
-    val linuxAppCategory: Property<String?> = objects.nullableProperty()
-
-    @get:Input
-    @get:Optional
-    val linuxDebMaintainer: Property<String?> = objects.nullableProperty()
-
-    @get:Input
-    @get:Optional
-    val linuxMenuGroup: Property<String?> = objects.nullableProperty()
-
-    @get:Input
-    @get:Optional
-    val linuxRpmLicenseType: Property<String?> = objects.nullableProperty()
 
     @get:Input
     @get:Optional

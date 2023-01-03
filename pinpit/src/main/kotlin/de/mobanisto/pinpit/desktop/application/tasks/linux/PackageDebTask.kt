@@ -78,10 +78,6 @@ abstract class PackageDebTask @Inject constructor(
 
     @get:Input
     @get:Optional
-    val packageVersion: Property<String?> = objects.nullableProperty()
-
-    @get:Input
-    @get:Optional
     val linuxShortcut: Property<Boolean?> = objects.nullableProperty()
 
     @get:Input
@@ -107,10 +103,6 @@ abstract class PackageDebTask @Inject constructor(
     @get:Input
     @get:Optional
     val linuxMenuGroup: Property<String?> = objects.nullableProperty()
-
-    @get:Input
-    @get:Optional
-    val linuxRpmLicenseType: Property<String?> = objects.nullableProperty()
 
     @get:InputDirectory
     @get:Optional
