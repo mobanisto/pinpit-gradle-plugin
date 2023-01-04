@@ -525,7 +525,8 @@ abstract class AppImageTask @Inject constructor(
                 packageName.orNull?.let { addAll(listOf("--product-name", it)) }
                 packageCopyright.orNull?.let { addAll(listOf("--legal-copyright", it)) }
                 packageDescription.orNull?.let { addAll(listOf("--file-description", it)) }
-            })
+            }
+        )
     }
 
     private fun packageMacOs() {

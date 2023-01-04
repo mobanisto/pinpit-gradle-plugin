@@ -128,35 +128,41 @@ class JvmDebPackager constructor(
     private fun packageControl(fileControl: Path, debFileTree: Path) {
         val debian = debFileTree.resolve("DEBIAN")
         packageTarXz(fileControl) {
-            walkFileTree(debian, object : SimpleFileVisitor<Path>() {
-                override fun preVisitDirectory(dir: Path, attrs: BasicFileAttributes): FileVisitResult {
-                    packageFile(debian, dir)
-                    return FileVisitResult.CONTINUE
-                }
+            walkFileTree(
+                debian,
+                object : SimpleFileVisitor<Path>() {
+                    override fun preVisitDirectory(dir: Path, attrs: BasicFileAttributes): FileVisitResult {
+                        packageFile(debian, dir)
+                        return FileVisitResult.CONTINUE
+                    }
 
-                override fun visitFile(file: Path, attrs: BasicFileAttributes): FileVisitResult {
-                    packageFile(debian, file)
-                    return FileVisitResult.CONTINUE
+                    override fun visitFile(file: Path, attrs: BasicFileAttributes): FileVisitResult {
+                        packageFile(debian, file)
+                        return FileVisitResult.CONTINUE
+                    }
                 }
-            })
+            )
         }
     }
 
     private fun packageData(fileData: Path, debFileTree: Path) {
         packageTarXz(fileData) {
-            walkFileTree(debFileTree, object : SimpleFileVisitor<Path>() {
-                override fun preVisitDirectory(dir: Path, attrs: BasicFileAttributes): FileVisitResult {
-                    val relative = debFileTree.relativize(dir)
-                    if (relative == Paths.get("DEBIAN")) return FileVisitResult.SKIP_SUBTREE
-                    packageFile(debFileTree, dir)
-                    return FileVisitResult.CONTINUE
-                }
+            walkFileTree(
+                debFileTree,
+                object : SimpleFileVisitor<Path>() {
+                    override fun preVisitDirectory(dir: Path, attrs: BasicFileAttributes): FileVisitResult {
+                        val relative = debFileTree.relativize(dir)
+                        if (relative == Paths.get("DEBIAN")) return FileVisitResult.SKIP_SUBTREE
+                        packageFile(debFileTree, dir)
+                        return FileVisitResult.CONTINUE
+                    }
 
-                override fun visitFile(file: Path, attrs: BasicFileAttributes): FileVisitResult {
-                    packageFile(debFileTree, file)
-                    return FileVisitResult.CONTINUE
+                    override fun visitFile(file: Path, attrs: BasicFileAttributes): FileVisitResult {
+                        packageFile(debFileTree, file)
+                        return FileVisitResult.CONTINUE
+                    }
                 }
-            })
+            )
         }
     }
 

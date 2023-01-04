@@ -56,25 +56,25 @@ internal class FileVisitorBuilderImpl : FileVisitorBuilder {
     private var onPostVisitDirectory: ((Path, IOException?) -> FileVisitResult)? = null
     private var isBuilt: Boolean = false
 
-    override fun onPreVisitDirectory(function: (directory: Path, attributes: BasicFileAttributes) -> FileVisitResult): Unit {
+    override fun onPreVisitDirectory(function: (directory: Path, attributes: BasicFileAttributes) -> FileVisitResult) {
         checkIsNotBuilt()
         checkNotDefined(onPreVisitDirectory, "onPreVisitDirectory")
         onPreVisitDirectory = function
     }
 
-    override fun onVisitFile(function: (file: Path, attributes: BasicFileAttributes) -> FileVisitResult): Unit {
+    override fun onVisitFile(function: (file: Path, attributes: BasicFileAttributes) -> FileVisitResult) {
         checkIsNotBuilt()
         checkNotDefined(onVisitFile, "onVisitFile")
         onVisitFile = function
     }
 
-    override fun onVisitFileFailed(function: (file: Path, exception: IOException) -> FileVisitResult): Unit {
+    override fun onVisitFileFailed(function: (file: Path, exception: IOException) -> FileVisitResult) {
         checkIsNotBuilt()
         checkNotDefined(onVisitFileFailed, "onVisitFileFailed")
         onVisitFileFailed = function
     }
 
-    override fun onPostVisitDirectory(function: (directory: Path, exception: IOException?) -> FileVisitResult): Unit {
+    override fun onPostVisitDirectory(function: (directory: Path, exception: IOException?) -> FileVisitResult) {
         checkIsNotBuilt()
         checkNotDefined(onPostVisitDirectory, "onPostVisitDirectory")
         onPostVisitDirectory = function
@@ -94,7 +94,6 @@ internal class FileVisitorBuilderImpl : FileVisitorBuilder {
         if (function != null) throw IllegalStateException("$name was already defined")
     }
 }
-
 
 private class FileVisitorImpl(
     private val onPreVisitDirectory: ((Path, BasicFileAttributes) -> FileVisitResult)?,

@@ -52,7 +52,8 @@ internal class BuildResultChecks(private val result: BuildResult) {
                 """|Unexpected outcome for task '$task'
                    |Expected: $expectedOutcome
                    |Actual: $actualOutcome
-            """.trimMargin())
+            """.trimMargin()
+            )
         }
     }
 }

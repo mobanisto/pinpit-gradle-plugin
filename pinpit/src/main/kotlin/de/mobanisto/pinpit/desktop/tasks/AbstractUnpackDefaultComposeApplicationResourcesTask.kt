@@ -22,9 +22,11 @@ abstract class AbstractUnpackDefaultComposeApplicationResourcesTask : AbstractPi
         val macIcon: Provider<RegularFile> = resourcesRootDir.map { it.file("default-icon-mac.icns") }
         val windowsIcon: Provider<RegularFile> = resourcesRootDir.map { it.file("default-icon-windows.ico") }
         val linuxIcon: Provider<RegularFile> = resourcesRootDir.map { it.file("default-icon-linux.png") }
-        val defaultComposeProguardRules: Provider<RegularFile> = resourcesRootDir.map { it.file(
-            DEFAULT_COMPOSE_PROGUARD_RULES_FILE_NAME
-        ) }
+        val defaultComposeProguardRules: Provider<RegularFile> = resourcesRootDir.map {
+            it.file(
+                DEFAULT_COMPOSE_PROGUARD_RULES_FILE_NAME
+            )
+        }
     }
 
     @OutputDirectory

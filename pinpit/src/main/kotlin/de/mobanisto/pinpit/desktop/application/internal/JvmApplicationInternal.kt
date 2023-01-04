@@ -27,11 +27,15 @@ internal open class JvmApplicationInternal @Inject constructor(
     final override fun from(from: SourceSet, files: FileCollection) {
         data.jvmApplicationRuntimeFilesProvider = JvmApplicationRuntimeFilesProvider.FromGradleSourceSet(from, files)
     }
+
     final override fun from(from: KotlinTarget) {
-        check(from is KotlinJvmTarget) { "Non JVM Kotlin MPP targets are not supported: ${from.javaClass.canonicalName} " +
-                "is not subtype of ${KotlinJvmTarget::class.java.canonicalName}" }
+        check(from is KotlinJvmTarget) {
+            "Non JVM Kotlin MPP targets are not supported: ${from.javaClass.canonicalName} " +
+                "is not subtype of ${KotlinJvmTarget::class.java.canonicalName}"
+        }
         data.jvmApplicationRuntimeFilesProvider = JvmApplicationRuntimeFilesProvider.FromKotlinMppTarget(from)
     }
+
     final override fun disableDefaultConfiguration() {
         data.isDefaultConfigurationEnabled = false
     }
@@ -43,6 +47,7 @@ internal open class JvmApplicationInternal @Inject constructor(
     final override fun dependsOn(vararg tasks: String) {
         data.dependenciesTaskNames.addAll(tasks)
     }
+
     final override fun dependsOn(vararg tasks: Task) {
         tasks.mapTo(data.dependenciesTaskNames) { it.path }
     }

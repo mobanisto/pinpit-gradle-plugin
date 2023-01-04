@@ -12,7 +12,7 @@ import org.gradle.api.logging.Logger
 import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.TaskProvider
 import java.io.File
-import java.util.*
+import java.util.Properties
 
 internal inline fun Logger.info(fn: () -> String) {
     if (isInfoEnabled) {

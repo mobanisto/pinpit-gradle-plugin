@@ -60,7 +60,8 @@ private class ErrorsCollector {
             if (correctFormat != null) {
                 appendLine("  * Correct format: $correctFormat")
             }
-            appendLine("  * You can specify the correct version using DSL properties: " +
+            appendLine(
+                "  * You can specify the correct version using DSL properties: " +
                     dslPropertiesFor(target).joinToString(", ")
             )
         }
@@ -135,9 +136,10 @@ private object DebVersionChecker : VersionChecker {
         version.matches(debRegex)
 
     private val debRegex = (
-            /* EPOCH */"([0-9]+:)?" +
-            /* UPSTREAM_VERSION */ "[0-9][0-9a-zA-Z.+\\-~]*" +
-            /* DEBIAN_REVISION */ "(-[0-9a-zA-Z.+~]+)?").toRegex()
+        "([0-9]+:)?" /* EPOCH */ +
+            "[0-9][0-9a-zA-Z.+\\-~]*" /* UPSTREAM_VERSION */ +
+            "(-[0-9a-zA-Z.+~]+)?" /* DEBIAN_REVISION */
+        ).toRegex()
 }
 
 private object RpmVersionChecker : VersionChecker {
@@ -158,15 +160,14 @@ private object WindowsVersionChecker : VersionChecker {
         val parts = version.split(".").map { it.toIntOrNull() }
         if (parts.size != 3) return false
 
-        return parts[0].isIntInRange(0, 255)
-                && parts[1].isIntInRange(0, 255)
-                && parts[2].isIntInRange(0, 65535)
+        return parts[0].isIntInRange(0, 255) &&
+            parts[1].isIntInRange(0, 255) &&
+            parts[2].isIntInRange(0, 65535)
     }
 
     private fun Int?.isIntInRange(min: Int, max: Int) =
         this != null && this >= min && this <= max
 }
-
 
 private object MacVersionChecker : VersionChecker {
     override val correctFormat = """|'MAJOR[.MINOR][.PATCH]', where:
@@ -178,9 +179,9 @@ private object MacVersionChecker : VersionChecker {
     override fun isValid(version: String): Boolean {
         val parts = version.split(".").map { it.toIntOrNull() }
 
-        return parts.isNotEmpty()
-                && parts.size <= 3
-                && parts.all { it != null && it >= 0 }
-                && (parts.first() ?: 0) > 0
+        return parts.isNotEmpty() &&
+            parts.size <= 3 &&
+            parts.all { it != null && it >= 0 } &&
+            (parts.first() ?: 0) > 0
     }
 }

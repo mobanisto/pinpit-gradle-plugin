@@ -59,7 +59,7 @@ abstract class AbstractUploadAppForNotarizationTask @Inject constructor(
             tool = MacUtils.xcrun,
             args = args,
             processStdout = { output ->
-               processUploadToolOutput(packageFile, output)
+                processUploadToolOutput(packageFile, output)
             }
         )
     }

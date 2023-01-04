@@ -16,4 +16,3 @@ abstract class PinpitExtension @Inject constructor(
 ) : ExtensionAware {
     val kotlinCompilerPlugin: Property<String?> = objects.nullableProperty()
 }
-

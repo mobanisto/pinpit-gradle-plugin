@@ -6,7 +6,7 @@
 package de.mobanisto.pinpit.desktop.application.internal
 
 import java.io.File
-import java.util.*
+import java.util.Properties
 
 internal const val NOTARIZATION_REQUEST_INFO_FILE_NAME = "notarization-request.properties"
 

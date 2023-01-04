@@ -6,10 +6,8 @@
 package de.mobanisto.pinpit.desktop.application.tasks
 
 import de.mobanisto.pinpit.desktop.application.internal.JvmRuntimeProperties
-import de.mobanisto.pinpit.desktop.application.internal.OS.Windows
 import de.mobanisto.pinpit.desktop.application.internal.RuntimeCompressionLevel
 import de.mobanisto.pinpit.desktop.application.internal.cliArg
-import de.mobanisto.pinpit.desktop.application.internal.currentOS
 import de.mobanisto.pinpit.desktop.application.internal.ioFile
 import de.mobanisto.pinpit.desktop.application.internal.notNullProperty
 import de.mobanisto.pinpit.desktop.application.internal.nullableProperty

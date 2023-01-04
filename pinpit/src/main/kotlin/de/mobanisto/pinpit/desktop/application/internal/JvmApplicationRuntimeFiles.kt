@@ -43,7 +43,6 @@ internal sealed class JvmApplicationRuntimeFilesProvider {
                 from(runtimeFiles.filter { it.path.endsWith(".jar") })
             }
             return JvmApplicationRuntimeFiles(runtimeJarFiles, mainJar, arrayOf(jarTask))
-
         }
     }
 

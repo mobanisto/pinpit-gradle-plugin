@@ -38,8 +38,8 @@ internal class ExternalToolRunner(
         logsDir.mkdirs()
 
         val toolName = tool.nameWithoutExtension
-        val outFile = logsDir.resolve("${toolName}-${currentTimeStamp()}-out.txt")
-        val errFile = logsDir.resolve("${toolName}-${currentTimeStamp()}-err.txt")
+        val outFile = logsDir.resolve("$toolName-${currentTimeStamp()}-out.txt")
+        val errFile = logsDir.resolve("$toolName-${currentTimeStamp()}-err.txt")
 
         val result = outFile.outputStream().buffered().use { outFileStream ->
             errFile.outputStream().buffered().use { errFileStream ->

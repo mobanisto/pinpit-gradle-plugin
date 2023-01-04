@@ -122,11 +122,13 @@ abstract class AbstractProguardTask : AbstractPinpitTask() {
                 writer.writeLn("-dontobfuscate")
             }
 
-            writer.writeLn("""
+            writer.writeLn(
+                """
                 -keep public class ${mainClass.get()} {
                     public static void main(java.lang.String[]);
                 }
-            """.trimIndent())
+                """.trimIndent()
+            )
 
             val includeFiles = sequenceOf(
                 jarsConfigurationFile.ioFile,

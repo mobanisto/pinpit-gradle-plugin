@@ -22,7 +22,7 @@ class NativeDebPackager constructor(
     workingDir: Path,
     packageName: String,
     linuxPackageName: String,
-     packageVersion: String,
+    packageVersion: String,
     appCategory: String,
     packageVendor: String,
     debMaintainer: String,

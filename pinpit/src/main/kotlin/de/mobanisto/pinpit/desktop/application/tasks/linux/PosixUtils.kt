@@ -27,5 +27,4 @@ object PosixUtils {
             Files.setPosixFilePermissions(this, permissions)
         }
     }
-
 }

@@ -6,27 +6,16 @@
 package de.mobanisto.pinpit.desktop.application.tasks.linux
 
 import de.mobanisto.pinpit.desktop.application.dsl.TargetFormat
-import de.mobanisto.pinpit.desktop.application.internal.DebianUtils
 import de.mobanisto.pinpit.desktop.application.internal.JvmRuntimeProperties
 import de.mobanisto.pinpit.desktop.application.internal.Target
-import de.mobanisto.pinpit.desktop.application.internal.currentArch
-import de.mobanisto.pinpit.desktop.application.internal.currentOS
-import de.mobanisto.pinpit.desktop.application.internal.dir
 import de.mobanisto.pinpit.desktop.application.internal.files.asPath
 import de.mobanisto.pinpit.desktop.application.internal.files.findOutputFileOrDir
-import de.mobanisto.pinpit.desktop.application.internal.files.posixExecutable
-import de.mobanisto.pinpit.desktop.application.internal.files.posixRegular
-import de.mobanisto.pinpit.desktop.application.internal.files.syncDir
-import de.mobanisto.pinpit.desktop.application.internal.files.writeLn
 import de.mobanisto.pinpit.desktop.application.internal.ioFile
-import de.mobanisto.pinpit.desktop.application.internal.ioFileOrNull
-import de.mobanisto.pinpit.desktop.application.internal.isUnix
 import de.mobanisto.pinpit.desktop.application.internal.nullableProperty
 import de.mobanisto.pinpit.desktop.application.internal.provider
 import de.mobanisto.pinpit.desktop.application.tasks.CustomPackageTask
 import org.gradle.api.file.Directory
 import org.gradle.api.file.DirectoryProperty
-import org.gradle.api.file.RegularFile
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.Property
@@ -39,15 +28,7 @@ import org.gradle.api.tasks.Optional
 import org.gradle.api.tasks.PathSensitive
 import org.gradle.api.tasks.PathSensitivity
 import org.gradle.process.ExecResult
-import java.nio.file.Files
-import java.nio.file.Files.createDirectories
-import java.nio.file.Path
-import java.nio.file.Paths
-import java.nio.file.attribute.FileAttribute
-import java.nio.file.attribute.PosixFilePermission
-import java.nio.file.attribute.PosixFilePermissions.asFileAttribute
 import javax.inject.Inject
-
 
 abstract class PackageDebTask @Inject constructor(
     target: Target,

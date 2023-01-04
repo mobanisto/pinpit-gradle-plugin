@@ -177,43 +177,49 @@ internal fun syncDir(source: Directory, target: Directory, takeFile: (file: Path
 }
 
 internal fun syncDir(source: Path, target: Path, takeFile: (file: Path) -> Boolean = { _ -> true }) {
-    Files.walkFileTree(source, object : SimpleFileVisitor<Path>() {
-        override fun visitFile(file: Path, attrs: BasicFileAttributes): FileVisitResult {
-            val relative = source.relativize(file)
-            if (!takeFile(relative)) {
+    Files.walkFileTree(
+        source,
+        object : SimpleFileVisitor<Path>() {
+            override fun visitFile(file: Path, attrs: BasicFileAttributes): FileVisitResult {
+                val relative = source.relativize(file)
+                if (!takeFile(relative)) {
+                    return FileVisitResult.CONTINUE
+                }
+                val pathTarget = target.resolve(relative)
+                if (currentOS.isUnix()) {
+                    Files.createDirectories(pathTarget.parent, PosixFilePermissions.asFileAttribute(posixExecutable))
+                } else {
+                    Files.createDirectories(pathTarget.parent)
+                }
+                if (currentOS.isUnix()) {
+                    if (Files.isExecutable(file)) {
+                        Files.setPosixFilePermissions(file, posixExecutable)
+                    } else {
+                        Files.setPosixFilePermissions(file, posixRegular)
+                    }
+                }
+                Files.copy(file, pathTarget)
                 return FileVisitResult.CONTINUE
             }
-            val pathTarget = target.resolve(relative)
-            if (currentOS.isUnix()) {
-                Files.createDirectories(pathTarget.parent, PosixFilePermissions.asFileAttribute(posixExecutable))
-            } else {
-                Files.createDirectories(pathTarget.parent)
-            }
-            if (currentOS.isUnix()) {
-                if (Files.isExecutable(file)) {
-                    Files.setPosixFilePermissions(file, posixExecutable)
-                } else {
-                    Files.setPosixFilePermissions(file, posixRegular)
-                }
-            }
-            Files.copy(file, pathTarget)
-            return FileVisitResult.CONTINUE
         }
-    })
+    )
 }
 
 internal fun findRelative(source: Path, takeFile: (file: Path) -> Boolean = { _ -> true }): MutableList<Path> {
     val results = mutableListOf<Path>()
-    Files.walkFileTree(source, object : SimpleFileVisitor<Path>() {
-        override fun visitFile(file: Path, attrs: BasicFileAttributes): FileVisitResult {
-            val relative = source.relativize(file)
-            if (!takeFile(file)) {
+    Files.walkFileTree(
+        source,
+        object : SimpleFileVisitor<Path>() {
+            override fun visitFile(file: Path, attrs: BasicFileAttributes): FileVisitResult {
+                val relative = source.relativize(file)
+                if (!takeFile(file)) {
+                    return FileVisitResult.CONTINUE
+                }
+                results.add(relative)
                 return FileVisitResult.CONTINUE
             }
-            results.add(relative)
-            return FileVisitResult.CONTINUE
         }
-    })
+    )
     return results
 }
 
@@ -223,7 +229,7 @@ public fun Path.visitFileTree(
     maxDepth: Int = Int.MAX_VALUE,
     followLinks: Boolean = false,
     builderAction: FileVisitorBuilder.() -> Unit
-): Unit {
+) {
     contract { callsInPlace(builderAction, InvocationKind.EXACTLY_ONCE) }
     visitFileTree(fileVisitor(builderAction), maxDepth, followLinks)
 }
@@ -233,7 +239,7 @@ internal fun Path.visitFileTree(
     visitor: FileVisitor<Path>,
     maxDepth: Int = Int.MAX_VALUE,
     followLinks: Boolean = false
-): Unit {
+) {
     val options = if (followLinks) setOf(FileVisitOption.FOLLOW_LINKS) else setOf()
     Files.walkFileTree(this, options, maxDepth, visitor)
 }

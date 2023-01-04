@@ -44,9 +44,11 @@ abstract class AbstractPinpitTask : DefaultTask() {
 
     @get:Internal
     val verbose: Property<Boolean> = objects.notNullProperty<Boolean>().apply {
-        set(providers.provider {
-            logger.isDebugEnabled || PinpitProperties.isVerbose(providers).get()
-        })
+        set(
+            providers.provider {
+                logger.isDebugEnabled || PinpitProperties.isVerbose(providers).get()
+            }
+        )
     }
 
     @get:Internal

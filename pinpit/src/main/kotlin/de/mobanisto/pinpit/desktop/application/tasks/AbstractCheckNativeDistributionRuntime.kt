@@ -103,7 +103,6 @@ abstract class AbstractCheckNativeDistributionRuntime : AbstractPinpitTask() {
         JvmRuntimeProperties.writeToFile(properties, javaRuntimePropertiesFile.ioFile)
     }
 
-
     private fun getJavaRuntimeVersionUnsafe(): String? {
         cleanDirs(workingDir)
         val workingDir = workingDir.ioFile
@@ -139,7 +138,7 @@ abstract class AbstractCheckNativeDistributionRuntime : AbstractPinpitTask() {
                         Runtime.getRuntime().exit(0);
                     }
                 }
-            """.trimIndent()
+                """.trimIndent()
             )
         }
         val classFilesDir = workingDir.resolve("out-classes")

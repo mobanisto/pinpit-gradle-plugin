@@ -56,4 +56,3 @@ internal class FilesMapping : Serializable {
         mapping = stream.readObject() as HashMap<File, List<File>>
     }
 }
-

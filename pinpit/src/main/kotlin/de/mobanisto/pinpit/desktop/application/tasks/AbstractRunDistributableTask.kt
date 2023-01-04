@@ -44,7 +44,7 @@ abstract class AbstractRunDistributableTask @Inject constructor(
         }
         val appExecutableName = executableName(packageName.get())
         val (workingDir, executable) = when (currentOS) {
-            OS.Linux ->  appDir to "bin/$appExecutableName"
+            OS.Linux -> appDir to "bin/$appExecutableName"
             OS.Windows -> appDir to appExecutableName
             OS.MacOS -> appDir.resolve("Contents") to "MacOS/$appExecutableName"
         }

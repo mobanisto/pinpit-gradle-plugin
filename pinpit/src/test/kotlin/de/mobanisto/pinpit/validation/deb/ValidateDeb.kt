@@ -34,8 +34,8 @@ object ValidateDeb {
                     val simplePath = name2.substring(2) // strip "./"
                     val path = Paths.get(simplePath)
                     val expectExecutable = entry2.isDirectory or scripts.contains(simplePath) or
-                            (path.parent != null && path.parent.fileName.toString() == "bin") or
-                            executables.contains(path.fileName.toString())
+                        (path.parent != null && path.parent.fileName.toString() == "bin") or
+                        executables.contains(path.fileName.toString())
                     println("  $name2: ${entry2.longGroupId}, ${entry2.longUserId}, ${toOctalString(entry2.mode)}")
                     if (expectExecutable) {
                         Assertions.assertEquals("755", toOctalString(entry2.mode))

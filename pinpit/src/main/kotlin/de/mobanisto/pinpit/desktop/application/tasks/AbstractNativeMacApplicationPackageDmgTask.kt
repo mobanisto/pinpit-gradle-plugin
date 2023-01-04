@@ -65,6 +65,7 @@ abstract class AbstractNativeMacApplicationPackageDmgTask : AbstractNativeMacApp
     }
 
     private data class MountedImage(val device: String, val disk: String)
+
     private fun mountImage(volumeName: String, imageFile: File): MountedImage {
         val output = hdiutil(
             "attach",
@@ -88,9 +89,9 @@ abstract class AbstractNativeMacApplicationPackageDmgTask : AbstractNativeMacApp
         }
         check(device != null && volume != null) {
             "Could not parse mounted image's device ($device) & volume ($volume) from hdiutil output:" +
-                    "\n=======\n" +
-                    output +
-                    "\n=======\n"
+                "\n=======\n" +
+                output +
+                "\n=======\n"
         }
         if (verbose.get()) {
             logger.info("Mounted DMG image '$imageFile': volume '$volume', device '$device'")
@@ -126,7 +127,8 @@ abstract class AbstractNativeMacApplicationPackageDmgTask : AbstractNativeMacApp
         val disk = mounted.disk
         val installDir = installDir.get()
         val setupScript = workingDir.ioFile.resolve("setup-dmg.scpt").apply {
-            writeText("""
+            writeText(
+                """
                    tell application "Finder"
                      tell disk "$disk"
                            open
@@ -145,7 +147,8 @@ abstract class AbstractNativeMacApplicationPackageDmgTask : AbstractNativeMacApp
                            close
                      end tell
                    end tell
-            """.trimIndent())
+                """.trimIndent()
+            )
         }
         runExternalTool(tool = osascript.ioFile, args = listOf(setupScript.absolutePath))
     }

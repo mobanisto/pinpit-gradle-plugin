@@ -9,7 +9,7 @@ import de.mobanisto.pinpit.desktop.application.tasks.windows.GenerateFilesWxs.Fi
 import org.w3c.dom.Document
 import java.nio.file.Files
 import java.nio.file.Path
-import java.util.*
+import java.util.UUID
 import javax.xml.parsers.DocumentBuilderFactory
 import javax.xml.transform.OutputKeys
 import javax.xml.transform.TransformerFactory
@@ -81,7 +81,7 @@ class GenerateProductWxs(
                 setAttribute("Value", bitmapBanner.toString())
             }
         }
-        if (bitmapDialog != null ) {
+        if (bitmapDialog != null) {
             product.createChild("WixVariable", "WixUIDialogBmp") {
                 setAttribute("Value", bitmapDialog.toString())
             }

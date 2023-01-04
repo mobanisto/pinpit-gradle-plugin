@@ -20,7 +20,6 @@ import java.util.regex.Matcher
 import java.util.regex.Pattern
 import javax.inject.Inject
 
-
 abstract class SuggestDebDependenciesTask @Inject constructor() : AbstractPinpitTask() {
 
     companion object {

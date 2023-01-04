@@ -12,7 +12,8 @@ import java.nio.file.FileVisitResult
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.Paths
-import java.util.*
+import java.util.Stack
+import java.util.UUID
 import javax.xml.parsers.DocumentBuilderFactory
 import javax.xml.transform.OutputKeys
 import javax.xml.transform.TransformerFactory
@@ -116,7 +117,7 @@ class GenerateFilesWxs(private val output: Path, private val dir: Path, private 
                 val component = stack.peek().createChild("Component", id) {
                     setAttribute("Guid", "{$uuid}")
                 }
-                component.createChild("File", fileId ) {
+                component.createChild("File", fileId) {
                     setAttribute("KeyPath", "yes")
                     setAttribute("Source", file.toString())
                 }

@@ -74,7 +74,6 @@ internal class MacSigner(
             file.absolutePath
         )
         runExternalTool(MacUtils.codesign, args)
-
     }
 
     private fun findCertificate(certificates: String): String {
@@ -84,7 +83,7 @@ internal class MacSigner(
             val keychainPath = settings.keychain?.absolutePath
             error(
                 "Could not find certificate for '${settings.identity}'" +
-                        " in keychain [${keychainPath.orEmpty()}]"
+                    " in keychain [${keychainPath.orEmpty()}]"
             )
         }
 
@@ -92,7 +91,7 @@ internal class MacSigner(
         if (m.find())
             error(
                 "Multiple matching certificates are found for '${settings.fullDeveloperID}'. " +
-                "Please specify keychain containing unique matching certificate."
+                    "Please specify keychain containing unique matching certificate."
             )
         return result
     }

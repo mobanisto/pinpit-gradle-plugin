@@ -110,7 +110,6 @@ internal object MacUtils {
     val open: File by lazy {
         File("/usr/bin/open").checkExistingFile()
     }
-
 }
 
 internal object UnixUtils {
@@ -132,7 +131,7 @@ internal fun jvmToolFile(toolName: String, javaHome: File): File {
     val jtool = javaHome.resolve("bin/${executableName(toolName)}")
     check(jtool.isFile) {
         "Invalid JDK: $jtool is not a file! \n" +
-                "Ensure JAVA_HOME or buildSettings.javaHome is set to JDK $MIN_JAVA_RUNTIME_VERSION or newer"
+            "Ensure JAVA_HOME or buildSettings.javaHome is set to JDK $MIN_JAVA_RUNTIME_VERSION or newer"
     }
     return jtool
 }

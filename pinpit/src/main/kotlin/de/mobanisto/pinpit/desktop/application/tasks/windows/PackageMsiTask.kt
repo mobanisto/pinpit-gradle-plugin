@@ -33,7 +33,6 @@ import org.gradle.api.tasks.PathSensitivity
 import org.gradle.process.ExecResult
 import java.nio.file.Files
 import java.nio.file.Path
-import java.util.*
 import javax.inject.Inject
 
 abstract class PackageMsiTask @Inject constructor(

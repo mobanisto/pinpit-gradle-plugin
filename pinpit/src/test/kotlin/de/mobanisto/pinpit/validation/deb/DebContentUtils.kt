@@ -16,11 +16,15 @@ data class ComparisonResult(
 )
 
 data class ArComparisonResult(
-    val onlyIn1: List<ArEntry>, val onlyIn2: List<ArEntry>, val different: List<Pair<ArEntry, ArEntry>>
+    val onlyIn1: List<ArEntry>,
+    val onlyIn2: List<ArEntry>,
+    val different: List<Pair<ArEntry, ArEntry>>
 )
 
 data class TarComparisonResult(
-    val onlyIn1: List<TarEntry>, val onlyIn2: List<TarEntry>, val different: List<Pair<TarEntry, TarEntry>>
+    val onlyIn1: List<TarEntry>,
+    val onlyIn2: List<TarEntry>,
+    val different: List<Pair<TarEntry, TarEntry>>
 )
 
 object DebContentUtils {
@@ -47,7 +51,7 @@ object DebContentUtils {
         return ComparisonResult(arComparison, map)
     }
 
-    private fun <T: ArchiveEntry> findOnlyInFirst(entries: List<T>, map: Map<String, T>): List<T> {
+    private fun <T : ArchiveEntry> findOnlyInFirst(entries: List<T>, map: Map<String, T>): List<T> {
         val only = mutableListOf<T>()
         for (entry in entries) {
             if (map[entry.name] == null) {

@@ -7,5 +7,5 @@ package de.mobanisto.pinpit.test.utils
 
 object TestKotlinVersions {
     val Default = TestProperties.composeCompilerCompatibleKotlinVersion
-    val AndroidxCompatible =  TestProperties.androidxCompilerCompatibleKotlinVersion
+    val AndroidxCompatible = TestProperties.androidxCompilerCompatibleKotlinVersion
 }

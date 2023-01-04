@@ -135,22 +135,25 @@ abstract class AbstractDebPackager constructor(
     }
 
     private fun syncDir(source: Path, target: Path, takeFile: (file: Path) -> Boolean = { _ -> true }) {
-        Files.walkFileTree(source, object : SimpleFileVisitor<Path>() {
-            override fun visitFile(file: Path, attrs: BasicFileAttributes): FileVisitResult {
-                val relative = source.relativize(file)
-                if (!takeFile(relative)) {
+        Files.walkFileTree(
+            source,
+            object : SimpleFileVisitor<Path>() {
+                override fun visitFile(file: Path, attrs: BasicFileAttributes): FileVisitResult {
+                    val relative = source.relativize(file)
+                    if (!takeFile(relative)) {
+                        return FileVisitResult.CONTINUE
+                    }
+                    val pathTarget = target.resolve(relative)
+                    pathTarget.parent.createDirectories(asFileAttribute(posixExecutable))
+                    if (Files.isExecutable(file)) {
+                        file.setPosixFilePermissions(posixExecutable)
+                    } else {
+                        file.setPosixFilePermissions(posixRegular)
+                    }
+                    Files.copy(file, pathTarget)
                     return FileVisitResult.CONTINUE
                 }
-                val pathTarget = target.resolve(relative)
-                pathTarget.parent.createDirectories(asFileAttribute(posixExecutable))
-                if (Files.isExecutable(file)) {
-                    file.setPosixFilePermissions(posixExecutable)
-                } else {
-                    file.setPosixFilePermissions(posixRegular)
-                }
-                Files.copy(file, pathTarget)
-                return FileVisitResult.CONTINUE
             }
-        })
+        )
     }
 }

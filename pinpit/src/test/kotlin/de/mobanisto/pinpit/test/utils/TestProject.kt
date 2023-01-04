@@ -8,7 +8,7 @@ package de.mobanisto.pinpit.test.utils
 import de.mobanisto.pinpit.desktop.application.internal.PinpitProperties
 import org.gradle.testkit.runner.GradleRunner
 import java.io.File
-import java.util.*
+import java.util.Properties
 
 data class TestEnvironment(
     val projectDir: File,
@@ -64,8 +64,8 @@ class TestProject(
             target.parentFile.mkdirs()
             orig.copyTo(target)
 
-            if (orig.name.endsWith(".gradle")|| orig.name.endsWith(".gradle.kts")
-                || orig.name == "gradle.properties"
+            if (orig.name.endsWith(".gradle") || orig.name.endsWith(".gradle.kts") ||
+                orig.name == "gradle.properties"
             ) {
                 testEnvironment.replacePlaceholdersInFile(target)
             }
@@ -120,4 +120,3 @@ class TestProject(
         }
     }
 }
-

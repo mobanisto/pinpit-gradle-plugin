@@ -72,7 +72,7 @@ abstract class DownloadJdkTask @Inject constructor() : AbstractPinpitTask() {
             val fileVersion = jvmVersion.get().replace("+", "_")
             val urlVersion = URLEncoder.encode(jvmVersion.get(), Charsets.UTF_8)
             val url = "https://github.com/adoptium/temurin${info.major}-binaries/releases/download/" +
-                    "jdk-$urlVersion/OpenJDK${info.major}U-jdk_${arch}_${os}_hotspot_$fileVersion.$extension"
+                "jdk-$urlVersion/OpenJDK${info.major}U-jdk_${arch}_${os}_hotspot_$fileVersion.$extension"
             val nameFile = "OpenJDK${info.major}U-jdk_${arch}_${os}_hotspot_$fileVersion.$extension"
             val nameDir = "OpenJDK${info.major}U-jdk_${arch}_${os}_hotspot_$fileVersion"
             val nameDirContent = "jdk-${info.major}.${info.minor}.${info.patch}+${info.build}"
@@ -122,7 +122,7 @@ abstract class DownloadJdkTask @Inject constructor() : AbstractPinpitTask() {
      */
     private fun extractZip(targetFile: Path, targetDir: Path, nameDir: String) {
         ZipArchiveInputStream(targetFile.inputStream()).use {
-            while(true ) {
+            while (true) {
                 val entry: ZipArchiveEntry = it.nextEntry as ZipArchiveEntry? ?: break
                 val path = Paths.get(entry.name)
                 if (!entry.isDirectory && path.startsWith(nameDir) && path.nameCount > 1) {

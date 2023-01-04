@@ -34,7 +34,7 @@ class FileHashTest {
     fun testFileHashIsAffectedByContent() {
         val input1 = inputFile("input1.txt", "1")
 
-        val initJar =  createJar("init", input1)
+        val initJar = createJar("init", input1)
         input1.writeText("2")
         val modifiedJar = createJar("modified", input1)
 

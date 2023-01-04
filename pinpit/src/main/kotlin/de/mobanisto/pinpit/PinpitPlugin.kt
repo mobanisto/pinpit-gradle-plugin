@@ -25,7 +25,10 @@ class PinpitPlugin : Plugin<Project> {
 
             fun ComponentModuleMetadataHandler.replaceAndroidx(original: String, replacement: String) {
                 module(original) {
-                    it.replacedBy(replacement, "org.jetbrains.compose isn't compatible with androidx.compose, because it is the same library published with different maven coordinates")
+                    it.replacedBy(
+                        replacement,
+                        "org.jetbrains.compose isn't compatible with androidx.compose, because it is the same library published with different maven coordinates"
+                    )
                 }
             }
 
@@ -34,8 +37,8 @@ class PinpitPlugin : Plugin<Project> {
                 it.kotlinOptions.apply {
                     if (overrideDefaultJvmTarget) {
                         if (jvmTarget.isNullOrBlank() || jvmTarget.toDouble() < 1.8) {
-                             jvmTarget = "1.8"
-                         }
+                            jvmTarget = "1.8"
+                        }
                     }
                 }
             }

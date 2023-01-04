@@ -49,8 +49,8 @@ abstract class AbstractJvmToolOperationTask(private val toolName: String) : Abst
         freeArgs.orNull?.forEach { add(it) }
     }
 
-    protected open fun jvmToolEnvironment():  MutableMap<String, String> =
-        HashMap()
+    protected open fun jvmToolEnvironment(): MutableMap<String, String> = HashMap()
+
     protected open fun checkResult(result: ExecResult) {
         result.assertNormalExitValue()
     }
@@ -65,7 +65,7 @@ abstract class AbstractJvmToolOperationTask(private val toolName: String) : Abst
         prepareWorkingDir(inputChanges)
         val argsFile = workingDir.ioFile.let { dir ->
             val args = makeArgs(dir)
-            dir.resolveSibling("${name}.args.txt").apply {
+            dir.resolveSibling("$name.args.txt").apply {
                 writeText(args.joinToString("\n"))
             }
         }

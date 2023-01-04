@@ -23,7 +23,12 @@ interface ArchiveEntry {
 }
 
 data class ArEntry(
-    override val name: String, val size: Long, val user: Long, val group: Long, val mode: Int, val hash: String
+    override val name: String,
+    val size: Long,
+    val user: Long,
+    val group: Long,
+    val mode: Int,
+    val hash: String
 ) :
     ArchiveEntry
 
