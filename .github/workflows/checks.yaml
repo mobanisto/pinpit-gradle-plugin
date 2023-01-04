@@ -18,7 +18,7 @@ jobs:
         distribution: 'temurin'
         java-version: '17'
     - name: Run Gradle tests
-      run: ./gradlew check --info --stacktrace
+      run: ./gradlew check --stacktrace
   build-windows:
     runs-on: windows-latest
     steps:
@@ -30,4 +30,4 @@ jobs:
         distribution: 'temurin'
         java-version: '17'
     - name: Run Gradle tests
-      run: ./gradlew check --info --stacktrace
+      run: ./gradlew check --stacktrace
