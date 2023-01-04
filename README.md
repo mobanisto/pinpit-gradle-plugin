@@ -273,6 +273,10 @@ For this to work, you need to have the current stable
 version of Wine installed (from the
 [WineHQ download page](https://wiki.winehq.org/Download), at
 the time of writing version 7.0.1).
+It's also required to install [Mono](https://wiki.winehq.org/Mono) using
+Wine. Download the latest MSI version from
+[here](https://dl.winehq.org/wine/wine-mono/) (version 7.4.0 at the moment)
+and install that using `wine msiexec /i wine-mono-7.4.0-x86.msi`.
 
 Here's a summary of the supported build hosts and target formats and what
 we plan to work on:
