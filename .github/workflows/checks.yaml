@@ -17,6 +17,8 @@ jobs:
       with:
         distribution: 'temurin'
         java-version: '17'
+    - name: Install Wine
+      run: sudo apt install wine
     - name: Run Gradle tests
       run: ./gradlew check --stacktrace
   build-windows:
