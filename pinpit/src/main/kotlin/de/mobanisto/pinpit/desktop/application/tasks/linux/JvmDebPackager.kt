@@ -10,6 +10,7 @@ import org.apache.commons.compress.archivers.ar.ArArchiveEntry
 import org.apache.commons.compress.archivers.ar.ArArchiveOutputStream
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry
 import org.apache.commons.compress.archivers.tar.TarArchiveOutputStream
+import org.apache.commons.compress.archivers.tar.TarArchiveOutputStream.LONGFILE_POSIX
 import org.apache.commons.compress.compressors.xz.XZCompressorOutputStream
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -183,6 +184,7 @@ class JvmDebPackager constructor(
         outputFile.outputStream().buffered().use { fos ->
             XZCompressorOutputStream(fos).use { xz ->
                 TarArchiveOutputStream(xz).use { tar ->
+                    tar.setLongFileMode(LONGFILE_POSIX)
                     tar.fn()
                 }
             }
