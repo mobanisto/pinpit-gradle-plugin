@@ -162,6 +162,8 @@ tasks.test {
 }
 fun testGradleVersion(gradleVersion: String) {
     val taskProvider = tasks.register("testGradle-$gradleVersion", Test::class) {
+        group = "verification"
+        description = "Runs the test suite for Gradle $gradleVersion"
         tasks.test.get().let { defaultTest ->
             classpath = defaultTest.classpath
         }
