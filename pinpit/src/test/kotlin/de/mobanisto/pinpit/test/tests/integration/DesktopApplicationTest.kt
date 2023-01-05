@@ -33,6 +33,7 @@ import de.mobanisto.pinpit.validation.deb.DebContent
 import de.mobanisto.pinpit.validation.deb.DebContentBuilder
 import de.mobanisto.pinpit.validation.deb.DebContentUtils
 import de.mobanisto.pinpit.validation.deb.NativeDebPackager
+import de.mobanisto.pinpit.validation.deb.ValidateDeb.checkDebExpectations
 import org.gradle.internal.impldep.org.testng.Assert
 import org.gradle.testkit.runner.TaskOutcome
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -335,70 +336,6 @@ class DesktopApplicationTest : GradlePluginTestBase() {
         )
         packager.createPackage()
         return outputDir
-    }
-
-    private fun checkDebExpectations(packageDirs: List<Path>, names: List<String>) {
-        val debs = mutableListOf<File>()
-
-        for (packageDir in packageDirs) {
-            val packageDirFiles = packageDir.toFile().listFiles() ?: arrayOf()
-            check(packageDirFiles.size == 1) {
-                "Expected single package in $packageDir, got [${packageDirFiles.joinToString(", ") { it.name }}]"
-            }
-            val packageFile = packageDirFiles.single()
-            debs.add(packageFile)
-            val isTestPackage = packageFile.name.contains("test-package", ignoreCase = true) ||
-                packageFile.name.contains("testpackage", ignoreCase = true)
-            val isDeb = packageFile.name.endsWith(".deb")
-            check(isTestPackage && isDeb) {
-                "Expected contain testpackage*.deb or test-package*.deb package in $packageDir, got '${packageFile.name}'"
-            }
-            println("got package file at $packageFile")
-        }
-
-        check(debs.size == 2)
-        val debContent = debs.map { file ->
-            file.inputStream().use { input ->
-                DebContentBuilder().buildContent(input)
-            }
-        }
-        val deb1 = debContent[0]
-        val deb2 = debContent[1]
-        val comparison = DebContentUtils.compare(deb1, deb2)
-        var allClear = true
-        for (entry in comparison.tarComparisonResult.entries) {
-            val tarComparison = entry.value
-            allClear = allClear && tarComparison.onlyIn1.isEmpty() && tarComparison.onlyIn2.isEmpty() &&
-                tarComparison.different.isEmpty()
-        }
-        val arComparison = comparison.arComparisonResult
-        allClear = allClear && arComparison.onlyIn1.isEmpty() &&
-            arComparison.onlyIn2.isEmpty() && arComparison.different.isEmpty()
-
-        val name1 = names[0]
-        val name2 = names[1]
-
-        if (!allClear) {
-            println("Found differences among deb files produced")
-            for (entry in comparison.tarComparisonResult.entries) {
-                println("  Differences in ${entry.key}:")
-                val tarComparison = entry.value
-                tarComparison.onlyIn1.forEach { println("    only in $name1 deb:  $it") }
-                tarComparison.onlyIn2.forEach { println("    only in $name2 deb: $it") }
-                tarComparison.different.forEach { println("    both but different ($name1):  ${it.first}") }
-                tarComparison.different.forEach { println("    both but different ($name2): ${it.second}") }
-            }
-
-            println("  Differences in top level archive:")
-            arComparison.onlyIn1.forEach { println("    only in $name1 deb:  $it") }
-            arComparison.onlyIn2.forEach { println("    only in $name2 deb: $it") }
-            arComparison.different.forEach { println("    both but different ($name1):  ${it.first}") }
-            arComparison.different.forEach { println("    both but different ($name2): ${it.second}") }
-
-            println("Showing files with differences:")
-            DebContentUtils.printDiff(debs[0], debs[1], comparison.tarComparisonResult)
-        }
-        check(allClear) { "Differences found in $name1 and $name2 deb" }
     }
 
     @Test
