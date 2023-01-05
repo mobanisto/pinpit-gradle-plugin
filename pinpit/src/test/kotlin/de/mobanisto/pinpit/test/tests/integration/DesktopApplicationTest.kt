@@ -23,8 +23,6 @@ import de.mobanisto.pinpit.test.utils.GradlePluginTestBase
 import de.mobanisto.pinpit.test.utils.ProcessRunResult
 import de.mobanisto.pinpit.test.utils.TestProject
 import de.mobanisto.pinpit.test.utils.TestProjects
-import de.mobanisto.pinpit.test.utils.assertEqualTextFiles
-import de.mobanisto.pinpit.test.utils.assertNotEqualTextFiles
 import de.mobanisto.pinpit.test.utils.checkExists
 import de.mobanisto.pinpit.test.utils.checks
 import de.mobanisto.pinpit.test.utils.modify
@@ -36,7 +34,6 @@ import de.mobanisto.pinpit.validation.deb.ValidateDeb.checkDebsAreEqual
 import org.gradle.internal.impldep.org.testng.Assert
 import org.gradle.testkit.runner.TaskOutcome
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Assumptions
@@ -93,9 +90,12 @@ class DesktopApplicationTest : GradlePluginTestBase() {
     @Test
     fun kotlinDsl(): Unit = with(testProject(TestProjects.jvmKotlinDsl)) {
         gradle(":packageDistributionForCurrentOS", "--dry-run").build()
-        gradle(":packageReleaseDistributionForCurrentOS", "--dry-run").build()
+        // TODO: enable when working on release build variant
+        // gradle(":packageReleaseDistributionForCurrentOS", "--dry-run").build()
     }
 
+    // TODO: enable when working on release build variant
+    /*
     @Test
     fun proguard(): Unit = with(testProject(TestProjects.proguard)) {
         val enableObfuscation = """
@@ -139,6 +139,7 @@ class DesktopApplicationTest : GradlePluginTestBase() {
             assertNotEqualTextFiles(file("main-methods.actual.txt"), file("main-methods.expected.txt"))
         }
     }
+     */
 
     @Test
     fun packageJvm() = with(testProject(TestProjects.jvm)) {

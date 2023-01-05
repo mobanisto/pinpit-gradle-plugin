@@ -93,12 +93,13 @@ object TestUtils {
             "Expecting to find some files with extension $extension, but found none"
         }
     }
+
     private fun checkContainsNone(dir: Path, extension: String) {
         Files.walkFileTree(
             dir,
             object : SimpleFileVisitor<Path>() {
                 override fun visitFile(file: Path, attrs: BasicFileAttributes): FileVisitResult {
-                    assertFalse (file.name.endsWith(extension)) {
+                    assertFalse(file.name.endsWith(extension)) {
                         "Not expecting to find files with extension $extension, but found $file"
                     }
                     return CONTINUE

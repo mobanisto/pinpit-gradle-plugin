@@ -63,7 +63,8 @@ internal fun JvmApplicationContext.configureJvmApplication() {
     val commonTasks = configureCommonJvmDesktopTasks()
     val targetTasks = TargetTasks()
     configurePackagingTasks(targets, targetTasks, commonTasks)
-    copy(buildType = app.buildTypes.release).configurePackagingTasks(targets, targetTasks, commonTasks)
+    // TODO: re-enable release build type and its tasks. Make sure they actually work though.
+    // copy(buildType = app.buildTypes.release).configurePackagingTasks(targets, targetTasks, commonTasks)
     configureWix()
     configurePeRebrander()
 }
