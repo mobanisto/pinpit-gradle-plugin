@@ -209,10 +209,6 @@ pinpitCreateDefaultDistributableLinuxX64 - Creates a directory for LinuxX64 cont
 pinpitCreateDefaultDistributableWindowsX64 - Creates a directory for WindowsX64 containing all files to be distributed including launcher, app and runtime image.
 pinpitCreateDefaultRuntimeImageLinuxX64 - Creates a runtime image from the JVM for LinuxX64 using jlink.
 pinpitCreateDefaultRuntimeImageWindowsX64 - Creates a runtime image from the JVM for WindowsX64 using jlink.
-pinpitCreateReleaseDistributableLinuxX64 - Creates a directory for LinuxX64 containing all files to be distributed including launcher, app and runtime image.
-pinpitCreateReleaseDistributableWindowsX64 - Creates a directory for WindowsX64 containing all files to be distributed including launcher, app and runtime image.
-pinpitCreateReleaseRuntimeImageLinuxX64 - Creates a runtime image from the JVM for LinuxX64 using jlink.
-pinpitCreateReleaseRuntimeImageWindowsX64 - Creates a runtime image from the JVM for WindowsX64 using jlink.
 pinpitDownloadJdkLinuxX64 - Downloads the JDK for LinuxX64 that is used to derive a runtime to distribute with the app.
 pinpitDownloadJdkWindowsX64 - Downloads the JDK for WindowsX64 that is used to derive a runtime to distribute with the app.
 pinpitPackageDefault - Builds packages for all systems and architectures.
@@ -221,19 +217,11 @@ pinpitPackageDefaultDebUbuntuFocalX64 - Builds a DEB package for LinuxX64.
 pinpitPackageDefaultMsiX64 - Builds an MSI package for WindowsX64.
 pinpitPackageDefaultUberJarForLinuxX64 - Packages an Uber-Jar for LinuxX64.
 pinpitPackageDefaultUberJarForWindowsX64 - Packages an Uber-Jar for WindowsX64.
-pinpitPackageRelease - Builds packages for all systems and architectures.
-pinpitPackageReleaseDebUbuntuBionicX64 - Builds a DEB package for LinuxX64.
-pinpitPackageReleaseDebUbuntuFocalX64 - Builds a DEB package for LinuxX64.
-pinpitPackageReleaseMsiX64 - Builds an MSI package for WindowsX64.
 pinpitPrepareAppResourcesLinuxX64 - Merge all app resources for LinuxX64 into a single build directory.
 pinpitPrepareAppResourcesWindowsX64 - Merge all app resources for WindowsX64 into a single build directory.
-pinpitProguardReleaseJarsLinuxX64 - Runs Proguard to minify and obfuscate release jars.
-pinpitProguardReleaseJarsWindowsX64 - Runs Proguard to minify and obfuscate release jars.
 pinpitRun - Runs the application.
 pinpitRunDefaultDistributableLinuxX64 - Runs the app from the created distributable directory for LinuxX64.
 pinpitRunDefaultDistributableWindowsX64 - Runs the app from the created distributable directory for WindowsX64.
-pinpitRunReleaseDistributableLinuxX64 - Runs the app from the created distributable directory for LinuxX64.
-pinpitRunReleaseDistributableWindowsX64 - Runs the app from the created distributable directory for WindowsX64.
 pinpitSuggestDebDependencies - Suggests Debian package dependencies to use for the current OS using dpkg.
 pinpitSuggestRuntimeModulesLinuxX64 - Suggests JVM modules to include for the distribution using jdeps.
 pinpitSuggestRuntimeModulesWindowsX64 - Suggests JVM modules to include for the distribution using jdeps.
