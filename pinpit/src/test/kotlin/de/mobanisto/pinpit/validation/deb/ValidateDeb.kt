@@ -6,46 +6,71 @@
 package de.mobanisto.pinpit.validation.deb
 
 import de.mobanisto.pinpit.test.tests.integration.NamedOutputDir
-import org.apache.commons.compress.archivers.ar.ArArchiveEntry
-import org.apache.commons.compress.archivers.ar.ArArchiveInputStream
-import org.apache.commons.compress.archivers.tar.TarArchiveInputStream
-import org.apache.commons.compress.compressors.xz.XZCompressorInputStream
-import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNotNull
 import java.io.File
 import java.io.InputStream
 import java.lang.Integer.toOctalString
 import java.nio.file.Paths
 
 object ValidateDeb {
-    fun validate(fis: InputStream) {
+
+    /**
+     * Perform some in-depth validation of the contents of the specified DEB archive.
+     */
+    fun validateDebContents(fis: InputStream) {
+        val content = DebContentBuilder().buildContent(fis)
+        validateDebPermissions(content)
+    }
+
+    /**
+     * Check that files contained in DEB archive have correct ownership and permissions.
+     */
+    private fun validateDebPermissions(content: DebContent) {
         // scripts located in DEBIAN source folder / control.tar.xz
         val scripts = setOf("preinst", "prerm", "postinst", "postrm")
         // some shared objects that are shipped in data.tar.xz
         val executables = setOf("libapplauncher.so", "jexec", "jspawnhelper")
-        val ais = ArArchiveInputStream(fis)
-        while (true) {
-            val entry1: ArArchiveEntry = ais.nextArEntry ?: break
-            val name1 = entry1.name
-            println("$name1: ${entry1.groupId}, ${entry1.userId}, ${toOctalString(entry1.mode)}")
-            if (name1.endsWith("tar.xz")) {
-                val xz = XZCompressorInputStream(ais)
-                val tar = TarArchiveInputStream(xz)
-                while (true) {
-                    val entry2 = tar.nextTarEntry ?: break
-                    val name2 = entry2.name
-                    val simplePath = name2.substring(2) // strip "./"
-                    val path = Paths.get(simplePath)
-                    val expectExecutable = entry2.isDirectory or scripts.contains(simplePath) or
-                        (path.parent != null && path.parent.fileName.toString() == "bin") or
-                        executables.contains(path.fileName.toString())
-                    println("  $name2: ${entry2.longGroupId}, ${entry2.longUserId}, ${toOctalString(entry2.mode)}")
-                    if (expectExecutable) {
-                        Assertions.assertEquals("755", toOctalString(entry2.mode))
-                    } else {
-                        Assertions.assertEquals("644", toOctalString(entry2.mode))
-                    }
+
+        assertEquals(2, content.tars.size)
+
+        val control = content.tars["control.tar.xz"]
+        val data = content.tars["data.tar.xz"]
+
+        assertNotNull(control)
+        assertNotNull(data)
+
+        for (entry in control!!.entries) {
+            val name = entry.name
+            val simplePath = name.substring(2) // strip "./"
+            val expectExecutable = entry.isDirectory or scripts.contains(simplePath)
+            if (expectExecutable) {
+                assertEquals("755", toOctalString(entry.mode))
+            } else {
+                assertEquals("644", toOctalString(entry.mode))
+            }
+            assertEquals(0, entry.group)
+            assertEquals(0, entry.user)
+        }
+
+        for (entry in data!!.entries) {
+            val name = entry.name
+            val simplePath = name.substring(2) // strip "./"
+            val path = Paths.get(simplePath)
+            val expectExecutable = entry.isDirectory or
+                (path.parent != null && path.parent == Paths.get("opt/test-package/bin")) or
+                executables.contains(path.fileName.toString())
+            if (expectExecutable) {
+                assertEquals("755", toOctalString(entry.mode)) {
+                    "expecting 755 on $name, but got ${toOctalString(entry.mode)}"
+                }
+            } else {
+                assertEquals("644", toOctalString(entry.mode)) {
+                    "expecting 644 on $name, but got ${toOctalString(entry.mode)}"
                 }
             }
+            assertEquals(0, entry.group)
+            assertEquals(0, entry.user)
         }
     }
 

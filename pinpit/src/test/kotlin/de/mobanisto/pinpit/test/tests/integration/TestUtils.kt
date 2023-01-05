@@ -6,6 +6,7 @@ import de.mobanisto.pinpit.test.utils.TestProject
 import de.mobanisto.pinpit.test.utils.checkContains
 import de.mobanisto.pinpit.test.utils.checkContainsNot
 import de.mobanisto.pinpit.test.utils.checkExists
+import de.mobanisto.pinpit.validation.deb.ValidateDeb
 import org.gradle.testkit.runner.TaskOutcome
 import org.junit.jupiter.api.Assertions
 import java.util.jar.JarFile
@@ -33,10 +34,9 @@ object TestUtils {
                 file("${projectDir}build/pinpit/binaries/main-default/linux/x64/deb/test-package-ubuntu-20.04-x64-1.0.0.deb")
             resultFile.checkExists()
 
-            // TODO: add some in-depth validation
-            /*resultFile.inputStream().use { fis ->
-                ValidateDeb.validate(fis)
-            }*/
+            resultFile.inputStream().use { fis ->
+                ValidateDeb.validateDebContents(fis)
+            }
         }
     }
 
