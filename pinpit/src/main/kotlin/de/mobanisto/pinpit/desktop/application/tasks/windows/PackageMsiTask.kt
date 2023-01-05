@@ -31,6 +31,8 @@ import org.gradle.api.tasks.Optional
 import org.gradle.api.tasks.PathSensitive
 import org.gradle.api.tasks.PathSensitivity
 import org.gradle.process.ExecResult
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import java.nio.file.Files
 import java.nio.file.Path
 import javax.inject.Inject
@@ -38,6 +40,10 @@ import javax.inject.Inject
 abstract class PackageMsiTask @Inject constructor(
     target: Target
 ) : CustomPackageTask(target, TargetFormat.CustomMsi), WindowsTask {
+
+    companion object {
+        val logger: Logger = LoggerFactory.getLogger(PackageMsiTask::class.java)
+    }
 
     /** @see internal/wixToolset.kt */
     override val wixToolsetDir: DirectoryProperty = objects.directoryProperty()
@@ -144,7 +150,7 @@ abstract class PackageMsiTask @Inject constructor(
         val appImage = appImage.get().dir(packageName).get()
         println("app image: $appImage")
         for (file in appImage.asFileTree.files) {
-            println("  $file")
+            logger.debug("  $file")
         }
 
         val upgradeCode = winUpgradeUuid.get()

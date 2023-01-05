@@ -6,6 +6,8 @@
 package de.mobanisto.pinpit.desktop.application.tasks.windows
 
 import de.mobanisto.pinpit.desktop.application.internal.files.visitFileTree
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import org.w3c.dom.Document
 import org.w3c.dom.Element
 import java.nio.file.FileVisitResult
@@ -22,6 +24,10 @@ import javax.xml.transform.stream.StreamResult
 import kotlin.io.path.name
 
 class GenerateFilesWxs(private val output: Path, private val dir: Path, private val defaultDirectoryName: String) {
+
+    companion object {
+        val logger: Logger = LoggerFactory.getLogger(GenerateFilesWxs::class.java)
+    }
 
     fun execute(): List<FileEntry> {
         val documentBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder()
@@ -82,7 +88,7 @@ class GenerateFilesWxs(private val output: Path, private val dir: Path, private 
                     return@onPreVisitDirectory FileVisitResult.CONTINUE
                 }
                 val indent = "  ".repeat(stack.size - 1)
-                println("${indent}directory: $relative")
+                logger.debug("${indent}directory: $relative")
                 val uuid = UUID.randomUUID()
                 stack.peek().createChild("Directory", fileIdFromUUID(uuid)) {
                     setAttribute("Name", relative.toString())
@@ -109,7 +115,7 @@ class GenerateFilesWxs(private val output: Path, private val dir: Path, private 
                     return@onVisitFile FileVisitResult.CONTINUE
                 }
                 val indent = "  ".repeat(stack.size - 1)
-                println("${indent}file: $relative")
+                logger.debug("${indent}file: $relative")
                 val id = "File${fileId++}"
                 val uuid = UUID.randomUUID()
                 val fileId = fileIdFromUUID(uuid)
