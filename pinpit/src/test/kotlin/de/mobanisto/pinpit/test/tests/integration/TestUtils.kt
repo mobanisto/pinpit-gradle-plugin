@@ -9,7 +9,15 @@ import de.mobanisto.pinpit.test.utils.checkExists
 import de.mobanisto.pinpit.validation.deb.ValidateDeb
 import org.gradle.testkit.runner.TaskOutcome
 import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.Assertions.assertFalse
+import java.nio.file.FileVisitResult
+import java.nio.file.FileVisitResult.CONTINUE
+import java.nio.file.Files
+import java.nio.file.Path
+import java.nio.file.SimpleFileVisitor
+import java.nio.file.attribute.BasicFileAttributes
 import java.util.jar.JarFile
+import kotlin.io.path.name
 
 object TestUtils {
 
@@ -37,6 +45,13 @@ object TestUtils {
             resultFile.inputStream().use { fis ->
                 ValidateDeb.validateDebContents(fis)
             }
+
+            val dirAppImage =
+                file("${projectDir}build/pinpit/binaries/main-default/linux/x64/appimage/")
+            dirAppImage.checkExists()
+
+            checkContainsSome(dirAppImage.toPath(), ".so")
+            checkContainsNone(dirAppImage.toPath(), ".dll")
         }
     }
 
@@ -51,7 +66,45 @@ object TestUtils {
             val resultFile =
                 file("${projectDir}build/pinpit/binaries/main-default/windows/x64/msi/TestPackage-x64-1.0.0.msi")
             resultFile.checkExists()
+
+            val dirAppImage =
+                file("${projectDir}build/pinpit/binaries/main-default/windows/x64/appimage/")
+            dirAppImage.checkExists()
+
+            checkContainsSome(dirAppImage.toPath(), ".dll")
+            checkContainsNone(dirAppImage.toPath(), ".so")
         }
+    }
+
+    private fun checkContainsSome(dir: Path, extension: String) {
+        var found = 0
+        Files.walkFileTree(
+            dir,
+            object : SimpleFileVisitor<Path>() {
+                override fun visitFile(file: Path, attrs: BasicFileAttributes): FileVisitResult {
+                    if (file.name.endsWith(extension)) {
+                        found++
+                    }
+                    return CONTINUE
+                }
+            }
+        )
+        assertFalse(found == 0) {
+            "Expecting to find some files with extension $extension, but found none"
+        }
+    }
+    private fun checkContainsNone(dir: Path, extension: String) {
+        Files.walkFileTree(
+            dir,
+            object : SimpleFileVisitor<Path>() {
+                override fun visitFile(file: Path, attrs: BasicFileAttributes): FileVisitResult {
+                    assertFalse (file.name.endsWith(extension)) {
+                        "Not expecting to find files with extension $extension, but found $file"
+                    }
+                    return CONTINUE
+                }
+            }
+        )
     }
 
     internal fun TestProject.testPackageUberJar(target: Target) {
