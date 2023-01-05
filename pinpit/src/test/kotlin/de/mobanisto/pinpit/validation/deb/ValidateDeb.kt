@@ -6,8 +6,8 @@
 package de.mobanisto.pinpit.validation.deb
 
 import de.mobanisto.pinpit.test.tests.integration.NamedOutputDir
+import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertNotNull
 import java.io.File
 import java.io.InputStream
 import java.lang.Integer.toOctalString
@@ -21,6 +21,32 @@ object ValidateDeb {
     fun validateDebContents(fis: InputStream) {
         val content = DebContentBuilder().buildContent(fis)
         validateDebPermissions(content)
+        validateNoDlls(content)
+        validateSomeSos(content)
+    }
+
+    private fun validateNoDlls(content: DebContent) {
+        val data = checkNotNull(content.tars["data.tar.xz"])
+        for (entry in data.entries) {
+            val name = entry.name
+            Assertions.assertFalse(name.endsWith(".dll")) {
+                "File $name seems to be a *.dll file, but we don't expect such to be packaged for Linux"
+            }
+        }
+    }
+
+    private fun validateSomeSos(content: DebContent) {
+        val data = checkNotNull(content.tars["data.tar.xz"])
+        val found = mutableSetOf<String>()
+        for (entry in data.entries) {
+            val name = entry.name
+            if (name.endsWith(".so")) {
+                found.add(name)
+            }
+        }
+        Assertions.assertFalse(found.isEmpty()) {
+            "Expecting to find some *.so files packaged for Linux"
+        }
     }
 
     /**
@@ -34,13 +60,10 @@ object ValidateDeb {
 
         assertEquals(2, content.tars.size)
 
-        val control = content.tars["control.tar.xz"]
-        val data = content.tars["data.tar.xz"]
+        val control = checkNotNull(content.tars["control.tar.xz"])
+        val data = checkNotNull(content.tars["data.tar.xz"])
 
-        assertNotNull(control)
-        assertNotNull(data)
-
-        for (entry in control!!.entries) {
+        for (entry in control.entries) {
             val name = entry.name
             val simplePath = name.substring(2) // strip "./"
             val expectExecutable = entry.isDirectory or scripts.contains(simplePath)
@@ -53,7 +76,7 @@ object ValidateDeb {
             assertEquals(0, entry.user)
         }
 
-        for (entry in data!!.entries) {
+        for (entry in data.entries) {
             val name = entry.name
             val simplePath = name.substring(2) // strip "./"
             val path = Paths.get(simplePath)
