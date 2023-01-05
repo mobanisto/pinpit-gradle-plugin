@@ -233,16 +233,6 @@ class DesktopApplicationTest : GradlePluginTestBase() {
         }
     }
 
-    @Test
-    fun packageUberJarForWindowsJvm() = with(testProject(TestProjects.jvm)) {
-        testPackageUberJar(Target(Windows, Arch.X64))
-    }
-
-    @Test
-    fun packageUberJarForLinuxJvm() = with(testProject(TestProjects.jvm)) {
-        testPackageUberJar(Target(Linux, Arch.X64))
-    }
-
     private fun TestProject.testPackageDebsAndCompareContent() {
         val packagingTask = ":pinpitPackageDefaultDebUbuntuFocalX64"
         gradle(packagingTask).build().checks { check ->
@@ -339,6 +329,16 @@ class DesktopApplicationTest : GradlePluginTestBase() {
         )
         packager.createPackage()
         return outputDir
+    }
+
+    @Test
+    fun packageUberJarForWindowsJvm() = with(testProject(TestProjects.jvm)) {
+        testPackageUberJar(Target(Windows, Arch.X64))
+    }
+
+    @Test
+    fun packageUberJarForLinuxJvm() = with(testProject(TestProjects.jvm)) {
+        testPackageUberJar(Target(Linux, Arch.X64))
     }
 
     @Test
