@@ -5,6 +5,10 @@
 
 package de.mobanisto.pinpit.desktop.application.tasks.linux
 
+import de.mobanisto.pinpit.desktop.application.internal.currentOS
+import de.mobanisto.pinpit.desktop.application.internal.isUnix
+import de.mobanisto.pinpit.desktop.application.tasks.linux.JvmDebPackager.SubArchive.CONTROL
+import de.mobanisto.pinpit.desktop.application.tasks.linux.JvmDebPackager.SubArchive.DATA
 import de.mobanisto.pinpit.desktop.application.tasks.linux.PosixUtils.createDirectories
 import org.apache.commons.compress.archivers.ar.ArArchiveEntry
 import org.apache.commons.compress.archivers.ar.ArArchiveOutputStream
@@ -23,6 +27,7 @@ import java.nio.file.Paths
 import java.nio.file.SimpleFileVisitor
 import java.nio.file.attribute.BasicFileAttributes
 import java.nio.file.attribute.PosixFilePermissions.asFileAttribute
+import kotlin.io.path.isDirectory
 import kotlin.io.path.isExecutable
 import kotlin.io.path.isRegularFile
 import kotlin.io.path.outputStream
@@ -68,6 +73,11 @@ class JvmDebPackager constructor(
 
     private val logger: Logger = LoggerFactory.getLogger(JvmDebPackager::class.java)
     private val debPackageDir: Path = workingDir.resolve("debContent")
+
+    enum class SubArchive {
+        CONTROL,
+        DATA
+    }
 
     fun createPackage() {
         logger.info("destination: $destinationDeb")
@@ -133,12 +143,12 @@ class JvmDebPackager constructor(
                 debian,
                 object : SimpleFileVisitor<Path>() {
                     override fun preVisitDirectory(dir: Path, attrs: BasicFileAttributes): FileVisitResult {
-                        packageFile(debian, dir)
+                        packageFile(CONTROL, debian, dir)
                         return FileVisitResult.CONTINUE
                     }
 
                     override fun visitFile(file: Path, attrs: BasicFileAttributes): FileVisitResult {
-                        packageFile(debian, file)
+                        packageFile(CONTROL, debian, file)
                         return FileVisitResult.CONTINUE
                     }
                 }
@@ -154,12 +164,12 @@ class JvmDebPackager constructor(
                     override fun preVisitDirectory(dir: Path, attrs: BasicFileAttributes): FileVisitResult {
                         val relative = debFileTree.relativize(dir)
                         if (relative == Paths.get("DEBIAN")) return FileVisitResult.SKIP_SUBTREE
-                        packageFile(debFileTree, dir)
+                        packageFile(DATA, debFileTree, dir)
                         return FileVisitResult.CONTINUE
                     }
 
                     override fun visitFile(file: Path, attrs: BasicFileAttributes): FileVisitResult {
-                        packageFile(debFileTree, file)
+                        packageFile(DATA, debFileTree, file)
                         return FileVisitResult.CONTINUE
                     }
                 }
@@ -167,17 +177,65 @@ class JvmDebPackager constructor(
         }
     }
 
-    private fun TarArchiveOutputStream.packageFile(dir: Path, file: Path) {
+    private fun TarArchiveOutputStream.packageFile(subArchive: SubArchive, dir: Path, file: Path) {
         val relative = dir.relativize(file)
         val entry = createArchiveEntry(file, "./$relative") as TarArchiveEntry
         entry.userId = 0
         entry.groupId = 0
-        entry.mode = (if (file.isExecutable()) "755" else "644").toInt(radix = 8)
+        if (currentOS.isUnix()) {
+            entry.mode = (if (file.isExecutable()) "755" else "644").toInt(radix = 8)
+        } else {
+            entry.mode = (permission(subArchive, file, relative)).toInt(radix = 8)
+        }
         putArchiveEntry(entry)
         if (file.isRegularFile()) {
             Files.copy(file, this)
         }
         closeArchiveEntry()
+    }
+
+    private fun permission(subArchive: SubArchive, file: Path, relative: Path): String {
+        when (subArchive) {
+            CONTROL -> {
+                // scripts located in DEBIAN source folder / control.tar.xz
+                val scripts = setOf("preinst", "prerm", "postinst", "postrm")
+                if (scripts.contains(relative.fileName.toString())) {
+                    return "755"
+                }
+            }
+
+            DATA -> {
+                // some shared objects that are shipped in data.tar.xz
+                val lib = setOf("libapplauncher.so") // in /opt/package-name/lib/
+                val runtimeLib = setOf("jexec", "jspawnhelper") // in /opt/package-name/lib/runtime/
+
+                // we don't have the path /opt/package-name available at this point, so guess only based on
+                // parent directories "bin/", "lib/", "runtime/lib"
+                val parent = relative.parent
+                if (parent != null) {
+                    if (relative.nameCount >= 2) {
+                        val relevant = relative.subpath(relative.nameCount - 2, relative.nameCount - 1)
+                        if (relevant == Paths.get("bin")) {
+                            return "755"
+                        }
+                        if (relevant == Paths.get("lib")) {
+                            if (lib.contains(relative.fileName.toString())) {
+                                return "755"
+                            }
+                        }
+                    }
+                    if (relative.nameCount >= 4) {
+                        val relevant = relative.subpath(relative.nameCount - 4, relative.nameCount - 1)
+                        if (relevant == Paths.get("lib/runtime/lib")) {
+                            if (runtimeLib.contains(relative.fileName.toString())) {
+                                return "755"
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return if (file.isDirectory()) "755" else "644"
     }
 
     private fun packageTarXz(outputFile: Path, fn: TarArchiveOutputStream.() -> Unit) {
