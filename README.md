@@ -240,8 +240,8 @@ or build the MSI for Windows:
 
 ## Platform compatibility
 
-It's currently possible to build Linux and Windows packages from a Linux
-host system. Also, Windows packages can be built on Windows.
+It's currently possible to build Linux and Windows packages
+cross-platform from both a Linux and a Windows host system.
 All other combinations do not work yet.
 
 One building block for bundling packages for any platform is creating
@@ -250,10 +250,10 @@ Fortunately, assembling a runtime image from a given JDK image works
 cross-platform because `jlink` can assemble runtime images from JDK
 images for different platforms than the build host platform.
 
-Assembling Debian packages currently still relies on Debian-specific native
-tools (i.e. `dpkg`), but it is planned to replace those with pure
-JVM-based archiving tools in a future release so that building Debian
-packages will become possible for all host systems.
+Assembling Debian packages does no longer rely on Debian-specific native
+tools (i.e. `dpkg-deb`). Instead this has been implemented using pure
+JVM-based archiving tools so that building Debian is possible for all host
+systems.
 
 Assembling MSI installers uses the Wix toolchain. On Windows, this runs
 natively and on Linux hosts, Wine is used to run it.
@@ -271,13 +271,12 @@ we plan to work on:
 
 | Build host              | Debian/Ubuntu       | Windows | macOS   |
 |:------------------------|---------------------|---------|---------|
-| Target: Linux (deb)     | yes                 | planned | planned |
+| Target: Linux (deb)     | yes                 | yes     | planned |
 | Target: Windows (MSI)   | yes (Wine required) | yes     | no      |
 | Target: macOS (PKG/DMG) | planned for Q1 2023 | no      | planned |
 
-Building Debian packages should become possible on Windows and macOS once
-we migrate the packaging code away from `dpkg` towards pure JVM code using
-`commons-compress`.
+Building Debian packages should already be possible on macOS but it has not
+been tested yet.
 
 Building MSI installers on macOS can work on systems for which Wine is
 available. See https://github.com/mobanisto/pinpit-gradle-plugin/issues/11
