@@ -31,15 +31,19 @@ object DebContentUtils {
     fun compare(deb1: DebContent, deb2: DebContent): ComparisonResult {
         val map = mutableMapOf<String, TarComparisonResult>()
         for (file in listOf("control.tar.xz", "data.tar.xz")) {
-            val data1 = deb1.tars[file]
-            val data2 = deb2.tars[file]
-            checkNotNull(data1)
-            checkNotNull(data2)
-            val map1 = data1.entries.associateBy({ it.name }, { it })
-            val map2 = data2.entries.associateBy({ it.name }, { it })
-            val onlyIn1 = findOnlyInFirst(data1.entries, map2)
-            val onlyIn2 = findOnlyInFirst(data2.entries, map1)
-            val different = findDifferent(data1.entries, map2)
+            val tar1 = deb1.tars[file]
+            val tar2 = deb2.tars[file]
+            checkNotNull(tar1) {
+                "required file $file in deb1 was null"
+            }
+            checkNotNull(tar2) {
+                "required file $file in deb2 was null"
+            }
+            val map1 = tar1.entries.associateBy({ it.name }, { it })
+            val map2 = tar2.entries.associateBy({ it.name }, { it })
+            val onlyIn1 = findOnlyInFirst(tar1.entries, map2)
+            val onlyIn2 = findOnlyInFirst(tar2.entries, map1)
+            val different = findDifferent(tar1.entries, map2)
             map[file] = TarComparisonResult(onlyIn1, onlyIn2, different)
         }
         val map1 = deb1.arEntries.associateBy({ it.name }, { it })
