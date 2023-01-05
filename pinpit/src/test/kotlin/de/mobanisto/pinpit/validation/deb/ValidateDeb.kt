@@ -5,6 +5,7 @@
 
 package de.mobanisto.pinpit.validation.deb
 
+import de.mobanisto.pinpit.test.tests.integration.NamedOutputDir
 import org.apache.commons.compress.archivers.ar.ArArchiveEntry
 import org.apache.commons.compress.archivers.ar.ArArchiveInputStream
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream
@@ -13,7 +14,6 @@ import org.junit.jupiter.api.Assertions
 import java.io.File
 import java.io.InputStream
 import java.lang.Integer.toOctalString
-import java.nio.file.Path
 import java.nio.file.Paths
 
 object ValidateDeb {
@@ -49,13 +49,13 @@ object ValidateDeb {
         }
     }
 
-    fun checkDebExpectations(packageDirs: List<Path>, names: List<String>) {
+    fun checkDebExpectations(output1: NamedOutputDir, output2: NamedOutputDir) {
         val debs = mutableListOf<File>()
 
-        for (packageDir in packageDirs) {
-            val packageDirFiles = packageDir.toFile().listFiles() ?: arrayOf()
+        for (namedOutput in listOf(output1, output2)) {
+            val packageDirFiles = namedOutput.dir.toFile().listFiles() ?: arrayOf()
             check(packageDirFiles.size == 1) {
-                "Expected single package in $packageDir, got [${packageDirFiles.joinToString(", ") { it.name }}]"
+                "Expected single package in $namedOutput, got [${packageDirFiles.joinToString(", ") { it.name }}]"
             }
             val packageFile = packageDirFiles.single()
             debs.add(packageFile)
@@ -63,7 +63,7 @@ object ValidateDeb {
                 packageFile.name.contains("testpackage", ignoreCase = true)
             val isDeb = packageFile.name.endsWith(".deb")
             check(isTestPackage && isDeb) {
-                "Expected contain testpackage*.deb or test-package*.deb package in $packageDir, got '${packageFile.name}'"
+                "Expected contain testpackage*.deb or test-package*.deb package in $namedOutput, got '${packageFile.name}'"
             }
             println("got package file at $packageFile")
         }
@@ -87,8 +87,8 @@ object ValidateDeb {
         allClear = allClear && arComparison.onlyIn1.isEmpty() &&
             arComparison.onlyIn2.isEmpty() && arComparison.different.isEmpty()
 
-        val name1 = names[0]
-        val name2 = names[1]
+        val name1 = output1.name
+        val name2 = output2.name
 
         if (!allClear) {
             println("Found differences among deb files produced")

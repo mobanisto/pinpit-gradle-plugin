@@ -31,7 +31,6 @@ import de.mobanisto.pinpit.test.utils.modify
 import de.mobanisto.pinpit.test.utils.runProcess
 import de.mobanisto.pinpit.validation.deb.DebContent
 import de.mobanisto.pinpit.validation.deb.DebContentBuilder
-import de.mobanisto.pinpit.validation.deb.DebContentUtils
 import de.mobanisto.pinpit.validation.deb.NativeDebPackager
 import de.mobanisto.pinpit.validation.deb.ValidateDeb.checkDebExpectations
 import org.gradle.internal.impldep.org.testng.Assert
@@ -258,8 +257,12 @@ class DesktopApplicationTest : GradlePluginTestBase() {
 
         val outputDirPinpitPackaging = dirBinaries.resolve("deb")
 
-        checkDebExpectations(listOf(outputDirPinpitPackaging, outputDirNativePackaging), listOf("pinpit", "native"))
-        checkDebExpectations(listOf(outputDirPinpitPackaging, outputDirJvmPackaging), listOf("pinpit", "jvm"))
+        val pinpit = NamedOutputDir("pinpit", outputDirPinpitPackaging)
+        val native = NamedOutputDir("native", outputDirNativePackaging)
+        val jvm = NamedOutputDir("jvm", outputDirJvmPackaging)
+
+        checkDebExpectations(pinpit, native)
+        checkDebExpectations(pinpit, jvm)
     }
 
     private fun TestProject.packageDebJvm(): Path {
