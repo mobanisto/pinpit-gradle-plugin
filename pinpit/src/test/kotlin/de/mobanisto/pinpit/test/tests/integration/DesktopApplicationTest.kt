@@ -32,7 +32,7 @@ import de.mobanisto.pinpit.test.utils.runProcess
 import de.mobanisto.pinpit.validation.deb.DebContent
 import de.mobanisto.pinpit.validation.deb.DebContentBuilder
 import de.mobanisto.pinpit.validation.deb.NativeDebPackager
-import de.mobanisto.pinpit.validation.deb.ValidateDeb.checkDebExpectations
+import de.mobanisto.pinpit.validation.deb.ValidateDeb.checkDebsAreEqual
 import org.gradle.internal.impldep.org.testng.Assert
 import org.gradle.testkit.runner.TaskOutcome
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -261,8 +261,8 @@ class DesktopApplicationTest : GradlePluginTestBase() {
         val native = NamedOutputDir("native", outputDirNativePackaging)
         val jvm = NamedOutputDir("jvm", outputDirJvmPackaging)
 
-        checkDebExpectations(pinpit, native)
-        checkDebExpectations(pinpit, jvm)
+        checkDebsAreEqual(pinpit, native)
+        checkDebsAreEqual(pinpit, jvm)
     }
 
     private fun TestProject.packageDebJvm(): Path {

@@ -74,7 +74,12 @@ object ValidateDeb {
         }
     }
 
-    fun checkDebExpectations(output1: NamedOutputDir, output2: NamedOutputDir) {
+    /**
+     * Finds a single *.deb file in each of the specified output directories and compares their content in-depth.
+     * Takes file names, ownership, permissions and content into account. Also prints a diff for text files found to be
+     * different.
+     */
+    fun checkDebsAreEqual(output1: NamedOutputDir, output2: NamedOutputDir) {
         val debs = mutableListOf<File>()
 
         for (namedOutput in listOf(output1, output2)) {
