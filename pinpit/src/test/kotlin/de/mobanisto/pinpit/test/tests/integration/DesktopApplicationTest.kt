@@ -388,10 +388,10 @@ class DesktopApplicationTest : GradlePluginTestBase() {
         Assumptions.assumeTrue(currentOS == MacOS)
 
         fun security(vararg args: Any): ProcessRunResult {
-            val args = args.map {
+            val normalizedArgs = args.map {
                 if (it is File) it.absolutePath else it.toString()
             }
-            return runProcess(MacUtils.security, args)
+            return runProcess(MacUtils.security, normalizedArgs)
         }
 
         fun withNewDefaultKeychain(newKeychain: File, fn: () -> Unit) {
