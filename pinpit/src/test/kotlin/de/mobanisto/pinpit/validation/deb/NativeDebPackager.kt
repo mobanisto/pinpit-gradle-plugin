@@ -68,7 +68,7 @@ class NativeDebPackager constructor(
 
         runExternalTool(
             tool = "/usr/bin/fakeroot",
-            args = listOf("/usr/bin/dpkg-deb", "-b", debFileTree.toString(), destinationDeb.toString())
+            args = listOf("/usr/bin/dpkg-deb", "-Z", "xz", "-b", debFileTree.toString(), destinationDeb.toString())
         )
     }
 
