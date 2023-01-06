@@ -102,6 +102,10 @@ abstract class PackageMsiTask @Inject constructor(
     @get:Optional
     val winUpgradeUuid: Property<String?> = objects.nullableProperty()
 
+    @get:Input
+    @get:Optional
+    val aumid: Property<String?> = objects.nullableProperty()
+
     @get:InputDirectory
     @get:Optional
     val runtimeImage: DirectoryProperty = objects.directoryProperty()
@@ -157,6 +161,7 @@ abstract class PackageMsiTask @Inject constructor(
         val vendor = packageVendor.get()
         val productName = packageName.get()
         val version = winPackageVersion.get()
+        val aumid = aumid.orNull
         val description = packageDescription.get()
         val bitmapBanner = this.bitmapBanner.orNull
         val bitmapDialog = this.bitmapDialog.orNull
@@ -179,6 +184,7 @@ abstract class PackageMsiTask @Inject constructor(
             vendor!!,
             productName,
             version!!,
+            aumid,
             description,
             mainExecutable,
             bitmapBanner?.asPath(),

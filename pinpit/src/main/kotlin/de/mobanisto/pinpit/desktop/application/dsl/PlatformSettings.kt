@@ -137,6 +137,7 @@ abstract class WindowsPlatformSettings : AbstractBasePlatformSettings() {
         get() = field || menuGroup != null
     var menuGroup: String? = null
     var upgradeUuid: String? = null
+    var aumid: String? = null
     var msiPackageVersion: String? = null
     var exePackageVersion: String? = null
 

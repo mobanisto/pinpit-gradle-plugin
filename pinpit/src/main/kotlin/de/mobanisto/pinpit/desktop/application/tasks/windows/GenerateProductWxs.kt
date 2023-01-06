@@ -22,6 +22,7 @@ class GenerateProductWxs(
     private val vendor: String,
     private val name: String,
     private val version: String,
+    private val aumid: String?,
     private val description: String,
     private val mainExecutable: FileEntry,
     private val bitmapBanner: Path?,
@@ -49,6 +50,7 @@ class GenerateProductWxs(
     private fun createDocument(doc: Document) {
         val iconId = "app_icon"
 
+        val aumid = this.aumid ?: "$vendor.$name"
         val productId = UUID.nameUUIDFromBytes("$vendor/$name/$version".toByteArray(Charsets.UTF_8))
         val wix = doc.createElement("Wix").apply {
             setAttribute("xmlns", "http://schemas.microsoft.com/wix/2006/wi")
@@ -111,7 +113,7 @@ class GenerateProductWxs(
                     setAttribute("Icon", iconId)
                     createChild("ShortcutProperty") {
                         setAttribute("Key", "System.AppUserModel.ID")
-                        setAttribute("Value", "$vendor.$name")
+                        setAttribute("Value", aumid)
                     }
                 }
                 createChild("RemoveFolder", "CleanupShortcut") {

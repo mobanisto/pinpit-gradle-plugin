@@ -674,6 +674,7 @@ internal fun JvmApplicationContext.configurePlatformSettings(
         packageTask.winMenu.set(provider { win.menu })
         packageTask.winMenuGroup.set(provider { win.menuGroup })
         packageTask.winUpgradeUuid.set(provider { win.upgradeUuid })
+        packageTask.aumid.set(provider { win.aumid })
         packageTask.winPackageVersion.set(provider { win.packageVersion })
         packageTask.iconFile.set(win.iconFile.orElse(unpackDefaultResources.flatMap { it.resources.windowsIcon }))
         packageTask.installationPath.set(win.installationPath)
