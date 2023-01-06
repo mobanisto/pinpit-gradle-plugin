@@ -96,13 +96,13 @@ private fun dslPropertiesFor(targetFormat: TargetFormat): List<String> {
     val packageVersion = "packageVersion"
 
     val formatSpecificProperty: String? = when (targetFormat) {
-        TargetFormat.AppImage -> null
-        TargetFormat.Deb -> "$linux.debPackageVersion"
-        TargetFormat.Rpm -> "$linux.rpmPackageVersion"
-        TargetFormat.Dmg -> "$macOS.dmgPackageVersion"
-        TargetFormat.Pkg -> "$macOS.pkgPackageVersion"
-        TargetFormat.Exe -> "$windows.exePackageVersion"
-        TargetFormat.Msi -> "$windows.msiPackageVersion"
+        is TargetFormat.AppImage -> null
+        is TargetFormat.Deb -> "$linux.debPackageVersion"
+        is TargetFormat.Rpm -> "$linux.rpmPackageVersion"
+        is TargetFormat.Dmg -> "$macOS.dmgPackageVersion"
+        is TargetFormat.Pkg -> "$macOS.pkgPackageVersion"
+        is TargetFormat.Exe -> "$windows.exePackageVersion"
+        is TargetFormat.Msi -> "$windows.msiPackageVersion"
     }
     val osSettingsProperty: String = when (targetFormat.targetOS) {
         OS.Linux -> "$linux.$packageVersion"

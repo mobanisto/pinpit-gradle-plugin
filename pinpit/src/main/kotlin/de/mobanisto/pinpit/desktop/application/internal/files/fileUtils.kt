@@ -121,7 +121,7 @@ internal fun InputStream.copyTo(file: File) {
 @Internal
 internal fun findOutputFileOrDir(dir: File, targetFormat: TargetFormat): File =
     when (targetFormat) {
-        TargetFormat.AppImage -> dir
+        is TargetFormat.AppImage -> dir
         else -> dir.walk().first { it.isFile && it.name.endsWith(targetFormat.fileExt) }
     }
 

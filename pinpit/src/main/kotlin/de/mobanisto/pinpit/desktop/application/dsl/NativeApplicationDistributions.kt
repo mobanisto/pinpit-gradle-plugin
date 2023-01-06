@@ -9,7 +9,7 @@ import org.gradle.api.Action
 import java.util.EnumSet
 
 abstract class NativeApplicationDistributions : AbstractDistributions() {
-    private val supportedFormats = EnumSet.of(TargetFormat.Dmg)
+    private val supportedFormats = setOf(TargetFormat.Dmg())
 
     val macOS: NativeApplicationMacOSPlatformSettings = objects.newInstance(NativeApplicationMacOSPlatformSettings::class.java)
     open fun macOS(fn: Action<NativeApplicationMacOSPlatformSettings>) {

@@ -33,7 +33,7 @@ import javax.inject.Inject
 abstract class PackageDebTask @Inject constructor(
     target: Target,
     @Input val qualifier: String,
-) : CustomPackageTask(target, TargetFormat.Deb) {
+) : CustomPackageTask(target, TargetFormat.Deb()) {
 
     @get:Input
     @get:Optional

@@ -33,7 +33,7 @@ abstract class AbstractUploadAppForNotarizationTask @Inject constructor(
     val requestsDir: DirectoryProperty = objects.directoryProperty()
 
     init {
-        check(targetFormat != TargetFormat.AppImage) { "${TargetFormat.AppImage} cannot be notarized!" }
+        check(targetFormat !is TargetFormat.AppImage) { "${TargetFormat.AppImage::class.java.simpleName} cannot be notarized!" }
     }
 
     @TaskAction
@@ -72,7 +72,7 @@ abstract class AbstractUploadAppForNotarizationTask @Inject constructor(
 
         val uploadTime = LocalDateTime.now()
             .format(DateTimeFormatter.ofPattern("yyyy-MM-dd-HH-mm-ss"))
-        val requestDir = requestsDir.ioFile.resolve("$uploadTime-${targetFormat.id}")
+        val requestDir = requestsDir.ioFile.resolve("$uploadTime-${targetFormat.outputDirName}")
         val packageCopy = requestDir.resolve(packageFile.name)
         packageFile.copyTo(packageCopy)
         val requestInfo = NotarizationRequestInfo(uuid = requestId, uploadTime = uploadTime)
