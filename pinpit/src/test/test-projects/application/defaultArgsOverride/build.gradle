@@ -1,32 +1,89 @@
-import org.jetbrains.compose.desktop.application.dsl.TargetFormat
-
 plugins {
     id "org.jetbrains.kotlin.jvm"
     id "org.jetbrains.compose"
+    id "de.mobanisto.pinpit"
 }
 
-repositories {
-    google()
-    mavenCentral()
-    maven {
-        url "https://maven.pkg.jetbrains.space/public/p/compose/dev"
+def attributeUsage = Attribute.of("org.gradle.usage", String)
+
+configurations {
+    currentOs {
+        extendsFrom implementation
+        attributes { attribute(attributeUsage, "java-runtime") }
+    }
+    windowsX64 {
+        extendsFrom implementation
+        attributes { attribute(attributeUsage, "java-runtime") }
+    }
+    linuxX64 {
+        extendsFrom implementation
+        attributes { attribute(attributeUsage, "java-runtime") }
+    }
+}
+
+sourceSets {
+    main {
+        java {
+            compileClasspath = configurations.currentOs
+            runtimeClasspath = configurations.currentOs
+        }
     }
 }
 
 dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib"
-    implementation compose.desktop.currentOs
+    currentOs compose.desktop.currentOs
+    windowsX64 compose.desktop.windows_x64
+    linuxX64 compose.desktop.linux_x64
 }
 
-compose.desktop {
+ext.versionCode = "1.0.0"
+
+pinpit.desktop {
     application {
         mainClass = "MainKt"
         nativeDistributions {
-            targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb)
-            packageVersion = "1.0.0"
-            packageName = "Test Package"
+            jvmVendor = "PINPIT_JVM_VENDOR"
+            jvmVersion = "PINPIT_JVM_VERSION"
+
+            packageVersion = versionCode
+            packageName = "TestPackage"
+            description = "Test description"
+            copyright = "Test Copyright Holder"
+            vendor = "Test Vendor"
 
             jvmArgs("-Dcompose.application.configure.swing.globals=false")
+
+            linux {
+                shortcut = true
+                packageName = "test-package"
+                debMaintainer = "example@example.com"
+                menuGroup = "menu-group"
+                debPackageVersion = versionCode
+                appCategory = "utils"
+                menuGroup = "System;Utility;"
+                deb("UbuntuFocalX64") {
+                    qualifier = "ubuntu-20.04"
+                    arch = "x64"
+                    depends("libc6", "libexpat1", "libgcc-s1", "libpcre3", "libuuid1", "xdg-utils", "zlib1g", "libnotify4")
+                }
+            }
+            windows {
+                console = true
+                dirChooser = true
+                perUserInstall = true
+                shortcut = true
+                menu = true
+                menuGroup = "compose"
+                upgradeUuid = "2d6ff464-75be-40ad-a256-56420b9cc374"
+                packageVersion = versionCode
+                iconFile.set(project.file("src/main/packaging/windows/hello.ico"))
+                msi {
+                    arch = "x64"
+                    bitmapBanner.set(project.file("src/main/packaging/windows/banner.bmp"))
+                    bitmapDialog.set(project.file("src/main/packaging/windows/dialog.bmp"))
+                }
+            }
         }
     }
 }

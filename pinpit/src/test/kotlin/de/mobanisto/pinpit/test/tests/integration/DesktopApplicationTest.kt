@@ -453,6 +453,7 @@ class DesktopApplicationTest : GradlePluginTestBase() {
 
     @Test
     fun optionsWithSpaces() {
+        val targetName = currentTarget.name
         with(testProject(TestProjects.optionsWithSpaces)) {
             fun testRunTask(runTask: String) {
                 gradle(runTask).build().checks { check ->
@@ -464,17 +465,14 @@ class DesktopApplicationTest : GradlePluginTestBase() {
                 }
             }
 
-            testRunTask(":runDistributable")
-            testRunTask(":run")
-
-            gradle(":packageDistributionForCurrentOS").build().checks { check ->
-                check.taskOutcome(":packageDistributionForCurrentOS", TaskOutcome.SUCCESS)
-            }
+            testRunTask(":pinpitRunDefaultDistributable$targetName")
+            testRunTask(":pinpitRun")
         }
     }
 
     @Test
     fun defaultArgs() {
+        val targetName = currentTarget.name
         with(testProject(TestProjects.defaultArgs)) {
             fun testRunTask(runTask: String) {
                 gradle(runTask).build().checks { check ->
@@ -483,17 +481,14 @@ class DesktopApplicationTest : GradlePluginTestBase() {
                 }
             }
 
-            testRunTask(":runDistributable")
-            testRunTask(":run")
-
-            gradle(":packageDistributionForCurrentOS").build().checks { check ->
-                check.taskOutcome(":packageDistributionForCurrentOS", TaskOutcome.SUCCESS)
-            }
+            testRunTask(":pinpitRunDefaultDistributable$targetName")
+            testRunTask(":pinpitRun")
         }
     }
 
     @Test
     fun defaultArgsOverride() {
+        val targetName = currentTarget.name
         with(testProject(TestProjects.defaultArgsOverride)) {
             fun testRunTask(runTask: String) {
                 gradle(runTask).build().checks { check ->
@@ -502,12 +497,8 @@ class DesktopApplicationTest : GradlePluginTestBase() {
                 }
             }
 
-            testRunTask(":runDistributable")
-            testRunTask(":run")
-
-            gradle(":packageDistributionForCurrentOS").build().checks { check ->
-                check.taskOutcome(":packageDistributionForCurrentOS", TaskOutcome.SUCCESS)
-            }
+            testRunTask(":pinpitRunDefaultDistributable$targetName")
+            testRunTask(":pinpitRun")
         }
     }
 
