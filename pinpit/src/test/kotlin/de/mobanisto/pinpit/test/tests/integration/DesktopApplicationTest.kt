@@ -384,11 +384,13 @@ class DesktopApplicationTest : GradlePluginTestBase() {
 
         Assumptions.assumeTrue(currentOS == MacOS)
 
+        val targetName = currentTarget.name
+
         with(testProject(TestProjects.macOptions)) {
-            gradle(":runDistributable").build().checks { check ->
-                check.taskOutcome(":runDistributable", TaskOutcome.SUCCESS)
+            gradle(":pinpitRunDefaultDistributable$targetName").build().checks { check ->
+                check.taskOutcome(":pinpitRunDefaultDistributable$targetName", TaskOutcome.SUCCESS)
                 check.logContains("Hello, from Mac OS!")
-                val appDir = file("build/compose/binaries/main/app/TestPackage.app/Contents/")
+                val appDir = file("build/pinpit/binaries/main-default/app/TestPackage.app/Contents/")
                 val actualInfoPlist = appDir.resolve("Info.plist").checkExists()
                 val expectedInfoPlist = file("Expected-Info.Plist")
                 val actualInfoPlistNormalized = actualInfoPlist.readText().normalized()
@@ -424,6 +426,8 @@ class DesktopApplicationTest : GradlePluginTestBase() {
             }
         }
 
+        val targetName = currentTarget.name
+
         with(testProject(TestProjects.macSign)) {
             val keychain = file("compose.test.keychain")
             val password = "compose.test"
@@ -432,9 +436,9 @@ class DesktopApplicationTest : GradlePluginTestBase() {
                 security("default-keychain", "-s", keychain)
                 security("unlock-keychain", "-p", password, keychain)
 
-                gradle(":createDistributable").build().checks { check ->
-                    check.taskOutcome(":createDistributable", TaskOutcome.SUCCESS)
-                    val appDir = file("build/compose/binaries/main/app/TestPackage.app/")
+                gradle(":pinpitCreateDefaultDistributable$targetName").build().checks { check ->
+                    check.taskOutcome(":pinpitCreateDefaultDistributable$targetName", TaskOutcome.SUCCESS)
+                    val appDir = file("build/pinpit/binaries/main-default/app/TestPackage.app/")
                     val result =
                         runProcess(MacUtils.codesign, args = listOf("--verify", "--verbose", appDir.absolutePath))
                     val actualOutput = result.err.trim()
@@ -445,8 +449,8 @@ class DesktopApplicationTest : GradlePluginTestBase() {
                     Assert.assertEquals(expectedOutput, actualOutput)
                 }
 
-                gradle(":runDistributable").build().checks { check ->
-                    check.taskOutcome(":runDistributable", TaskOutcome.SUCCESS)
+                gradle(":pinpitRunDistributable$targetName").build().checks { check ->
+                    check.taskOutcome(":pinpitRunDistributable$targetName", TaskOutcome.SUCCESS)
                     check.logContains("Signed app successfully started!")
                 }
             }
