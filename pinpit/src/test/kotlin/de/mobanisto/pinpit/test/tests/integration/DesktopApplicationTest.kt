@@ -91,9 +91,9 @@ class DesktopApplicationTest : GradlePluginTestBase() {
 
     @Test
     fun kotlinDsl(): Unit = with(testProject(TestProjects.jvmKotlinDsl)) {
-        gradle(":packageDistributionForCurrentOS", "--dry-run").build()
+        gradle(":pinpitCreateDefaultDistributable", "--dry-run").build()
         // TODO: enable when working on release build variant
-        // gradle(":packageReleaseDistributionForCurrentOS", "--dry-run").build()
+        // gradle(":pinpitCreateReleaseDistributable", "--dry-run").build()
     }
 
     // TODO: enable when working on release build variant
