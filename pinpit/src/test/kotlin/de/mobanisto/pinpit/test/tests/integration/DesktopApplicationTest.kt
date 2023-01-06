@@ -367,8 +367,9 @@ class DesktopApplicationTest : GradlePluginTestBase() {
 
     @Test
     fun javaLogger() = with(testProject(TestProjects.javaLogger)) {
-        gradle(":runDistributable").build().checks { check ->
-            check.taskOutcome(":runDistributable", TaskOutcome.SUCCESS)
+        val targetName = currentTarget.name
+        gradle(":pinpitRunDefaultDistributable$targetName").build().checks { check ->
+            check.taskOutcome(":pinpitRunDefaultDistributable$targetName", TaskOutcome.SUCCESS)
             check.logContains("Compose Gradle plugin test log warning!")
         }
     }
