@@ -286,7 +286,9 @@ we plan to work on:
 | Build host              | Debian/Ubuntu       | Windows | macOS   |
 |:------------------------|---------------------|---------|---------|
 | Target: Linux (deb)     | yes                 | yes     | planned |
+| Target: Linux (tar.gz)  | yes                 | yes     | planned |
 | Target: Windows (MSI)   | yes (Wine required) | yes     | no      |
+| Target: Windows (zip)   | yes (Wine required) | yes     | no      |
 | Target: macOS (PKG/DMG) | planned for Q1 2023 | no      | planned |
 
 Building Debian packages should already be possible on macOS but it has not
