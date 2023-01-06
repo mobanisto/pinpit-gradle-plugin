@@ -356,9 +356,10 @@ class DesktopApplicationTest : GradlePluginTestBase() {
 
     @Test
     fun moduleClash() = with(testProject(TestProjects.moduleClashCli)) {
-        gradle(":app:runDistributable").build().checks { check ->
-            check.taskOutcome(":app:createDistributable", TaskOutcome.SUCCESS)
-            check.taskOutcome(":app:runDistributable", TaskOutcome.SUCCESS)
+        val targetName = currentTarget.name
+        gradle(":app:pinpitRunDefaultDistributable$targetName").build().checks { check ->
+            check.taskOutcome(":app:pinpitCreateDefaultDistributable$targetName", TaskOutcome.SUCCESS)
+            check.taskOutcome(":app:pinpitRunDefaultDistributable$targetName", TaskOutcome.SUCCESS)
             check.logContains("Called lib1#util()")
             check.logContains("Called lib2#util()")
         }
