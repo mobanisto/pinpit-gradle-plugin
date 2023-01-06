@@ -205,8 +205,10 @@ Pinpit tasks
 ------------
 pinpitCheckRuntimeLinuxX64 - Checks that the JDK used for building is compatible with the distribution JVM.
 pinpitCheckRuntimeWindowsX64 - Checks that the JDK used for building is compatible with the distribution JVM.
+pinpitCreateDefaultDistributable - Creates a directory for each system and architecture containing all files to be distributed including launcher, app and runtime image.
 pinpitCreateDefaultDistributableLinuxX64 - Creates a directory for LinuxX64 containing all files to be distributed including launcher, app and runtime image.
 pinpitCreateDefaultDistributableWindowsX64 - Creates a directory for WindowsX64 containing all files to be distributed including launcher, app and runtime image.
+pinpitCreateDefaultRuntime - Creates a runtime image for each system and architecture using jlink.
 pinpitCreateDefaultRuntimeImageLinuxX64 - Creates a runtime image from the JVM for LinuxX64 using jlink.
 pinpitCreateDefaultRuntimeImageWindowsX64 - Creates a runtime image from the JVM for WindowsX64 using jlink.
 pinpitDownloadJdkLinuxX64 - Downloads the JDK for LinuxX64 that is used to derive a runtime to distribute with the app.
@@ -215,6 +217,7 @@ pinpitPackageDefault - Builds packages for all systems and architectures.
 pinpitPackageDefaultDebUbuntuBionicX64 - Builds a DEB package for LinuxX64.
 pinpitPackageDefaultDebUbuntuFocalX64 - Builds a DEB package for LinuxX64.
 pinpitPackageDefaultMsiX64 - Builds an MSI package for WindowsX64.
+pinpitPackageDefaultUberJar - Packages an Uber-Jar for each system and architecture.
 pinpitPackageDefaultUberJarForLinuxX64 - Packages an Uber-Jar for LinuxX64.
 pinpitPackageDefaultUberJarForWindowsX64 - Packages an Uber-Jar for WindowsX64.
 pinpitPrepareAppResourcesLinuxX64 - Merge all app resources for LinuxX64 into a single build directory.
