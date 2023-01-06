@@ -77,10 +77,10 @@ object TestUtils {
     internal fun TestProject.testPackageLinuxDistributableArchive() {
         val project = projectName()
         val projectDir = projectDir()
-        gradle("$project:pinpitPackageDefaultDistributableArchiveLinuxX64").build().let { result ->
+        gradle("$project:pinpitPackageDefaultDistributableTarGzLinuxX64").build().let { result ->
             Assertions.assertEquals(
                 TaskOutcome.SUCCESS,
-                result.task("$project:pinpitPackageDefaultDistributableArchiveLinuxX64")?.outcome
+                result.task("$project:pinpitPackageDefaultDistributableTarGzLinuxX64")?.outcome
             )
 
             val resultFile =
@@ -103,10 +103,10 @@ object TestUtils {
     internal fun TestProject.testPackageWindowsDistributableArchive() {
         val project = projectName()
         val projectDir = projectDir()
-        gradle("$project:pinpitPackageDefaultDistributableArchiveWindowsX64").build().let { result ->
+        gradle("$project:pinpitPackageDefaultDistributableZipWindowsX64").build().let { result ->
             Assertions.assertEquals(
                 TaskOutcome.SUCCESS,
-                result.task("$project:pinpitPackageDefaultDistributableArchiveWindowsX64")?.outcome
+                result.task("$project:pinpitPackageDefaultDistributableZipWindowsX64")?.outcome
             )
 
             val resultFile =

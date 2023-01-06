@@ -154,8 +154,8 @@ private fun JvmApplicationContext.configurePackagingTasks(
 
         tasks.register<PackageWindowsDistributableArchiveTask>(
             taskNameAction = "pinpitPackage",
-            taskNameObject = "distributableArchive" + target.name,
-            description = "Builds a distributable archive for ${target.name}.",
+            taskNameObject = "distributable${format.name}${target.name}",
+            description = "Builds a distributable ${format.name} archive for ${target.name}.",
             args = listOf(target, targetFormat),
         ) {
             configureCustomPackageTask(
@@ -209,8 +209,8 @@ private fun JvmApplicationContext.configurePackagingTasks(
 
         tasks.register<PackageLinuxDistributableArchiveTask>(
             taskNameAction = "pinpitPackage",
-            taskNameObject = "distributableArchive" + target.name,
-            description = "Builds a distributable archive for ${target.name}.",
+            taskNameObject = "distributable${format.name}${target.name}",
+            description = "Builds a distributable ${format.name} archive for ${target.name}.",
             args = listOf(target, targetFormat),
         ) {
             configureCustomPackageTask(
