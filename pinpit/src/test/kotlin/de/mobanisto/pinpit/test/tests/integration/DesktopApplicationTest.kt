@@ -523,8 +523,9 @@ class DesktopApplicationTest : GradlePluginTestBase() {
     @Test
     fun unpackSkiko() {
         with(testProject(TestProjects.unpackSkiko)) {
-            gradle(":runDistributable").build().checks { check ->
-                check.taskOutcome(":runDistributable", TaskOutcome.SUCCESS)
+            val targetName = currentTarget.name
+            gradle(":pinpitRunDefaultDistributable$targetName").build().checks { check ->
+                check.taskOutcome(":pinpitRunDefaultDistributable$targetName", TaskOutcome.SUCCESS)
 
                 val libraryPathPattern = "Read skiko library path: '(.*)'".toRegex()
                 val m = libraryPathPattern.find(check.log)
