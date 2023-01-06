@@ -66,7 +66,7 @@ import javax.inject.Inject
 import kotlin.io.path.copyTo
 import kotlin.io.path.isRegularFile
 
-abstract class AppImageTask @Inject constructor(
+abstract class DistributableAppTask @Inject constructor(
     @Input val target: Target,
 ) : AbstractCustomTask(), WindowsTask {
     @get:InputFiles
@@ -215,7 +215,7 @@ abstract class AppImageTask @Inject constructor(
 
     @get:InputDirectory
     @get:Optional
-    val appImage: DirectoryProperty = objects.directoryProperty()
+    val distributableApp: DirectoryProperty = objects.directoryProperty()
 
     @get:Input
     @get:Optional
@@ -420,19 +420,19 @@ abstract class AppImageTask @Inject constructor(
     override fun runTask() {
         val dir = destinationDir.asPath()
 
-        val dirAppImage = dir.resolve(packageName.get())
-        createDirectories(dirAppImage)
-        logger.lifecycle("app image: $dirAppImage")
+        val dirDistributableApp = dir.resolve(packageName.get())
+        createDirectories(dirDistributableApp)
+        logger.lifecycle("distributable app: $dirDistributableApp")
 
         val jpackageJMods = jdkDir.get().resolve("jmods/jdk.jpackage.jmod")
 
         when (target.os) {
             Linux -> {
-                packageLinux(dirAppImage, jpackageJMods)
+                packageLinux(dirDistributableApp, jpackageJMods)
             }
 
             Windows -> {
-                packageWindows(dirAppImage, jpackageJMods)
+                packageWindows(dirDistributableApp, jpackageJMods)
             }
 
             MacOS -> {
@@ -441,9 +441,9 @@ abstract class AppImageTask @Inject constructor(
         }
     }
 
-    private fun packageLinux(dirAppImage: Path, jpackageJMods: Path) {
-        val dirBin = dirAppImage.resolve("bin")
-        val dirLib = dirAppImage.resolve("lib")
+    private fun packageLinux(dirDistributableApp: Path, jpackageJMods: Path) {
+        val dirBin = dirDistributableApp.resolve("bin")
+        val dirLib = dirDistributableApp.resolve("lib")
         createDirectories(dirBin)
         createDirectories(dirLib)
 
@@ -480,9 +480,9 @@ abstract class AppImageTask @Inject constructor(
         }
     }
 
-    private fun packageWindows(dirAppImage: Path, jpackageJMods: Path) {
-        val dirRuntime = dirAppImage.resolve("runtime")
-        val dirApp = dirAppImage.resolve("app")
+    private fun packageWindows(dirDistributableApp: Path, jpackageJMods: Path) {
+        val dirRuntime = dirDistributableApp.resolve("runtime")
+        val dirApp = dirDistributableApp.resolve("app")
         // The equivalent of JPackage's --win-console
         val resAppLauncher = if (winConsole.get()!!) {
             // Show console window while app is running
@@ -492,7 +492,7 @@ abstract class AppImageTask @Inject constructor(
             "classes/jdk/jpackage/internal/resources/jpackageapplauncherw.exe"
         }
 
-        val launcher = dirAppImage.resolve("${packageName.get()}.exe")
+        val launcher = dirDistributableApp.resolve("${packageName.get()}.exe")
         extractZip(jpackageJMods, resAppLauncher, launcher)
         if (currentOS.isUnix()) {
             Files.setPosixFilePermissions(launcher, posixExecutable)

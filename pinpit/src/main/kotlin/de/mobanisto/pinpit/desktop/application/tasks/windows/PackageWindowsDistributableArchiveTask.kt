@@ -80,8 +80,8 @@ abstract class PackageWindowsDistributableArchiveTask @Inject constructor(
         logger.lifecycle("destination: $destination")
         destination.asFile.mkdirs()
 
-        val appImage = appImage.get().dir(packageName).get()
-        logger.lifecycle("app image: $appImage")
+        val distributableApp = distributableApp.get().dir(packageName).get()
+        logger.lifecycle("distributable app: $distributableApp")
 
         logger.lifecycle("working dir: ${workingDir.get()}")
         fileOperations.delete(workingDir)
@@ -89,7 +89,7 @@ abstract class PackageWindowsDistributableArchiveTask @Inject constructor(
         val fullName = "${packageName.get()}-${target.arch.id}-${packageVersion.get()}"
         val archive = destination.file("$fullName.${targetFormat.fileExt}")
 
-        val pathAppImage = appImage.asPath()
+        val pathDistributableApp = distributableApp.asPath()
 
         if (targetFormat.archiveFormat != ArchiveFormat.Zip) {
             throw GradleException("Invalid archive format for Windows: ${targetFormat.archiveFormat}. Please use 'zip'")
@@ -98,15 +98,15 @@ abstract class PackageWindowsDistributableArchiveTask @Inject constructor(
         archive.asFile.outputStream().use { fis ->
             ZipArchiveOutputStream(fis).use { zip ->
                 Files.walkFileTree(
-                    pathAppImage,
+                    pathDistributableApp,
                     object : SimpleFileVisitor<Path>() {
                         override fun preVisitDirectory(dir: Path, attrs: BasicFileAttributes): FileVisitResult {
-                            zip.packageFile(pathAppImage, dir, fullName)
+                            zip.packageFile(pathDistributableApp, dir, fullName)
                             return FileVisitResult.CONTINUE
                         }
 
                         override fun visitFile(file: Path, attrs: BasicFileAttributes): FileVisitResult {
-                            zip.packageFile(pathAppImage, file, fullName)
+                            zip.packageFile(pathDistributableApp, file, fullName)
                             return FileVisitResult.CONTINUE
                         }
                     }

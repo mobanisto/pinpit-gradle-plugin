@@ -33,7 +33,7 @@ abstract class AbstractUploadAppForNotarizationTask @Inject constructor(
     val requestsDir: DirectoryProperty = objects.directoryProperty()
 
     init {
-        check(targetFormat !is TargetFormat.AppImage) { "${TargetFormat.AppImage::class.java.simpleName} cannot be notarized!" }
+        check(targetFormat !is TargetFormat.DistributableApp) { "${TargetFormat.DistributableApp::class.java.simpleName} cannot be notarized!" }
     }
 
     @TaskAction

@@ -28,7 +28,7 @@ abstract class SuggestDebDependenciesTask @Inject constructor() : AbstractPinpit
     }
 
     @get:InputDirectory
-    val appImage: DirectoryProperty = objects.directoryProperty()
+    val distributableApp: DirectoryProperty = objects.directoryProperty()
 
     @TaskAction
     fun run() {
@@ -47,7 +47,7 @@ abstract class SuggestDebDependenciesTask @Inject constructor() : AbstractPinpit
 
     private fun findPackageDependencies(debArch: String): FindPackageResults {
         val set = mutableSetOf<Path>()
-        for (file in appImage.asFileTree.filter { canDependOnLibs(it) }) {
+        for (file in distributableApp.asFileTree.filter { canDependOnLibs(it) }) {
             val resultLdd = runExternalToolAndGetOutput(
                 tool = DebianUtils.ldd,
                 args = listOf(file.toString())

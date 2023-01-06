@@ -96,7 +96,7 @@ private fun dslPropertiesFor(targetFormat: TargetFormat): List<String> {
     val packageVersion = "packageVersion"
 
     val formatSpecificProperty: String? = when (targetFormat) {
-        is TargetFormat.AppImage -> null
+        is TargetFormat.DistributableApp -> null
         is TargetFormat.DistributableArchive -> null
         is TargetFormat.Deb -> "$linux.debPackageVersion"
         is TargetFormat.Rpm -> "$linux.rpmPackageVersion"

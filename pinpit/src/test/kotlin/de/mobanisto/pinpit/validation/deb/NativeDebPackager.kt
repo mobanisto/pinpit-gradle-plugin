@@ -17,7 +17,7 @@ import kotlin.io.path.createDirectories
  * our platform-independent DEB packaging matches native packaging.
  */
 class NativeDebPackager constructor(
-    private val appImage: Path,
+    private val distributableApp: Path,
     private val destinationDeb: Path,
     workingDir: Path,
     packageName: String,
@@ -58,13 +58,13 @@ class NativeDebPackager constructor(
         logger.info("destination: $destinationDeb")
         destinationDeb.parent.createDirectories(asFileAttribute(posixExecutable))
 
-        logger.info("app image: $appImage")
+        logger.info("distributable app: $distributableApp")
 
         logger.info("building debian file tree at: $debFileTree")
         debFileTree.createDirectories(asFileAttribute(posixExecutable))
 
-        buildDebFileTree(appImage, debFileTree)
-        buildDebianDir(appImage, debFileTree)
+        buildDebFileTree(distributableApp, debFileTree)
+        buildDebianDir(distributableApp, debFileTree)
 
         runExternalTool(
             tool = "/usr/bin/fakeroot",

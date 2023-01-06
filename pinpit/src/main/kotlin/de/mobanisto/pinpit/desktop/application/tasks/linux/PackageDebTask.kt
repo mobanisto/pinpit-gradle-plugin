@@ -150,8 +150,8 @@ abstract class PackageDebTask @Inject constructor(
         logger.lifecycle("destination: $destination")
         destination.asFile.mkdirs()
 
-        val appImage = appImage.get().dir(packageName).get()
-        logger.lifecycle("app image: $appImage")
+        val distributableApp = distributableApp.get().dir(packageName).get()
+        logger.lifecycle("distributable app: $distributableApp")
 
         logger.lifecycle("working dir: ${workingDir.get()}")
         fileOperations.delete(workingDir)
@@ -160,7 +160,7 @@ abstract class PackageDebTask @Inject constructor(
             destination.file("${linuxPackageName.get()}-$qualifier-${target.arch.id}-${linuxDebPackageVersion.get()}.deb")
 
         val packager = JvmDebPackager(
-            appImage.asPath(),
+            distributableApp.asPath(),
             deb.asPath(),
             workingDir.asPath(),
             packageName.get(),

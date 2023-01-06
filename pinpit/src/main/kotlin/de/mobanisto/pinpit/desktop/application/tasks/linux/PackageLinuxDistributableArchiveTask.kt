@@ -90,8 +90,8 @@ abstract class PackageLinuxDistributableArchiveTask @Inject constructor(
         logger.lifecycle("destination: $destination")
         destination.asFile.mkdirs()
 
-        val appImage = appImage.get().dir(packageName).get()
-        logger.lifecycle("app image: $appImage")
+        val distributableApp = distributableApp.get().dir(packageName).get()
+        logger.lifecycle("distributable app: $distributableApp")
 
         logger.lifecycle("working dir: ${workingDir.get()}")
         fileOperations.delete(workingDir)
@@ -99,7 +99,7 @@ abstract class PackageLinuxDistributableArchiveTask @Inject constructor(
         val fullName = "${linuxPackageName.get()}-${target.arch.id}-${packageVersion.get()}"
         val archive = destination.file("$fullName.${targetFormat.fileExt}")
 
-        val pathAppImage = appImage.asPath()
+        val pathDistributableApp = distributableApp.asPath()
 
         if (targetFormat.archiveFormat != ArchiveFormat.TarGz) {
             throw GradleException("Invalid archive format for Linux: ${targetFormat.archiveFormat}. Please use 'tar.gz'")
@@ -110,15 +110,15 @@ abstract class PackageLinuxDistributableArchiveTask @Inject constructor(
                 TarArchiveOutputStream(gzip).use { tar ->
                     tar.setLongFileMode(TarArchiveOutputStream.LONGFILE_POSIX)
                     Files.walkFileTree(
-                        pathAppImage,
+                        pathDistributableApp,
                         object : SimpleFileVisitor<Path>() {
                             override fun preVisitDirectory(dir: Path, attrs: BasicFileAttributes): FileVisitResult {
-                                tar.packageFile(pathAppImage, dir, fullName)
+                                tar.packageFile(pathDistributableApp, dir, fullName)
                                 return FileVisitResult.CONTINUE
                             }
 
                             override fun visitFile(file: Path, attrs: BasicFileAttributes): FileVisitResult {
-                                tar.packageFile(pathAppImage, file, fullName)
+                                tar.packageFile(pathDistributableApp, file, fullName)
                                 return FileVisitResult.CONTINUE
                             }
                         }

@@ -53,7 +53,7 @@ abstract class AbstractDebPackager constructor(
     private val logger: Logger = LoggerFactory.getLogger(AbstractDebPackager::class.java)
     val debFileTree: Path = workingDir.resolve("debFileTree")
 
-    internal fun buildDebFileTree(appImage: Path, debFileTree: Path) {
+    internal fun buildDebFileTree(distributableApp: Path, debFileTree: Path) {
         val dirOpt = debFileTree.resolve("opt")
         val dirPackage = dirOpt.resolve(linuxPackageName)
         val dirBin = dirPackage.resolve("bin")
@@ -63,17 +63,17 @@ abstract class AbstractDebPackager constructor(
         debCopyright?.copy(dirShareDoc.resolve("copyright"), posixRegular)
         debLauncher?.copy(dirLib.resolve("$linuxPackageName-$packageName.desktop"), posixRegular)
 
-        syncDir(appImage.resolve("bin"), dirBin)
-        syncDir(appImage.resolve("lib"), dirLib) {
+        syncDir(distributableApp.resolve("bin"), dirBin)
+        syncDir(distributableApp.resolve("lib"), dirLib) {
             it != Paths.get("app/.jpackage.xml")
         }
     }
 
-    internal fun buildDebianDir(appImage: Path, debFileTree: Path) {
+    internal fun buildDebianDir(distributableApp: Path, debFileTree: Path) {
         val dirDebian = debFileTree.resolve("DEBIAN")
         dirDebian.createDirectories(asFileAttribute(posixExecutable))
         val fileControl = dirDebian.resolve("control")
-        createControlFile(fileControl, appImage)
+        createControlFile(fileControl, distributableApp)
         debPreInst?.copy(dirDebian.resolve("preinst"), posixExecutable)
         debPostInst?.copy(dirDebian.resolve("postinst"), posixExecutable)
         debPreRm?.copy(dirDebian.resolve("prerm"), posixExecutable)
@@ -91,9 +91,9 @@ abstract class AbstractDebPackager constructor(
         }
     }
 
-    private fun createControlFile(fileControl: Path, appImage: Path) {
+    private fun createControlFile(fileControl: Path, distributableApp: Path) {
         // Determine installed size as in jdk.jpackage.internal.LinuxDebBundler#createReplacementData()
-        val sizeInBytes = sizeInBytes(appImage)
+        val sizeInBytes = sizeInBytes(distributableApp)
         val installedSize = (sizeInBytes shr 10).toString()
         logger.info("size in bytes: $sizeInBytes")
         logger.info("installed size: $installedSize")

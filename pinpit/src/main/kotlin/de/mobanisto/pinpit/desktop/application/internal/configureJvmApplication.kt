@@ -20,8 +20,8 @@ import de.mobanisto.pinpit.desktop.application.tasks.AbstractNotarizationTask
 import de.mobanisto.pinpit.desktop.application.tasks.AbstractProguardTask
 import de.mobanisto.pinpit.desktop.application.tasks.AbstractRunDistributableTask
 import de.mobanisto.pinpit.desktop.application.tasks.AbstractSuggestModulesTask
-import de.mobanisto.pinpit.desktop.application.tasks.AppImageTask
 import de.mobanisto.pinpit.desktop.application.tasks.CustomPackageTask
+import de.mobanisto.pinpit.desktop.application.tasks.DistributableAppTask
 import de.mobanisto.pinpit.desktop.application.tasks.DownloadJdkTask
 import de.mobanisto.pinpit.desktop.application.tasks.linux.PackageDebTask
 import de.mobanisto.pinpit.desktop.application.tasks.linux.PackageLinuxDistributableArchiveTask
@@ -83,7 +83,7 @@ internal class TargetTasks {
     val prepareAppResources = mutableMapOf<Target, TaskProvider<Sync>>()
     val proguardTasks = mutableMapOf<TargetAndBuildType, TaskProvider<AbstractProguardTask>>()
     val runtimeTasks = mutableMapOf<TargetAndBuildType, TaskProvider<AbstractJLinkTask>>()
-    val distributableTasks = mutableMapOf<TargetAndBuildType, TaskProvider<AppImageTask>>()
+    val distributableTasks = mutableMapOf<TargetAndBuildType, TaskProvider<DistributableAppTask>>()
     val runTasks = mutableMapOf<TargetAndBuildType, TaskProvider<AbstractRunDistributableTask>>()
     val suggestDebDependenciesTasks = mutableMapOf<TargetAndBuildType, TaskProvider<SuggestDebDependenciesTask>>()
 }
@@ -96,7 +96,7 @@ internal class CommonJvmPackageTasks(
     val checkRuntime: TaskProvider<AbstractCheckNativeDistributionRuntime>,
     val runProguard: TaskProvider<AbstractProguardTask>?,
     val createRuntimeImage: TaskProvider<AbstractJLinkTask>,
-    val createDistributable: TaskProvider<AppImageTask>,
+    val createDistributable: TaskProvider<DistributableAppTask>,
 )
 
 private fun JvmApplicationContext.configureCommonJvmDesktopTasks(): CommonJvmDesktopTasks {
@@ -159,7 +159,7 @@ private fun JvmApplicationContext.configurePackagingTasks(
         ) {
             configureCustomPackageTask(
                 this,
-                createAppImage = packageTasks.createDistributable,
+                createDistributableApp = packageTasks.createDistributable,
                 checkRuntime = packageTasks.checkRuntime,
                 unpackDefaultResources = commonTasks.unpackDefaultResources
             )
@@ -185,7 +185,7 @@ private fun JvmApplicationContext.configurePackagingTasks(
         ) {
             configureCustomPackageTask(
                 this,
-                createAppImage = packageTasks.createDistributable,
+                createDistributableApp = packageTasks.createDistributable,
                 checkRuntime = packageTasks.checkRuntime,
                 unpackDefaultResources = commonTasks.unpackDefaultResources
             )
@@ -214,7 +214,7 @@ private fun JvmApplicationContext.configurePackagingTasks(
         ) {
             configureCustomPackageTask(
                 this,
-                createAppImage = packageTasks.createDistributable,
+                createDistributableApp = packageTasks.createDistributable,
                 checkRuntime = packageTasks.checkRuntime,
                 unpackDefaultResources = commonTasks.unpackDefaultResources
             )
@@ -241,7 +241,7 @@ private fun JvmApplicationContext.configurePackagingTasks(
         ) {
             configureCustomPackageTask(
                 this,
-                createAppImage = packageTasks.createDistributable,
+                createDistributableApp = packageTasks.createDistributable,
                 checkRuntime = packageTasks.checkRuntime,
                 unpackDefaultResources = commonTasks.unpackDefaultResources
             )
@@ -284,7 +284,7 @@ private fun JvmApplicationContext.configurePackagingTasks(
                 useBuildTypeForTaskName = false,
             ) {
                 dependsOn(createDistributable)
-                appImage.set(createDistributable.flatMap { it.destinationDir })
+                distributableApp.set(createDistributable.flatMap { it.destinationDir })
             }.also { targetTasks.suggestDebDependenciesTasks[defaultTargetBuild] = it }
         }
     }
@@ -391,13 +391,13 @@ private fun JvmApplicationContext.configureCommonPackageTasks(
         destinationDir.set(appTmpDir.dir("${target.os.id}/${target.arch.id}/runtime"))
     }.also { targetTasks.runtimeTasks[targetBuild] = it }
 
-    val createDistributable = targetTasks.distributableTasks[targetBuild] ?: tasks.register<AppImageTask>(
+    val createDistributable = targetTasks.distributableTasks[targetBuild] ?: tasks.register<DistributableAppTask>(
         taskNameAction = "pinpitCreate",
         taskNameObject = "distributable${target.name}",
         description = "Creates a directory for ${target.name} containing all files to be distributed including launcher, app and runtime image.",
         args = listOf(target),
     ) {
-        configureAppImageTask(
+        configureDistributableAppTask(
             this,
             createRuntimeImage = createRuntimeImage,
             prepareAppResources = targetTasks.prepareAppResources[target],
@@ -451,14 +451,14 @@ private fun JvmApplicationContext.configureProguardTask(
 
 private fun JvmApplicationContext.configureCustomPackageTask(
     packageTask: CustomPackageTask,
-    createAppImage: TaskProvider<AppImageTask>,
+    createDistributableApp: TaskProvider<DistributableAppTask>,
     checkRuntime: TaskProvider<AbstractCheckNativeDistributionRuntime>,
     unpackDefaultResources: TaskProvider<AbstractUnpackDefaultComposeApplicationResourcesTask>,
     runProguard: Provider<AbstractProguardTask>? = null
 ) {
-    createAppImage.let { createAppImage ->
-        packageTask.dependsOn(createAppImage)
-        packageTask.appImage.set(createAppImage.flatMap { it.destinationDir })
+    createDistributableApp.let { createDistributableApp ->
+        packageTask.dependsOn(createDistributableApp)
+        packageTask.distributableApp.set(createDistributableApp.flatMap { it.destinationDir })
     }
 
     checkRuntime.let { checkRuntime ->
@@ -492,8 +492,8 @@ private fun JvmApplicationContext.configureCustomPackageTask(
     }
 }
 
-private fun JvmApplicationContext.configureAppImageTask(
-    packageTask: AppImageTask,
+private fun JvmApplicationContext.configureDistributableAppTask(
+    packageTask: DistributableAppTask,
     createRuntimeImage: TaskProvider<AbstractJLinkTask>? = null,
     prepareAppResources: TaskProvider<Sync>? = null,
     checkRuntime: TaskProvider<AbstractCheckNativeDistributionRuntime>? = null,
@@ -532,7 +532,7 @@ private fun JvmApplicationContext.configureAppImageTask(
 
     packageTask.destinationDir.set(
         app.nativeDistributions.outputBaseDir.map {
-            it.dir("$appDirName/${packageTask.target.os.id}/${packageTask.target.arch.id}/appimage")
+            it.dir("$appDirName/${packageTask.target.os.id}/${packageTask.target.arch.id}/distributableApp")
         }
     )
     packageTask.javaHome.set(app.javaHomeProvider)
@@ -651,7 +651,7 @@ internal fun JvmApplicationContext.configurePlatformSettings(
 }
 
 internal fun JvmApplicationContext.configurePlatformSettings(
-    packageTask: AppImageTask,
+    packageTask: DistributableAppTask,
     unpackDefaultResources: TaskProvider<AbstractUnpackDefaultComposeApplicationResourcesTask>
 ) {
     packageTask.dependsOn(unpackDefaultResources)

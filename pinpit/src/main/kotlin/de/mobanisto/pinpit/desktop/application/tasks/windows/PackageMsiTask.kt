@@ -147,9 +147,9 @@ abstract class PackageMsiTask @Inject constructor(
             put("PATH", "$wixPath;$path")
         }
         println("Using environment: $environment")
-        val appImage = appImage.get().dir(packageName).get()
-        println("app image: $appImage")
-        for (file in appImage.asFileTree.files) {
+        val distributableApp = distributableApp.get().dir(packageName).get()
+        println("distributable app: $distributableApp")
+        for (file in distributableApp.asFileTree.files) {
             logger.debug("  $file")
         }
 
@@ -171,7 +171,7 @@ abstract class PackageMsiTask @Inject constructor(
 
         val outputFiles = destinationWix.resolve("Files.wxs")
         val outputProduct = destinationWix.resolve("Product.wxs")
-        val executables = GenerateFilesWxs(outputFiles, appImage.asPath(), productName).execute()
+        val executables = GenerateFilesWxs(outputFiles, distributableApp.asPath(), productName).execute()
         val mainExecutable = executables[0]
         GenerateProductWxs(
             outputProduct,

@@ -282,9 +282,9 @@ class DesktopApplicationTest : GradlePluginTestBase() {
         val dirBinaries = dirBuild.resolve("pinpit/binaries/main-default/linux/x64/")
 
         val packaging = file("src/main/packaging").toPath()
-        val appImage = dirBinaries.resolve("appimage/TestPackage")
+        val distributableApp = dirBinaries.resolve("distributableApp/TestPackage")
         val packager = JvmDebPackager(
-            appImage,
+            distributableApp,
             deb,
             workingDir,
             "TestPackage",
@@ -320,9 +320,9 @@ class DesktopApplicationTest : GradlePluginTestBase() {
         val dirBinaries = dirBuild.resolve("pinpit/binaries/main-default/linux/x64/")
 
         val packaging = file("src/main/packaging").toPath()
-        val appImage = dirBinaries.resolve("appimage/TestPackage")
+        val distributableApp = dirBinaries.resolve("distributableApp/TestPackage")
         val packager = NativeDebPackager(
-            appImage,
+            distributableApp,
             deb,
             workingDir,
             "TestPackage",

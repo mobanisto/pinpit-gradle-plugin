@@ -46,11 +46,11 @@ object TestUtils {
                 ValidateDeb.validateDebContents(fis)
             }
 
-            val dirAppImage = file("${projectDir}build/pinpit/binaries/main-default/linux/x64/appimage/")
-            dirAppImage.checkExists()
+            val dirDistributableApp = file("${projectDir}build/pinpit/binaries/main-default/linux/x64/distributableApp/")
+            dirDistributableApp.checkExists()
 
-            checkContainsSome(dirAppImage.toPath(), ".so")
-            checkContainsNone(dirAppImage.toPath(), ".dll")
+            checkContainsSome(dirDistributableApp.toPath(), ".so")
+            checkContainsNone(dirDistributableApp.toPath(), ".dll")
         }
     }
 
@@ -66,11 +66,11 @@ object TestUtils {
                 file("${projectDir}build/pinpit/binaries/main-default/windows/x64/msi/TestPackage-x64-1.0.0.msi")
             resultFile.checkExists()
 
-            val dirAppImage = file("${projectDir}build/pinpit/binaries/main-default/windows/x64/appimage/")
-            dirAppImage.checkExists()
+            val dirDistributableApp = file("${projectDir}build/pinpit/binaries/main-default/windows/x64/distributableApp/")
+            dirDistributableApp.checkExists()
 
-            checkContainsSome(dirAppImage.toPath(), ".dll")
-            checkContainsNone(dirAppImage.toPath(), ".so")
+            checkContainsSome(dirDistributableApp.toPath(), ".dll")
+            checkContainsNone(dirDistributableApp.toPath(), ".so")
         }
     }
 
@@ -92,11 +92,11 @@ object TestUtils {
 //                ValidateDeb.validateDebContents(fis)
 //            }
 
-            val dirAppImage = file("${projectDir}build/pinpit/binaries/main-default/linux/x64/appimage/")
-            dirAppImage.checkExists()
+            val dirDistributableApp = file("${projectDir}build/pinpit/binaries/main-default/linux/x64/distributableApp/")
+            dirDistributableApp.checkExists()
 
-            checkContainsSome(dirAppImage.toPath(), ".so")
-            checkContainsNone(dirAppImage.toPath(), ".dll")
+            checkContainsSome(dirDistributableApp.toPath(), ".so")
+            checkContainsNone(dirDistributableApp.toPath(), ".dll")
         }
     }
 
@@ -118,11 +118,11 @@ object TestUtils {
 //                ValidateDeb.validateDebContents(fis)
 //            }
 
-            val dirAppImage = file("${projectDir}build/pinpit/binaries/main-default/windows/x64/appimage/")
-            dirAppImage.checkExists()
+            val dirDistributableApp = file("${projectDir}build/pinpit/binaries/main-default/windows/x64/distributableApp/")
+            dirDistributableApp.checkExists()
 
-            checkContainsSome(dirAppImage.toPath(), ".dll")
-            checkContainsNone(dirAppImage.toPath(), ".so")
+            checkContainsSome(dirDistributableApp.toPath(), ".dll")
+            checkContainsNone(dirDistributableApp.toPath(), ".so")
         }
     }
 

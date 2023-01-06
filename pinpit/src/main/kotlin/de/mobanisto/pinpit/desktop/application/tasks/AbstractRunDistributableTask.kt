@@ -20,26 +20,26 @@ import javax.inject.Inject
 
 // Custom task is used instead of Exec, because Exec does not support
 // lazy configuration yet. Lazy configuration is needed to
-// calculate appImageDir after the evaluation of createApplicationImage
+// calculate distributableAppDir after the evaluation of createApplicationImage
 abstract class AbstractRunDistributableTask @Inject constructor(
-    createApplicationImage: TaskProvider<AppImageTask>
+    createApplicationImage: TaskProvider<DistributableAppTask>
 ) : AbstractPinpitTask() {
     @get:InputDirectory
-    internal val appImageRootDir: Provider<Directory> = createApplicationImage.flatMap { it.destinationDir }
+    internal val distributableAppRootDir: Provider<Directory> = createApplicationImage.flatMap { it.destinationDir }
 
     @get:Input
     internal val packageName: Provider<String> = createApplicationImage.flatMap { it.packageName }
 
     @TaskAction
     fun run() {
-        val appDir = appImageRootDir.ioFile.let { appImageRoot ->
-            val files = appImageRoot.listFiles()
+        val appDir = distributableAppRootDir.ioFile.let { distributableAppRoot ->
+            val files = distributableAppRoot.listFiles()
                 // Sometimes ".DS_Store" files are created on macOS, so ignore them.
                 ?.filterNot { it.name == ".DS_Store" }
             if (files == null || files.isEmpty()) {
-                error("Could not find application image: $appImageRoot is empty!")
+                error("Could not find application image: $distributableAppRoot is empty!")
             } else if (files.size > 1) {
-                error("Could not find application image: $appImageRoot contains multiple children [${files.joinToString(", ")}]")
+                error("Could not find application image: $distributableAppRoot contains multiple children [${files.joinToString(", ")}]")
             } else files.single()
         }
         val appExecutableName = executableName(packageName.get())

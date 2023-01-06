@@ -19,7 +19,7 @@ enum class ArchiveFormat(val extension: String) {
 
 sealed class TargetFormat(val targetOS: OS) : Serializable {
 
-    class AppImage(os: OS) : TargetFormat(os)
+    class DistributableApp(os: OS) : TargetFormat(os)
     class DistributableArchive(os: OS, val archiveFormat: ArchiveFormat) : TargetFormat(os)
     class Deb : TargetFormat(Linux)
     class Rpm : TargetFormat(Linux)
@@ -34,7 +34,7 @@ sealed class TargetFormat(val targetOS: OS) : Serializable {
 
     val outputDirName: String
         get() = when (this) {
-            is AppImage -> "app"
+            is DistributableApp -> "app"
             is DistributableArchive -> archiveFormat.extension
             is Deb -> "deb"
             is Rpm -> "rpm"
@@ -47,7 +47,7 @@ sealed class TargetFormat(val targetOS: OS) : Serializable {
     val fileExt: String
         get() {
             return when (this) {
-                is AppImage -> throw IllegalStateException("AppImage does not have a file extension")
+                is DistributableApp -> throw IllegalStateException("DistributableApp does not have a file extension")
                 is DistributableArchive -> archiveFormat.extension
                 is Deb -> ".deb"
                 is Rpm -> ".rpm"

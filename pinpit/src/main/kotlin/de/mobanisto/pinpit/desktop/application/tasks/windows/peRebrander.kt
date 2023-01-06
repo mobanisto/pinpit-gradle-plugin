@@ -7,7 +7,7 @@ package de.mobanisto.pinpit.desktop.application.tasks.windows
 
 import de.mobanisto.pinpit.desktop.application.internal.JvmApplicationContext
 import de.mobanisto.pinpit.desktop.application.internal.OS
-import de.mobanisto.pinpit.desktop.application.tasks.AppImageTask
+import de.mobanisto.pinpit.desktop.application.tasks.DistributableAppTask
 import de.undercouch.gradle.tasks.download.Download
 import org.gradle.api.Project
 import org.gradle.api.tasks.Copy
@@ -60,7 +60,7 @@ internal fun JvmApplicationContext.configurePeRebrander() {
 }
 
 private fun Project.eachWindowsPackageTask(fn: WindowsTask.() -> Unit) {
-    tasks.withType(AppImageTask::class.java).configureEach { packageTask ->
+    tasks.withType(DistributableAppTask::class.java).configureEach { packageTask ->
         if (packageTask.target.os == OS.Windows) {
             packageTask.fn()
         }

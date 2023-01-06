@@ -36,7 +36,7 @@ import kotlin.io.path.outputStream
  * A class for creating a DEB package without using native tools.
  */
 class JvmDebPackager constructor(
-    private val appImage: Path,
+    private val distributableApp: Path,
     private val destinationDeb: Path,
     workingDir: Path,
     packageName: String,
@@ -83,13 +83,13 @@ class JvmDebPackager constructor(
         logger.info("destination: $destinationDeb")
         destinationDeb.parent.createDirectories(asFileAttribute(posixExecutable))
 
-        logger.info("app image: $appImage")
+        logger.info("distributable app: $distributableApp")
 
         logger.info("building debian file tree at: $debFileTree")
         debFileTree.createDirectories(asFileAttribute(posixExecutable))
 
-        buildDebFileTree(appImage, debFileTree)
-        buildDebianDir(appImage, debFileTree)
+        buildDebFileTree(distributableApp, debFileTree)
+        buildDebianDir(distributableApp, debFileTree)
 
         logger.info("building debian archives at: $debPackageDir")
         debPackageDir.createDirectories(asFileAttribute(posixExecutable))
