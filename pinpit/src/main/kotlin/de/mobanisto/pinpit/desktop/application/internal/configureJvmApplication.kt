@@ -253,6 +253,26 @@ private fun JvmApplicationContext.configurePackagingTasks(
     }
 
     tasks.register<DefaultTask>(
+        taskNameAction = "pinpitCreate",
+        taskNameObject = "runtime",
+        description = "Creates a runtime image for each system and architecture using jlink.",
+    ) {
+        targetTasks.runtimeTasks.values.forEach {
+            dependsOn(it)
+        }
+    }
+
+    tasks.register<DefaultTask>(
+        taskNameAction = "pinpitCreate",
+        taskNameObject = "distributable",
+        description = "Creates a directory for each system and architecture containing all files to be distributed including launcher, app and runtime image.",
+    ) {
+        targetTasks.distributableTasks.values.forEach {
+            dependsOn(it)
+        }
+    }
+
+    tasks.register<DefaultTask>(
         taskNameAction = "pinpitPackage",
         description = "Builds packages for all systems and architectures.",
     ) {
