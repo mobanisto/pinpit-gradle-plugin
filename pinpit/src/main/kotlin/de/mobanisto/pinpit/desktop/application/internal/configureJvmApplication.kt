@@ -127,6 +127,7 @@ private fun JvmApplicationContext.configurePackagingTasks(
         ?: throw GradleException("Invalid JVM vendor or version")
 
     val allPackageTasks = mutableListOf<TaskProvider<out Task>>()
+    val allUberJarTasks = mutableListOf<TaskProvider<out Task>>()
 
     targets.forEach { target ->
         if (buildType == app.buildTypes.default) {
@@ -136,7 +137,7 @@ private fun JvmApplicationContext.configurePackagingTasks(
                 description = "Packages an Uber-Jar for ${target.name}.",
             ) {
                 configurePackageUberJar(this, target)
-            }.also { allPackageTasks.add(it) }
+            }.also { allUberJarTasks.add(it) }
         }
     }
 
@@ -258,8 +259,19 @@ private fun JvmApplicationContext.configurePackagingTasks(
         allPackageTasks.forEach {
             dependsOn(it)
         }
-        // TODO: depend on uber jar tasks too?
-        // dependsOn(packageForCurrentOS)
+        allUberJarTasks.forEach {
+            dependsOn(it)
+        }
+    }
+
+    tasks.register<DefaultTask>(
+        taskNameAction = "pinpitPackage",
+        taskNameObject = "uberJar",
+        description = "Packages an Uber-Jar for each system and architecture.",
+    ) {
+        allUberJarTasks.forEach {
+            dependsOn(it)
+        }
     }
 
     if (buildType == app.buildTypes.default) {
