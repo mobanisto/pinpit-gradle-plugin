@@ -39,7 +39,7 @@ import javax.inject.Inject
 
 abstract class PackageMsiTask @Inject constructor(
     target: Target
-) : CustomPackageTask(target, TargetFormat.CustomMsi), WindowsTask {
+) : CustomPackageTask(target, TargetFormat.Msi), WindowsTask {
 
     companion object {
         val logger: Logger = LoggerFactory.getLogger(PackageMsiTask::class.java)
