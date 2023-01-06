@@ -599,7 +599,7 @@ internal fun JvmApplicationContext.configurePlatformSettings(
 ) {
     packageTask.destinationDir.set(
         app.nativeDistributions.outputBaseDir.map {
-            it.dir("$appDirName/${packageTask.target.os.id}/${packageTask.target.arch.id}/${packageTask.targetFormat.archiveFormat.extension}")
+            it.dir("$appDirName/${packageTask.target.os.id}/${packageTask.target.arch.id}/distributableArchive")
         }
     )
     packageTask.dependsOn(unpackDefaultResources)
@@ -615,7 +615,7 @@ internal fun JvmApplicationContext.configurePlatformSettings(
 ) {
     packageTask.destinationDir.set(
         app.nativeDistributions.outputBaseDir.map {
-            it.dir("$appDirName/${packageTask.target.os.id}/${packageTask.target.arch.id}/${packageTask.targetFormat.archiveFormat.extension}")
+            it.dir("$appDirName/${packageTask.target.os.id}/${packageTask.target.arch.id}/distributableArchive")
         }
     )
     packageTask.dependsOn(unpackDefaultResources)

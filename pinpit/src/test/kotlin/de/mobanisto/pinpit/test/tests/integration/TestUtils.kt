@@ -84,7 +84,7 @@ object TestUtils {
             )
 
             val resultFile =
-                file("${projectDir}build/pinpit/binaries/main-default/linux/x64/tar.gz/test-package-x64-1.0.0.tar.gz")
+                file("${projectDir}build/pinpit/binaries/main-default/linux/x64/distributableArchive/test-package-x64-1.0.0.tar.gz")
             resultFile.checkExists()
 
             // TODO: add some in-depth verification similar to deb file verification
@@ -110,7 +110,7 @@ object TestUtils {
             )
 
             val resultFile =
-                file("${projectDir}build/pinpit/binaries/main-default/windows/x64/zip/TestPackage-x64-1.0.0.zip")
+                file("${projectDir}build/pinpit/binaries/main-default/windows/x64/distributableArchive/TestPackage-x64-1.0.0.zip")
             resultFile.checkExists()
 
             // TODO: add some in-depth verification similar to deb file verification
