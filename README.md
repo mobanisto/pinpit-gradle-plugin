@@ -140,7 +140,8 @@ pinpit.desktop {
 
 We can then go on to specify the Linux-specific options as well as defining
 all the classes of Debian-based distributions that we would like to
-create a specific `.deb` package for:
+create a specific `.deb` package for as well as a distributable tar.gz
+archive:
 ```kotlin
             linux {
                 shortcut = true
@@ -175,11 +176,15 @@ create a specific `.deb` package for:
                         "xdg-utils", "zlib1g", "libnotify4"
                     )
                 }
+                distributableArchive {
+                     format = "tar.gz"
+                     arch = "x64"
+                }
             }
 ```
 
 Let's also define the Windows-specific options in order to package an MSI
-installer:
+installer and a distributable zip archive:
 ```kotlin
             windows {
                 console = true
@@ -195,6 +200,10 @@ installer:
                     arch = "x64"
                     bitmapBanner.set(project.file("src/main/packaging/windows/banner.bmp"))
                     bitmapDialog.set(project.file("src/main/packaging/windows/dialog.bmp"))
+                }
+                distributableArchive {
+                     format = "zip"
+                     arch = "x64"
                 }
             }
 ```
@@ -216,6 +225,8 @@ pinpitDownloadJdkWindowsX64 - Downloads the JDK for WindowsX64 that is used to d
 pinpitPackageDefault - Builds packages for all systems and architectures.
 pinpitPackageDefaultDebUbuntuBionicX64 - Builds a DEB package for LinuxX64.
 pinpitPackageDefaultDebUbuntuFocalX64 - Builds a DEB package for LinuxX64.
+pinpitPackageDefaultDistributableTarGzLinuxX64 - Builds a distributable TarGz archive for LinuxX64.
+pinpitPackageDefaultDistributableZipWindowsX64 - Builds a distributable Zip archive for WindowsX64.
 pinpitPackageDefaultMsiX64 - Builds an MSI package for WindowsX64.
 pinpitPackageDefaultUberJar - Packages an Uber-Jar for each system and architecture.
 pinpitPackageDefaultUberJarForLinuxX64 - Packages an Uber-Jar for LinuxX64.
