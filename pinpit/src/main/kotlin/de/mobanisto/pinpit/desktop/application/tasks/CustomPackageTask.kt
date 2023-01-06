@@ -28,7 +28,7 @@ import javax.inject.Inject
 
 abstract class CustomPackageTask @Inject constructor(
     @get:Input val target: Target,
-    @get:Input val targetFormat: TargetFormat,
+    @get:Input open val targetFormat: TargetFormat,
 ) : AbstractPinpitTask() {
     @get:LocalState
     protected val workingDir: Provider<Directory> = project.layout.buildDirectory.dir("pinpit/tmp/$name")

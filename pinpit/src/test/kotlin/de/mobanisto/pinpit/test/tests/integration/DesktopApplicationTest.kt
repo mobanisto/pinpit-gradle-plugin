@@ -17,8 +17,10 @@ import de.mobanisto.pinpit.desktop.application.internal.currentTarget
 import de.mobanisto.pinpit.desktop.application.tasks.linux.JvmDebPackager
 import de.mobanisto.pinpit.test.tests.integration.TestUtils.testPackageDebUbuntuFocal
 import de.mobanisto.pinpit.test.tests.integration.TestUtils.testPackageJvmDistributions
+import de.mobanisto.pinpit.test.tests.integration.TestUtils.testPackageLinuxDistributableArchive
 import de.mobanisto.pinpit.test.tests.integration.TestUtils.testPackageMsi
 import de.mobanisto.pinpit.test.tests.integration.TestUtils.testPackageUberJar
+import de.mobanisto.pinpit.test.tests.integration.TestUtils.testPackageWindowsDistributableArchive
 import de.mobanisto.pinpit.test.utils.GradlePluginTestBase
 import de.mobanisto.pinpit.test.utils.ProcessRunResult
 import de.mobanisto.pinpit.test.utils.TestProject
@@ -223,6 +225,16 @@ class DesktopApplicationTest : GradlePluginTestBase() {
     @Test
     fun packageMsi() = with(testProject(TestProjects.jvm)) {
         testPackageMsi()
+    }
+
+    @Test
+    fun packageLinuxDistributableArchive() = with(testProject(TestProjects.jvm)) {
+        testPackageLinuxDistributableArchive()
+    }
+
+    @Test
+    fun packageWindowsDistributableArchive() = with(testProject(TestProjects.jvm)) {
+        testPackageWindowsDistributableArchive()
     }
 
     @Test

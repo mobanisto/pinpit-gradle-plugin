@@ -5,9 +5,12 @@
 
 package de.mobanisto.pinpit.desktop.application.internal
 
+import de.mobanisto.pinpit.desktop.application.dsl.ArchiveFormat
 import de.mobanisto.pinpit.desktop.application.dsl.DebianPlatformSettings
+import de.mobanisto.pinpit.desktop.application.dsl.DistributableArchiveSettings
 import de.mobanisto.pinpit.desktop.application.dsl.JvmApplicationBuildType
 import de.mobanisto.pinpit.desktop.application.dsl.MsiPlatformSettings
+import de.mobanisto.pinpit.desktop.application.dsl.TargetFormat.DistributableArchive
 import de.mobanisto.pinpit.desktop.application.internal.OS.Linux
 import de.mobanisto.pinpit.desktop.application.internal.OS.Windows
 import de.mobanisto.pinpit.desktop.application.internal.validation.validatePackageVersions
@@ -21,8 +24,10 @@ import de.mobanisto.pinpit.desktop.application.tasks.AppImageTask
 import de.mobanisto.pinpit.desktop.application.tasks.CustomPackageTask
 import de.mobanisto.pinpit.desktop.application.tasks.DownloadJdkTask
 import de.mobanisto.pinpit.desktop.application.tasks.linux.PackageDebTask
+import de.mobanisto.pinpit.desktop.application.tasks.linux.PackageLinuxDistributableArchiveTask
 import de.mobanisto.pinpit.desktop.application.tasks.linux.SuggestDebDependenciesTask
 import de.mobanisto.pinpit.desktop.application.tasks.windows.PackageMsiTask
+import de.mobanisto.pinpit.desktop.application.tasks.windows.PackageWindowsDistributableArchiveTask
 import de.mobanisto.pinpit.desktop.application.tasks.windows.configurePeRebrander
 import de.mobanisto.pinpit.desktop.application.tasks.windows.configureWix
 import de.mobanisto.pinpit.desktop.tasks.AbstractUnpackDefaultComposeApplicationResourcesTask
@@ -135,6 +140,35 @@ private fun JvmApplicationContext.configurePackagingTasks(
         }
     }
 
+    app.nativeDistributions.windows.distributableArchives.forEach { archive ->
+        val target = Target(Windows, arch(archive.arch))
+        val targetBuild = TargetAndBuildType(target, buildType)
+
+        val packageTasks = configureCommonPackageTasks(
+            tasks, jdkInfo, targetBuild, app, appTmpDir, targetTasks, commonTasks
+        )
+
+        val format = determineArchiveFormat(archive)
+        val targetFormat = DistributableArchive(target.os, format)
+
+        tasks.register<PackageWindowsDistributableArchiveTask>(
+            taskNameAction = "pinpitPackage",
+            taskNameObject = "distributableArchive" + target.name,
+            description = "Builds a distributable archive for ${target.name}.",
+            args = listOf(target, targetFormat),
+        ) {
+            configureCustomPackageTask(
+                this,
+                createAppImage = packageTasks.createDistributable,
+                checkRuntime = packageTasks.checkRuntime,
+                unpackDefaultResources = commonTasks.unpackDefaultResources
+            )
+            configurePlatformSettings(
+                this, unpackDefaultResources = commonTasks.unpackDefaultResources
+            )
+        }.also { allPackageTasks.add(it) }
+    }
+
     app.nativeDistributions.windows.msis.forEach { msi ->
         val target = Target(Windows, arch(msi.arch))
         val targetBuild = TargetAndBuildType(target, buildType)
@@ -156,9 +190,36 @@ private fun JvmApplicationContext.configurePackagingTasks(
                 unpackDefaultResources = commonTasks.unpackDefaultResources
             )
             configurePlatformSettings(
+                this, msi = msi, unpackDefaultResources = commonTasks.unpackDefaultResources
+            )
+        }.also { allPackageTasks.add(it) }
+    }
+
+    app.nativeDistributions.linux.distributableArchives.forEach { archive ->
+        val target = Target(Linux, arch(archive.arch))
+        val targetBuild = TargetAndBuildType(target, buildType)
+
+        val packageTasks = configureCommonPackageTasks(
+            tasks, jdkInfo, targetBuild, app, appTmpDir, targetTasks, commonTasks
+        )
+
+        val format = determineArchiveFormat(archive)
+        val targetFormat = DistributableArchive(target.os, format)
+
+        tasks.register<PackageLinuxDistributableArchiveTask>(
+            taskNameAction = "pinpitPackage",
+            taskNameObject = "distributableArchive" + target.name,
+            description = "Builds a distributable archive for ${target.name}.",
+            args = listOf(target, targetFormat),
+        ) {
+            configureCustomPackageTask(
                 this,
-                msi = msi,
+                createAppImage = packageTasks.createDistributable,
+                checkRuntime = packageTasks.checkRuntime,
                 unpackDefaultResources = commonTasks.unpackDefaultResources
+            )
+            configurePlatformSettings(
+                this, unpackDefaultResources = commonTasks.unpackDefaultResources
             )
         }.also { allPackageTasks.add(it) }
     }
@@ -185,9 +246,7 @@ private fun JvmApplicationContext.configurePackagingTasks(
                 unpackDefaultResources = commonTasks.unpackDefaultResources
             )
             configurePlatformSettings(
-                this,
-                deb = deb,
-                unpackDefaultResources = commonTasks.unpackDefaultResources
+                this, deb = deb, unpackDefaultResources = commonTasks.unpackDefaultResources
             )
         }.also { allPackageTasks.add(it) }
     }
@@ -229,6 +288,16 @@ private fun JvmApplicationContext.configurePackagingTasks(
             }.also { targetTasks.suggestDebDependenciesTasks[defaultTargetBuild] = it }
         }
     }
+}
+
+fun determineArchiveFormat(archive: DistributableArchiveSettings): ArchiveFormat {
+    ArchiveFormat.values().forEach { format ->
+        if (archive.format == format.extension) {
+            return format
+        }
+    }
+
+    throw GradleException("Invalid archive format ${archive.format}")
 }
 
 private fun JvmApplicationContext.configureCommonPackageTasks(
@@ -297,16 +366,15 @@ private fun JvmApplicationContext.configureCommonPackageTasks(
         into(jvmTmpDirForTask())
     }.also { targetTasks.prepareAppResources[target] = it }
 
-    val runProguard =
-        targetTasks.proguardTasks[targetBuild] ?: if (buildType.proguard.isEnabled.orNull == true) {
-            tasks.register<AbstractProguardTask>(
-                taskNameAction = "pinpitProguard",
-                taskNameObject = "jars${target.name}",
-                description = "Runs Proguard to minify and obfuscate release jars.",
-            ) {
-                configureProguardTask(this, target, /*targetData,*/ commonTasks.unpackDefaultResources)
-            }.also { targetTasks.proguardTasks[targetBuild] = it }
-        } else null
+    val runProguard = targetTasks.proguardTasks[targetBuild] ?: if (buildType.proguard.isEnabled.orNull == true) {
+        tasks.register<AbstractProguardTask>(
+            taskNameAction = "pinpitProguard",
+            taskNameObject = "jars${target.name}",
+            description = "Runs Proguard to minify and obfuscate release jars.",
+        ) {
+            configureProguardTask(this, target, /*targetData,*/ commonTasks.unpackDefaultResources)
+        }.also { targetTasks.proguardTasks[targetBuild] = it }
+    } else null
 
     val createRuntimeImage = targetTasks.runtimeTasks[targetBuild] ?: tasks.register<AbstractJLinkTask>(
         taskNameAction = "pinpitCreate",
@@ -494,6 +562,37 @@ internal fun JvmApplicationContext.configureCommonNotarizationSettings(
 }
 
 internal fun JvmApplicationContext.configurePlatformSettings(
+    packageTask: PackageLinuxDistributableArchiveTask,
+    unpackDefaultResources: TaskProvider<AbstractUnpackDefaultComposeApplicationResourcesTask>
+) {
+    packageTask.destinationDir.set(
+        app.nativeDistributions.outputBaseDir.map {
+            it.dir("$appDirName/${packageTask.target.os.id}/${packageTask.target.arch.id}/${packageTask.targetFormat.archiveFormat.extension}")
+        }
+    )
+    packageTask.dependsOn(unpackDefaultResources)
+    app.nativeDistributions.linux.also { linux ->
+        packageTask.linuxPackageName.set(provider { linux.packageName })
+        packageTask.packageVersion.set(provider { linux.packageVersion ?: app.nativeDistributions.packageVersion })
+    }
+}
+
+internal fun JvmApplicationContext.configurePlatformSettings(
+    packageTask: PackageWindowsDistributableArchiveTask,
+    unpackDefaultResources: TaskProvider<AbstractUnpackDefaultComposeApplicationResourcesTask>
+) {
+    packageTask.destinationDir.set(
+        app.nativeDistributions.outputBaseDir.map {
+            it.dir("$appDirName/${packageTask.target.os.id}/${packageTask.target.arch.id}/${packageTask.targetFormat.archiveFormat.extension}")
+        }
+    )
+    packageTask.dependsOn(unpackDefaultResources)
+    app.nativeDistributions.windows.also { windows ->
+        packageTask.packageVersion.set(provider { windows.packageVersion ?: app.nativeDistributions.packageVersion })
+    }
+}
+
+internal fun JvmApplicationContext.configurePlatformSettings(
     packageTask: PackageDebTask,
     deb: DebianPlatformSettings,
     unpackDefaultResources: TaskProvider<AbstractUnpackDefaultComposeApplicationResourcesTask>
@@ -582,11 +681,10 @@ internal fun JvmApplicationContext.configurePlatformSettings(
             app.nativeDistributions.macOS.also { mac ->
                 packageTask.macPackageName.set(provider { mac.packageName })
                 packageTask.macDockName.set(
-                    if (mac.setDockNameSameAsPackageName)
-                        provider { mac.dockName }
-                            .orElse(packageTask.macPackageName).orElse(packageTask.packageName)
-                    else
-                        provider { mac.dockName }
+                    if (mac.setDockNameSameAsPackageName) provider { mac.dockName }.orElse(
+                        packageTask.macPackageName
+                    ).orElse(packageTask.packageName)
+                    else provider { mac.dockName }
                 )
                 packageTask.macAppStore.set(mac.appStore)
                 packageTask.macAppCategory.set(mac.appCategory)
@@ -632,10 +730,9 @@ private fun JvmApplicationContext.configureRunTask(
 }
 
 private fun JvmApplicationContext.configurePackageUberJar(jar: Jar, target: Target) {
-    fun flattenJars(files: FileCollection): FileCollection =
-        jar.project.files({
-            files.map { if (it.isZipOrJar()) jar.project.zipTree(it) else it }
-        })
+    fun flattenJars(files: FileCollection): FileCollection = jar.project.files({
+        files.map { if (it.isZipOrJar()) jar.project.zipTree(it) else it }
+    })
 
     jar.useAppRuntimeFiles(target) { (runtimeJars, _) ->
         from(flattenJars(runtimeJars))
@@ -653,6 +750,4 @@ private fun JvmApplicationContext.configurePackageUberJar(jar: Jar, target: Targ
     }
 }
 
-private fun File.isZipOrJar() =
-    name.endsWith(".jar", ignoreCase = true) ||
-        name.endsWith(".zip", ignoreCase = true)
+private fun File.isZipOrJar() = name.endsWith(".jar", ignoreCase = true) || name.endsWith(".zip", ignoreCase = true)

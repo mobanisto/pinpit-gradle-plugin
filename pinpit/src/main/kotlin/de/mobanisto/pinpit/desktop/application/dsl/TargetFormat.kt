@@ -12,9 +12,15 @@ import de.mobanisto.pinpit.desktop.application.internal.OS.Windows
 import de.mobanisto.pinpit.desktop.application.internal.currentOS
 import java.io.Serializable
 
+enum class ArchiveFormat(val extension: String) {
+    TarGz("tar.gz"),
+    Zip("zip");
+}
+
 sealed class TargetFormat(val targetOS: OS) : Serializable {
 
     class AppImage(os: OS) : TargetFormat(os)
+    class DistributableArchive(os: OS, val archiveFormat: ArchiveFormat) : TargetFormat(os)
     class Deb : TargetFormat(Linux)
     class Rpm : TargetFormat(Linux)
     class Dmg : TargetFormat(MacOS)
@@ -29,6 +35,7 @@ sealed class TargetFormat(val targetOS: OS) : Serializable {
     val outputDirName: String
         get() = when (this) {
             is AppImage -> "app"
+            is DistributableArchive -> archiveFormat.extension
             is Deb -> "deb"
             is Rpm -> "rpm"
             is Dmg -> "dmg"
@@ -41,6 +48,7 @@ sealed class TargetFormat(val targetOS: OS) : Serializable {
         get() {
             return when (this) {
                 is AppImage -> throw IllegalStateException("AppImage does not have a file extension")
+                is DistributableArchive -> archiveFormat.extension
                 is Deb -> ".deb"
                 is Rpm -> ".rpm"
                 is Dmg -> ".dmg"
@@ -49,5 +57,4 @@ sealed class TargetFormat(val targetOS: OS) : Serializable {
                 is Msi -> ".msi"
             }
         }
-
 }

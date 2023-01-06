@@ -46,8 +46,7 @@ object TestUtils {
                 ValidateDeb.validateDebContents(fis)
             }
 
-            val dirAppImage =
-                file("${projectDir}build/pinpit/binaries/main-default/linux/x64/appimage/")
+            val dirAppImage = file("${projectDir}build/pinpit/binaries/main-default/linux/x64/appimage/")
             dirAppImage.checkExists()
 
             checkContainsSome(dirAppImage.toPath(), ".so")
@@ -67,8 +66,59 @@ object TestUtils {
                 file("${projectDir}build/pinpit/binaries/main-default/windows/x64/msi/TestPackage-x64-1.0.0.msi")
             resultFile.checkExists()
 
-            val dirAppImage =
-                file("${projectDir}build/pinpit/binaries/main-default/windows/x64/appimage/")
+            val dirAppImage = file("${projectDir}build/pinpit/binaries/main-default/windows/x64/appimage/")
+            dirAppImage.checkExists()
+
+            checkContainsSome(dirAppImage.toPath(), ".dll")
+            checkContainsNone(dirAppImage.toPath(), ".so")
+        }
+    }
+
+    internal fun TestProject.testPackageLinuxDistributableArchive() {
+        val project = projectName()
+        val projectDir = projectDir()
+        gradle("$project:pinpitPackageDefaultDistributableArchiveLinuxX64").build().let { result ->
+            Assertions.assertEquals(
+                TaskOutcome.SUCCESS,
+                result.task("$project:pinpitPackageDefaultDistributableArchiveLinuxX64")?.outcome
+            )
+
+            val resultFile =
+                file("${projectDir}build/pinpit/binaries/main-default/linux/x64/tar.gz/test-package-x64-1.0.0.tar.gz")
+            resultFile.checkExists()
+
+            // TODO: add some in-depth verification similar to deb file verification
+//            resultFile.inputStream().use { fis ->
+//                ValidateDeb.validateDebContents(fis)
+//            }
+
+            val dirAppImage = file("${projectDir}build/pinpit/binaries/main-default/linux/x64/appimage/")
+            dirAppImage.checkExists()
+
+            checkContainsSome(dirAppImage.toPath(), ".so")
+            checkContainsNone(dirAppImage.toPath(), ".dll")
+        }
+    }
+
+    internal fun TestProject.testPackageWindowsDistributableArchive() {
+        val project = projectName()
+        val projectDir = projectDir()
+        gradle("$project:pinpitPackageDefaultDistributableArchiveWindowsX64").build().let { result ->
+            Assertions.assertEquals(
+                TaskOutcome.SUCCESS,
+                result.task("$project:pinpitPackageDefaultDistributableArchiveWindowsX64")?.outcome
+            )
+
+            val resultFile =
+                file("${projectDir}build/pinpit/binaries/main-default/windows/x64/zip/TestPackage-x64-1.0.0.zip")
+            resultFile.checkExists()
+
+            // TODO: add some in-depth verification similar to deb file verification
+//            resultFile.inputStream().use { fis ->
+//                ValidateDeb.validateDebContents(fis)
+//            }
+
+            val dirAppImage = file("${projectDir}build/pinpit/binaries/main-default/windows/x64/appimage/")
             dirAppImage.checkExists()
 
             checkContainsSome(dirAppImage.toPath(), ".dll")

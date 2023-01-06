@@ -95,6 +95,14 @@ abstract class LinuxPlatformSettings : AbstractBasePlatformSettings() {
 //        objects.newInstance(DebEnvironment::class.java, name)
 //    }
 
+    val distributableArchives: MutableList<DistributableArchiveSettings> = arrayListOf()
+    open fun distributableArchive(fn: Action<DistributableArchiveSettings>) {
+        val distributableArchive = objects.newInstance(DistributableArchiveSettings::class.java).also {
+            distributableArchives.add(it)
+        }
+        fn.execute(distributableArchive)
+    }
+
     val debs: MutableList<DebianPlatformSettings> = arrayListOf()
     open fun deb(name: String, fn: Action<DebianPlatformSettings>) {
         val deb = objects.newInstance(DebianPlatformSettings::class.java).also {
@@ -103,6 +111,11 @@ abstract class LinuxPlatformSettings : AbstractBasePlatformSettings() {
         }
         fn.execute(deb)
     }
+}
+
+abstract class DistributableArchiveSettings : AbstractPlatformSettings() {
+    var arch: String? = null
+    var format: String? = null
 }
 
 abstract class DebianPlatformSettings : AbstractPlatformSettings() {
@@ -126,6 +139,14 @@ abstract class WindowsPlatformSettings : AbstractBasePlatformSettings() {
     var upgradeUuid: String? = null
     var msiPackageVersion: String? = null
     var exePackageVersion: String? = null
+
+    val distributableArchives: MutableList<DistributableArchiveSettings> = arrayListOf()
+    open fun distributableArchive(fn: Action<DistributableArchiveSettings>) {
+        val distributableArchive = objects.newInstance(DistributableArchiveSettings::class.java).also {
+            distributableArchives.add(it)
+        }
+        fn.execute(distributableArchive)
+    }
 
     val msis: MutableList<MsiPlatformSettings> = arrayListOf()
     open fun msi(fn: Action<MsiPlatformSettings>) {
