@@ -7,6 +7,7 @@ package de.mobanisto.pinpit.desktop.application.tasks.windows
 
 import de.mobanisto.pinpit.desktop.application.tasks.windows.GenerateFilesWxs.FileEntry
 import org.w3c.dom.Document
+import org.w3c.dom.Element
 import java.nio.file.Files
 import java.nio.file.Path
 import java.util.UUID
@@ -94,6 +95,25 @@ class GenerateProductWxs(
         product.createChild("Directory", "TARGETDIR") {
             setAttribute("Name", "SourceDir")
         }
+        shortcut(product, aumid, iconId)
+        product.createChild("Feature", "MainFeature") {
+            createChild("ComponentGroupRef", "Files")
+            createChild("ComponentRef", "ApplicationShortcut")
+        }
+        product.createChild("Property", "WIXUI_INSTALLDIR") {
+            setAttribute("Value", "INSTALLDIR")
+        }
+        product.createChild("UIRef", "InstallUI")
+
+        product.createChild("Icon", iconId) {
+            setAttribute("SourceFile", icon.toString())
+        }
+        product.createChild("Property", "ARPPRODUCTICON") {
+            setAttribute("Value", iconId)
+        }
+    }
+
+    private fun shortcut(product: Element, aumid: String, iconId: String) {
         product.createChild("DirectoryRef", "TARGETDIR") {
             createChild("Directory", "ProgramMenuFolder") {
                 createChild("Directory", "ApplicationProgramsFolder") {
@@ -129,21 +149,6 @@ class GenerateProductWxs(
                     setAttribute("KeyPath", "yes")
                 }
             }
-        }
-        product.createChild("Feature", "MainFeature") {
-            createChild("ComponentGroupRef", "Files")
-            createChild("ComponentRef", "ApplicationShortcut")
-        }
-        product.createChild("Property", "WIXUI_INSTALLDIR") {
-            setAttribute("Value", "INSTALLDIR")
-        }
-        product.createChild("UIRef", "InstallUI")
-
-        product.createChild("Icon", iconId) {
-            setAttribute("SourceFile", icon.toString())
-        }
-        product.createChild("Property", "ARPPRODUCTICON") {
-            setAttribute("Value", iconId)
         }
     }
 }
