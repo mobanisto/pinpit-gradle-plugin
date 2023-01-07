@@ -98,10 +98,6 @@ abstract class DistributableAppTask @Inject constructor(
     @get:Input
     val mangleJarFilesNames: Property<Boolean> = objects.notNullProperty(true)
 
-    @get:Input
-    @get:Optional
-    val installationPath: Property<String?> = objects.nullableProperty()
-
     @get:InputFile
     @get:Optional
     @get:PathSensitive(PathSensitivity.ABSOLUTE)
@@ -184,30 +180,6 @@ abstract class DistributableAppTask @Inject constructor(
     @get:Input
     @get:Optional
     val winConsole: Property<Boolean?> = objects.nullableProperty()
-
-    @get:Input
-    @get:Optional
-    val winDirChooser: Property<Boolean?> = objects.nullableProperty()
-
-    @get:Input
-    @get:Optional
-    val winPerUserInstall: Property<Boolean?> = objects.nullableProperty()
-
-    @get:Input
-    @get:Optional
-    val winShortcut: Property<Boolean?> = objects.nullableProperty()
-
-    @get:Input
-    @get:Optional
-    val winMenu: Property<Boolean?> = objects.nullableProperty()
-
-    @get:Input
-    @get:Optional
-    val winMenuGroup: Property<String?> = objects.nullableProperty()
-
-    @get:Input
-    @get:Optional
-    val winUpgradeUuid: Property<String?> = objects.nullableProperty()
 
     @get:InputDirectory
     @get:Optional

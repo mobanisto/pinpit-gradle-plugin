@@ -29,6 +29,8 @@ class GenerateProductWxs(
     private val bitmapBanner: Path?,
     private val bitmapDialog: Path?,
     private val icon: Path,
+    private val shortcut: Boolean,
+    private val menuFolder: String?,
 ) {
 
     fun execute() {
@@ -95,10 +97,14 @@ class GenerateProductWxs(
         product.createChild("Directory", "TARGETDIR") {
             setAttribute("Name", "SourceDir")
         }
-        shortcut(product, aumid, iconId)
+        if (shortcut) {
+            shortcut(product, aumid, iconId)
+        }
         product.createChild("Feature", "MainFeature") {
             createChild("ComponentGroupRef", "Files")
-            createChild("ComponentRef", "ApplicationShortcut")
+            if (shortcut) {
+                createChild("ComponentRef", "ApplicationShortcut")
+            }
         }
         product.createChild("Property", "WIXUI_INSTALLDIR") {
             setAttribute("Value", "INSTALLDIR")
@@ -114,14 +120,26 @@ class GenerateProductWxs(
     }
 
     private fun shortcut(product: Element, aumid: String, iconId: String) {
+        val withMenuFolder = menuFolder != null
+
         product.createChild("DirectoryRef", "TARGETDIR") {
             createChild("Directory", "ProgramMenuFolder") {
-                createChild("Directory", "ApplicationProgramsFolder") {
-                    setAttribute("Name", vendor)
+                if (withMenuFolder) {
+                    createChild("Directory", "ApplicationProgramsFolder") {
+                        setAttribute("Name", menuFolder)
+                    }
                 }
             }
         }
-        product.createChild("DirectoryRef", "ApplicationProgramsFolder") {
+        if (withMenuFolder) {
+            shortcut(product, "ApplicationProgramsFolder", true, aumid, iconId)
+        } else {
+            shortcut(product, "ProgramMenuFolder", false, aumid, iconId)
+        }
+    }
+
+    private fun shortcut(product: Element, folderId: String, withMenuFolder: Boolean, aumid: String, iconId: String) {
+        product.createChild("DirectoryRef", folderId) {
             createChild("Component", "ApplicationShortcut") {
                 val uuid = UUID.randomUUID()
                 setAttribute("Guid", "{$uuid}")
@@ -136,9 +154,11 @@ class GenerateProductWxs(
                         setAttribute("Value", aumid)
                     }
                 }
-                createChild("RemoveFolder", "CleanupShortcut") {
-                    setAttribute("Directory", "ApplicationProgramsFolder")
-                    setAttribute("On", "uninstall")
+                if (withMenuFolder) {
+                    createChild("RemoveFolder", "CleanupShortcut") {
+                        setAttribute("Directory", "ApplicationProgramsFolder")
+                        setAttribute("On", "uninstall")
+                    }
                 }
                 createChild("RegistryValue") {
                     setAttribute("Root", "HKCU")

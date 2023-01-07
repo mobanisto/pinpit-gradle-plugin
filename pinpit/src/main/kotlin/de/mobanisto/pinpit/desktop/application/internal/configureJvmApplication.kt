@@ -671,7 +671,6 @@ internal fun JvmApplicationContext.configurePlatformSettings(
         packageTask.winDirChooser.set(provider { win.dirChooser })
         packageTask.winPerUserInstall.set(provider { win.perUserInstall })
         packageTask.winShortcut.set(provider { win.shortcut })
-        packageTask.winMenu.set(provider { win.menu })
         packageTask.winMenuGroup.set(provider { win.menuGroup })
         packageTask.winUpgradeUuid.set(provider { win.upgradeUuid })
         packageTask.aumid.set(provider { win.aumid })
@@ -692,21 +691,13 @@ internal fun JvmApplicationContext.configurePlatformSettings(
         Linux -> {
             app.nativeDistributions.linux.also { linux ->
                 packageTask.iconFile.set(linux.iconFile.orElse(unpackDefaultResources.flatMap { it.resources.linuxIcon }))
-                packageTask.installationPath.set(linux.installationPath)
             }
         }
 
         Windows -> {
             app.nativeDistributions.windows.also { win ->
                 packageTask.winConsole.set(provider { win.console })
-                packageTask.winDirChooser.set(provider { win.dirChooser })
-                packageTask.winPerUserInstall.set(provider { win.perUserInstall })
-                packageTask.winShortcut.set(provider { win.shortcut })
-                packageTask.winMenu.set(provider { win.menu })
-                packageTask.winMenuGroup.set(provider { win.menuGroup })
-                packageTask.winUpgradeUuid.set(provider { win.upgradeUuid })
                 packageTask.iconFile.set(win.iconFile.orElse(unpackDefaultResources.flatMap { it.resources.windowsIcon }))
-                packageTask.installationPath.set(win.installationPath)
             }
         }
 
@@ -730,7 +721,6 @@ internal fun JvmApplicationContext.configurePlatformSettings(
                 packageTask.macExtraPlistKeysRawXml.set(provider { mac.infoPlistSettings.extraKeysRawXml })
                 packageTask.nonValidatedMacSigningSettings = app.nativeDistributions.macOS.signing
                 packageTask.iconFile.set(mac.iconFile.orElse(unpackDefaultResources.flatMap { it.resources.macIcon }))
-                packageTask.installationPath.set(mac.installationPath)
             }
         }
     }

@@ -14,13 +14,13 @@ import de.mobanisto.pinpit.desktop.application.internal.currentOS
 import de.mobanisto.pinpit.desktop.application.internal.files.asPath
 import de.mobanisto.pinpit.desktop.application.internal.files.findOutputFileOrDir
 import de.mobanisto.pinpit.desktop.application.internal.ioFile
+import de.mobanisto.pinpit.desktop.application.internal.notNullProperty
 import de.mobanisto.pinpit.desktop.application.internal.nullableProperty
 import de.mobanisto.pinpit.desktop.application.internal.provider
 import de.mobanisto.pinpit.desktop.application.tasks.CustomPackageTask
 import org.gradle.api.file.Directory
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.file.RegularFileProperty
-import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.Input
@@ -64,14 +64,6 @@ abstract class PackageMsiTask @Inject constructor(
 
     @get:Input
     @get:Optional
-    val launcherArgs: ListProperty<String> = objects.listProperty(String::class.java)
-
-    @get:Input
-    @get:Optional
-    val launcherJvmArgs: ListProperty<String> = objects.listProperty(String::class.java)
-
-    @get:Input
-    @get:Optional
     val winPackageVersion: Property<String?> = objects.nullableProperty()
 
     @get:Input
@@ -87,12 +79,7 @@ abstract class PackageMsiTask @Inject constructor(
     val winPerUserInstall: Property<Boolean?> = objects.nullableProperty()
 
     @get:Input
-    @get:Optional
-    val winShortcut: Property<Boolean?> = objects.nullableProperty()
-
-    @get:Input
-    @get:Optional
-    val winMenu: Property<Boolean?> = objects.nullableProperty()
+    val winShortcut: Property<Boolean> = objects.notNullProperty()
 
     @get:Input
     @get:Optional
@@ -105,10 +92,6 @@ abstract class PackageMsiTask @Inject constructor(
     @get:Input
     @get:Optional
     val aumid: Property<String?> = objects.nullableProperty()
-
-    @get:InputDirectory
-    @get:Optional
-    val runtimeImage: DirectoryProperty = objects.directoryProperty()
 
     @get:InputFile
     @get:Optional
@@ -166,6 +149,8 @@ abstract class PackageMsiTask @Inject constructor(
         val bitmapBanner = this.bitmapBanner.orNull
         val bitmapDialog = this.bitmapDialog.orNull
         val icon = iconFile.get()
+        val shortcut = winShortcut.get()
+        val menuGroup = winMenuGroup.orNull
 
         val destination = destinationDir.get()
         logger.lifecycle("destination: $destination")
@@ -190,6 +175,8 @@ abstract class PackageMsiTask @Inject constructor(
             bitmapBanner?.asPath(),
             bitmapDialog?.asPath(),
             icon.asPath(),
+            shortcut,
+            menuGroup,
         ).execute()
 
         val outputInstallDir = destinationWix.resolve("InstallDir.wxs")

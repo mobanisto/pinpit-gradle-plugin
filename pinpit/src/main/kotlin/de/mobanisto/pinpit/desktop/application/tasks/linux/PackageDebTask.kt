@@ -51,14 +51,6 @@ abstract class PackageDebTask @Inject constructor(
 
     @get:Input
     @get:Optional
-    val launcherArgs: ListProperty<String> = objects.listProperty(String::class.java)
-
-    @get:Input
-    @get:Optional
-    val launcherJvmArgs: ListProperty<String> = objects.listProperty(String::class.java)
-
-    @get:Input
-    @get:Optional
     val linuxShortcut: Property<Boolean?> = objects.nullableProperty()
 
     @get:Input
@@ -84,10 +76,6 @@ abstract class PackageDebTask @Inject constructor(
     @get:Input
     @get:Optional
     val linuxMenuGroup: Property<String?> = objects.nullableProperty()
-
-    @get:InputDirectory
-    @get:Optional
-    val runtimeImage: DirectoryProperty = objects.directoryProperty()
 
     @get:InputFile
     @get:Optional

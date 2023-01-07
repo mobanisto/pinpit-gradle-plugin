@@ -133,8 +133,6 @@ abstract class WindowsPlatformSettings : AbstractBasePlatformSettings() {
     var dirChooser: Boolean = true
     var perUserInstall: Boolean = false
     var shortcut: Boolean = false
-    var menu: Boolean = false
-        get() = field || menuGroup != null
     var menuGroup: String? = null
     var upgradeUuid: String? = null
     var aumid: String? = null
