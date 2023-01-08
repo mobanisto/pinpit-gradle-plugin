@@ -532,7 +532,7 @@ abstract class DistributableAppTask @Inject constructor(
             return listOf("\$APPDIR", *pathParts).joinToString(separator) { it }
         }
 
-        Files.newBufferedWriter(fileConfig, CREATE, WRITE, TRUNCATE_EXISTING).use { it ->
+        Files.newBufferedWriter(fileConfig, CREATE, WRITE, TRUNCATE_EXISTING).use {
             it.apply {
                 writeLn("[Application]")
                 // We intentionally write the main jar before the 'app.mainclass' property and the others afterwards,

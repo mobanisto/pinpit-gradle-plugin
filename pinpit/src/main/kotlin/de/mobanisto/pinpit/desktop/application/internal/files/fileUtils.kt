@@ -225,7 +225,7 @@ internal fun findRelative(source: Path, takeFile: (file: Path) -> Boolean = { _ 
 
 // TODO: remove once upgraded to kotlin 1.7.X
 @OptIn(ExperimentalContracts::class)
-public fun Path.visitFileTree(
+fun Path.visitFileTree(
     maxDepth: Int = Int.MAX_VALUE,
     followLinks: Boolean = false,
     builderAction: FileVisitorBuilder.() -> Unit
@@ -246,7 +246,7 @@ internal fun Path.visitFileTree(
 
 // TODO: remove once upgraded to kotlin 1.7.X
 @OptIn(ExperimentalContracts::class)
-public fun fileVisitor(builderAction: FileVisitorBuilder.() -> Unit): FileVisitor<Path> {
+fun fileVisitor(builderAction: FileVisitorBuilder.() -> Unit): FileVisitor<Path> {
     contract { callsInPlace(builderAction, InvocationKind.EXACTLY_ONCE) }
     return FileVisitorBuilderImpl().apply(builderAction).build()
 }

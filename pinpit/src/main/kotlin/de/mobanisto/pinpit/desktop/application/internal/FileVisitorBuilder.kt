@@ -14,7 +14,7 @@ import java.nio.file.attribute.BasicFileAttributes
 
 // TODO: remove once upgraded to kotlin 1.7.X
 /**
- * The builder to provide implementation of the file visitor that [fileVisitor] builds.
+ * The builder to provide implementation of the file visitor that [FileVisitor] builds.
  */
 sealed interface FileVisitorBuilder {
     /**
@@ -22,14 +22,14 @@ sealed interface FileVisitorBuilder {
      *
      * By default, [FileVisitor.preVisitDirectory] of the built file visitor returns [FileVisitResult.CONTINUE].
      */
-    public fun onPreVisitDirectory(function: (directory: Path, attributes: BasicFileAttributes) -> FileVisitResult): Unit
+    fun onPreVisitDirectory(function: (directory: Path, attributes: BasicFileAttributes) -> FileVisitResult)
 
     /**
      * Overrides the corresponding function of the built file visitor with the provided [function].
      *
      * By default, [FileVisitor.visitFile] of the built file visitor returns [FileVisitResult.CONTINUE].
      */
-    public fun onVisitFile(function: (file: Path, attributes: BasicFileAttributes) -> FileVisitResult): Unit
+    fun onVisitFile(function: (file: Path, attributes: BasicFileAttributes) -> FileVisitResult)
 
     /**
      * Overrides the corresponding function of the built file visitor with the provided [function].
@@ -37,7 +37,7 @@ sealed interface FileVisitorBuilder {
      * By default, [FileVisitor.visitFileFailed] of the built file visitor re-throws the I/O exception
      * that prevented the file from being visited.
      */
-    public fun onVisitFileFailed(function: (file: Path, exception: IOException) -> FileVisitResult): Unit
+    fun onVisitFileFailed(function: (file: Path, exception: IOException) -> FileVisitResult)
 
     /**
      * Overrides the corresponding function of the built file visitor with the provided [function].
@@ -46,7 +46,7 @@ sealed interface FileVisitorBuilder {
      * [FileVisitor.postVisitDirectory] of the built file visitor returns [FileVisitResult.CONTINUE];
      * otherwise it re-throws the I/O exception that caused the iteration of the directory to terminate prematurely.
      */
-    public fun onPostVisitDirectory(function: (directory: Path, exception: IOException?) -> FileVisitResult): Unit
+    fun onPostVisitDirectory(function: (directory: Path, exception: IOException?) -> FileVisitResult)
 }
 
 internal class FileVisitorBuilderImpl : FileVisitorBuilder {
