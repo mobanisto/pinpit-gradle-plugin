@@ -349,3 +349,10 @@ PINPIT_GRADLE_PLUGIN_VERSION=0.X.0-SNAPSHOT ./gradlew publishToMavenLocal
 
 See `PinpitProperties.kt` for flags and switches that can be passed
 to the plugin via Gradle project properties (`-P` flags).
+
+For example, you can preserve temporary build directories by passing
+`pinpit.preserve.working.dir=true` like this:
+
+```
+./gradlew -Ppinpit.preserve.working.dir=true pinpitPackageDefault
+```
