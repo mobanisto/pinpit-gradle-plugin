@@ -35,6 +35,7 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.nio.file.Files
 import java.nio.file.Path
+import java.nio.file.StandardCopyOption
 import javax.inject.Inject
 
 abstract class PackageMsiTask @Inject constructor(
@@ -130,11 +131,19 @@ abstract class PackageMsiTask @Inject constructor(
             put("PATH", "$wixPath;$path")
         }
         println("Using environment: $environment")
+
+        val destination = destinationDir.get()
+        logger.lifecycle("destination: $destination")
+        destination.asFile.mkdirs()
+
         val distributableApp = distributableApp.get().dir(packageName).get()
         println("distributable app: $distributableApp")
         for (file in distributableApp.asFileTree.files) {
             logger.debug("  $file")
         }
+
+        logger.lifecycle("working dir: ${workingDir.get()}")
+        fileOperations.delete(workingDir)
 
         val upgradeCode = upgradeUuid.get()
         val vendor = packageVendor.get()
@@ -149,11 +158,7 @@ abstract class PackageMsiTask @Inject constructor(
         val menuGroup = menuGroup.orNull
         val perUserInstall = perUserInstall.get()
 
-        val destination = destinationDir.get()
-        logger.lifecycle("destination: $destination")
-        destination.asFile.mkdirs()
-
-        val destinationWix = destination.asPath().resolve("wix")
+        val destinationWix = workingDir.asPath().resolve("wix")
         Files.createDirectories(destinationWix)
 
         val outputFiles = destinationWix.resolve("Files.wxs")
@@ -190,9 +195,13 @@ abstract class PackageMsiTask @Inject constructor(
         val wxsFilesWine = wxsFiles.map { winePaths(it) }
         val wixobjFilesWine = wixobjFiles.map { winePaths(it) }
 
-        val msi = destination.asPath().resolve("${packageName.get()}-${target.arch.id}-${packageVersion.get()}.msi")
-        val msiWine = winePaths(msi)
+        val msiName = "${packageName.get()}-${target.arch.id}-${packageVersion.get()}.msi"
+        // Don't build directly to [msiFinal] because this will put a *.wixpdb next to the msi file.
+        // Instead, build in the temporary directory and move to the final destination later.
+        val msiTmp = workingDir.asPath().resolve(msiName)
+        val msiFinal = destination.asPath().resolve(msiName)
 
+        val msiWine = winePaths(msiTmp)
         val wixWine = winePaths(destinationWix)
 
         val candle = wixToolsetDir.file("candle.exe").get()
@@ -215,6 +224,8 @@ abstract class PackageMsiTask @Inject constructor(
                 addAll(listOf("-out", msiWine))
             }
         )
+
+        Files.move(msiTmp, msiFinal, StandardCopyOption.REPLACE_EXISTING)
     }
 
     private fun winePaths(path: Path): String {
