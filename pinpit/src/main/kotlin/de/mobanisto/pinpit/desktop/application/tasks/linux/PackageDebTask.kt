@@ -11,6 +11,7 @@ import de.mobanisto.pinpit.desktop.application.internal.Target
 import de.mobanisto.pinpit.desktop.application.internal.files.asPath
 import de.mobanisto.pinpit.desktop.application.internal.files.findOutputFileOrDir
 import de.mobanisto.pinpit.desktop.application.internal.ioFile
+import de.mobanisto.pinpit.desktop.application.internal.notNullProperty
 import de.mobanisto.pinpit.desktop.application.internal.nullableProperty
 import de.mobanisto.pinpit.desktop.application.internal.provider
 import de.mobanisto.pinpit.desktop.application.tasks.CustomPackageTask
@@ -55,7 +56,7 @@ abstract class PackageDebTask @Inject constructor(
 
     @get:Input
     @get:Optional
-    val linuxPackageName: Property<String?> = objects.nullableProperty()
+    val linuxPackageName: Property<String> = objects.notNullProperty()
 
     @get:Input
     @get:Optional
@@ -63,15 +64,15 @@ abstract class PackageDebTask @Inject constructor(
 
     @get:Input
     @get:Optional
-    val appCategory: Property<String?> = objects.nullableProperty()
+    val appCategory: Property<String> = objects.notNullProperty()
 
     @get:Input
     @get:Optional
-    val debPackageVersion: Property<String?> = objects.nullableProperty()
+    val debPackageVersion: Property<String> = objects.notNullProperty()
 
     @get:Input
     @get:Optional
-    val debMaintainer: Property<String?> = objects.nullableProperty()
+    val debMaintainer: Property<String> = objects.notNullProperty()
 
     @get:Input
     @get:Optional
@@ -152,11 +153,11 @@ abstract class PackageDebTask @Inject constructor(
             deb.asPath(),
             workingDir.asPath(),
             packageName.get(),
-            linuxPackageName.get()!!,
-            debPackageVersion.get()!!,
-            appCategory.get()!!,
-            packageVendor.get()!!,
-            debMaintainer.get()!!,
+            linuxPackageName.get(),
+            debPackageVersion.get(),
+            appCategory.get(),
+            packageVendor.get(),
+            debMaintainer.get(),
             packageDescription.get(),
             depends.get(),
             debCopyright.orNull?.asPath(),

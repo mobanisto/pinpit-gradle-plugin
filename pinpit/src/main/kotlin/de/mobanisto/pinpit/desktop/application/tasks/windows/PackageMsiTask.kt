@@ -60,7 +60,7 @@ abstract class PackageMsiTask @Inject constructor(
 
     @get:Input
     @get:Optional
-    val packageVersion: Property<String?> = objects.nullableProperty()
+    val packageVersion: Property<String> = objects.notNullProperty()
 
     @get:Input
     @get:Optional
@@ -83,7 +83,7 @@ abstract class PackageMsiTask @Inject constructor(
 
     @get:Input
     @get:Optional
-    val upgradeUuid: Property<String?> = objects.nullableProperty()
+    val upgradeUuid: Property<String> = objects.notNullProperty()
 
     @get:Input
     @get:Optional
@@ -161,10 +161,10 @@ abstract class PackageMsiTask @Inject constructor(
         val mainExecutable = executables[0]
         GenerateProductWxs(
             outputProduct,
-            upgradeCode!!,
-            vendor!!,
+            upgradeCode,
+            vendor,
             productName,
-            version!!,
+            version,
             aumid,
             description,
             mainExecutable,

@@ -81,7 +81,7 @@ abstract class CustomPackageTask @Inject constructor(
 
     @get:Input
     @get:Optional
-    val packageVendor: Property<String?> = objects.nullableProperty()
+    val packageVendor: Property<String> = objects.notNullProperty()
 
     @get:InputDirectory
     val distributableApp: DirectoryProperty = objects.directoryProperty()
