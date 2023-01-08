@@ -60,30 +60,30 @@ abstract class PackageMsiTask @Inject constructor(
 
     @get:Input
     @get:Optional
-    val winPackageVersion: Property<String?> = objects.nullableProperty()
+    val packageVersion: Property<String?> = objects.nullableProperty()
 
     @get:Input
     @get:Optional
-    val winConsole: Property<Boolean?> = objects.nullableProperty()
+    val console: Property<Boolean?> = objects.nullableProperty()
 
     @get:Input
     @get:Optional
-    val winDirChooser: Property<Boolean?> = objects.nullableProperty()
+    val dirChooser: Property<Boolean?> = objects.nullableProperty()
 
     @get:Input
     @get:Optional
-    val winPerUserInstall: Property<Boolean?> = objects.nullableProperty()
+    val perUserInstall: Property<Boolean?> = objects.nullableProperty()
 
     @get:Input
-    val winShortcut: Property<Boolean> = objects.notNullProperty()
-
-    @get:Input
-    @get:Optional
-    val winMenuGroup: Property<String?> = objects.nullableProperty()
+    val shortcut: Property<Boolean> = objects.notNullProperty()
 
     @get:Input
     @get:Optional
-    val winUpgradeUuid: Property<String?> = objects.nullableProperty()
+    val menuGroup: Property<String?> = objects.nullableProperty()
+
+    @get:Input
+    @get:Optional
+    val upgradeUuid: Property<String?> = objects.nullableProperty()
 
     @get:Input
     @get:Optional
@@ -136,17 +136,17 @@ abstract class PackageMsiTask @Inject constructor(
             logger.debug("  $file")
         }
 
-        val upgradeCode = winUpgradeUuid.get()
+        val upgradeCode = upgradeUuid.get()
         val vendor = packageVendor.get()
         val productName = packageName.get()
-        val version = winPackageVersion.get()
+        val version = packageVersion.get()
         val aumid = aumid.orNull
         val description = packageDescription.get()
         val bitmapBanner = this.bitmapBanner.orNull
         val bitmapDialog = this.bitmapDialog.orNull
         val icon = iconFile.get()
-        val shortcut = winShortcut.get()
-        val menuGroup = winMenuGroup.orNull
+        val shortcut = shortcut.get()
+        val menuGroup = menuGroup.orNull
 
         val destination = destinationDir.get()
         logger.lifecycle("destination: $destination")
@@ -188,7 +188,7 @@ abstract class PackageMsiTask @Inject constructor(
         val wxsFilesWine = wxsFiles.map { winePaths(it) }
         val wixobjFilesWine = wixobjFiles.map { winePaths(it) }
 
-        val msi = destination.asPath().resolve("${packageName.get()}-${target.arch.id}-${winPackageVersion.get()}.msi")
+        val msi = destination.asPath().resolve("${packageName.get()}-${target.arch.id}-${packageVersion.get()}.msi")
         val msiWine = winePaths(msi)
 
         val wixWine = winePaths(destinationWix)

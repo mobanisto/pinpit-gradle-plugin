@@ -51,7 +51,7 @@ abstract class PackageDebTask @Inject constructor(
 
     @get:Input
     @get:Optional
-    val linuxShortcut: Property<Boolean?> = objects.nullableProperty()
+    val shortcut: Property<Boolean?> = objects.nullableProperty()
 
     @get:Input
     @get:Optional
@@ -59,53 +59,53 @@ abstract class PackageDebTask @Inject constructor(
 
     @get:Input
     @get:Optional
-    val linuxAppRelease: Property<String?> = objects.nullableProperty()
+    val appRelease: Property<String?> = objects.nullableProperty()
 
     @get:Input
     @get:Optional
-    val linuxAppCategory: Property<String?> = objects.nullableProperty()
+    val appCategory: Property<String?> = objects.nullableProperty()
 
     @get:Input
     @get:Optional
-    val linuxDebPackageVersion: Property<String?> = objects.nullableProperty()
+    val debPackageVersion: Property<String?> = objects.nullableProperty()
 
     @get:Input
     @get:Optional
-    val linuxDebMaintainer: Property<String?> = objects.nullableProperty()
+    val debMaintainer: Property<String?> = objects.nullableProperty()
 
     @get:Input
     @get:Optional
-    val linuxMenuGroup: Property<String?> = objects.nullableProperty()
+    val menuGroup: Property<String?> = objects.nullableProperty()
 
     @get:InputFile
     @get:Optional
     @get:PathSensitive(PathSensitivity.ABSOLUTE)
-    val linuxDebPreInst: RegularFileProperty = objects.fileProperty()
+    val debPreInst: RegularFileProperty = objects.fileProperty()
 
     @get:InputFile
     @get:Optional
     @get:PathSensitive(PathSensitivity.ABSOLUTE)
-    val linuxDebPostInst: RegularFileProperty = objects.fileProperty()
+    val debPostInst: RegularFileProperty = objects.fileProperty()
 
     @get:InputFile
     @get:Optional
     @get:PathSensitive(PathSensitivity.ABSOLUTE)
-    val linuxDebPreRm: RegularFileProperty = objects.fileProperty()
+    val debPreRm: RegularFileProperty = objects.fileProperty()
 
     @get:InputFile
     @get:Optional
     @get:PathSensitive(PathSensitivity.ABSOLUTE)
-    val linuxDebPostRm: RegularFileProperty = objects.fileProperty()
+    val debPostRm: RegularFileProperty = objects.fileProperty()
 
     @get:InputFile
     @get:Optional
     @get:PathSensitive(PathSensitivity.ABSOLUTE)
-    val linuxDebCopyright: RegularFileProperty = objects.fileProperty()
+    val debCopyright: RegularFileProperty = objects.fileProperty()
 
     @get:InputFile
     @get:Optional
     @get:PathSensitive(PathSensitivity.ABSOLUTE)
-    val linuxDebLauncher: RegularFileProperty = objects.fileProperty()
+    val debLauncher: RegularFileProperty = objects.fileProperty()
 
     @get:Input
     @get:Optional
@@ -145,7 +145,7 @@ abstract class PackageDebTask @Inject constructor(
         fileOperations.delete(workingDir)
 
         val deb =
-            destination.file("${linuxPackageName.get()}-$qualifier-${target.arch.id}-${linuxDebPackageVersion.get()}.deb")
+            destination.file("${linuxPackageName.get()}-$qualifier-${target.arch.id}-${debPackageVersion.get()}.deb")
 
         val packager = JvmDebPackager(
             distributableApp.asPath(),
@@ -153,18 +153,18 @@ abstract class PackageDebTask @Inject constructor(
             workingDir.asPath(),
             packageName.get(),
             linuxPackageName.get()!!,
-            linuxDebPackageVersion.get()!!,
-            linuxAppCategory.get()!!,
+            debPackageVersion.get()!!,
+            appCategory.get()!!,
             packageVendor.get()!!,
-            linuxDebMaintainer.get()!!,
+            debMaintainer.get()!!,
             packageDescription.get(),
             depends.get(),
-            linuxDebCopyright.orNull?.asPath(),
-            linuxDebLauncher.orNull?.asPath(),
-            linuxDebPreInst.orNull?.asPath(),
-            linuxDebPostInst.orNull?.asPath(),
-            linuxDebPreRm.orNull?.asPath(),
-            linuxDebPostRm.orNull?.asPath(),
+            debCopyright.orNull?.asPath(),
+            debLauncher.orNull?.asPath(),
+            debPreInst.orNull?.asPath(),
+            debPostInst.orNull?.asPath(),
+            debPreRm.orNull?.asPath(),
+            debPostRm.orNull?.asPath(),
         )
         packager.createPackage()
     }
