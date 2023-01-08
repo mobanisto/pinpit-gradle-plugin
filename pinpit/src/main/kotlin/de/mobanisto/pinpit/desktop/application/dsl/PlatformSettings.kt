@@ -18,7 +18,6 @@ abstract class AbstractPlatformSettings {
 abstract class AbstractBasePlatformSettings : AbstractPlatformSettings() {
     val iconFile: RegularFileProperty = objects.fileProperty()
     var packageVersion: String? = null
-    var installationPath: String? = null
 }
 
 abstract class AbstractMacOSPlatformSettings : AbstractBasePlatformSettings() {
@@ -74,6 +73,7 @@ open class InfoPlistSettings {
 }
 
 abstract class LinuxPlatformSettings : AbstractBasePlatformSettings() {
+    var installationPath: String? = null
     var shortcut: Boolean = false
     var packageName: String? = null
     var appRelease: String? = null

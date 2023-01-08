@@ -48,10 +48,6 @@ abstract class PackageMsiTask @Inject constructor(
     /** @see internal/wixToolset.kt */
     override val wixToolsetDir: DirectoryProperty = objects.directoryProperty()
 
-    @get:Input
-    @get:Optional
-    val installationPath: Property<String?> = objects.nullableProperty()
-
     @get:InputFile
     @get:Optional
     @get:PathSensitive(PathSensitivity.ABSOLUTE)

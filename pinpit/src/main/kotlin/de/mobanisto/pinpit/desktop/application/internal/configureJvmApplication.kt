@@ -676,7 +676,6 @@ internal fun JvmApplicationContext.configurePlatformSettings(
         packageTask.aumid.set(provider { win.aumid })
         packageTask.winPackageVersion.set(provider { win.packageVersion })
         packageTask.iconFile.set(win.iconFile.orElse(unpackDefaultResources.flatMap { it.resources.windowsIcon }))
-        packageTask.installationPath.set(win.installationPath)
         packageTask.bitmapBanner.set(msi.bitmapBanner)
         packageTask.bitmapDialog.set(msi.bitmapDialog)
     }
