@@ -31,6 +31,7 @@ class GenerateProductWxs(
     private val icon: Path,
     private val shortcut: Boolean,
     private val menuFolder: String?,
+    private val perUserInstall: Boolean,
 ) {
 
     fun execute() {
@@ -72,7 +73,7 @@ class GenerateProductWxs(
             setAttribute("Manufacturer", vendor)
             setAttribute("InstallerVersion", "200")
             setAttribute("Compressed", "yes")
-            setAttribute("InstallScope", "perMachine") // alternative: "perUser"
+            setAttribute("InstallScope", if (perUserInstall) "perUser" else "perMachine")
             // setAttribute("Platform", "x64") // Use of this switch is discouraged in favor of the -arch switch
         }
         product.createChild("MajorUpgrade") {

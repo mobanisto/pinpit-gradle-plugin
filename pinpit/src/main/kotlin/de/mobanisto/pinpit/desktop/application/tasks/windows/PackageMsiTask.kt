@@ -72,7 +72,7 @@ abstract class PackageMsiTask @Inject constructor(
 
     @get:Input
     @get:Optional
-    val perUserInstall: Property<Boolean?> = objects.nullableProperty()
+    val perUserInstall: Property<Boolean> = objects.notNullProperty()
 
     @get:Input
     val shortcut: Property<Boolean> = objects.notNullProperty()
@@ -147,6 +147,7 @@ abstract class PackageMsiTask @Inject constructor(
         val icon = iconFile.get()
         val shortcut = shortcut.get()
         val menuGroup = menuGroup.orNull
+        val perUserInstall = perUserInstall.get()
 
         val destination = destinationDir.get()
         logger.lifecycle("destination: $destination")
@@ -173,6 +174,7 @@ abstract class PackageMsiTask @Inject constructor(
             icon.asPath(),
             shortcut,
             menuGroup,
+            perUserInstall,
         ).execute()
 
         val outputInstallDir = destinationWix.resolve("InstallDir.wxs")
