@@ -488,14 +488,14 @@ private fun JvmApplicationContext.configureCustomPackageTask(
     unpackDefaultResources: TaskProvider<AbstractUnpackDefaultComposeApplicationResourcesTask>,
     runProguard: Provider<AbstractProguardTask>? = null
 ) {
-    createDistributableApp.let { createDistributableApp ->
-        packageTask.dependsOn(createDistributableApp)
-        packageTask.distributableApp.set(createDistributableApp.flatMap { it.destinationDir })
+    createDistributableApp.let { task ->
+        packageTask.dependsOn(task)
+        packageTask.distributableApp.set(task.flatMap { it.destinationDir })
     }
 
-    checkRuntime.let { checkRuntime ->
-        packageTask.dependsOn(checkRuntime)
-        packageTask.javaRuntimePropertiesFile.set(checkRuntime.flatMap { it.javaRuntimePropertiesFile })
+    checkRuntime.let { task ->
+        packageTask.dependsOn(task)
+        packageTask.javaRuntimePropertiesFile.set(task.flatMap { it.javaRuntimePropertiesFile })
     }
 
     packageTask.dependsOn(unpackDefaultResources)
@@ -534,9 +534,9 @@ private fun JvmApplicationContext.configureDistributableAppTask(
 ) {
     packageTask.enabled = true
 
-    createRuntimeImage?.let { createRuntimeImage ->
-        packageTask.dependsOn(createRuntimeImage)
-        packageTask.runtimeImage.set(createRuntimeImage.flatMap { it.destinationDir })
+    createRuntimeImage?.let { task ->
+        packageTask.dependsOn(task)
+        packageTask.runtimeImage.set(task.flatMap { it.destinationDir })
     }
 
     prepareAppResources?.let { prepareResources ->
@@ -545,11 +545,11 @@ private fun JvmApplicationContext.configureDistributableAppTask(
         packageTask.appResourcesDir.set(resourcesDir)
     }
 
-    checkRuntime?.let { checkRuntime ->
-        packageTask.dependsOn(checkRuntime)
-        packageTask.javaRuntimePropertiesFile.set(checkRuntime.flatMap { it.javaRuntimePropertiesFile })
-        packageTask.jdkDir.set(checkRuntime.flatMap { it.jdk })
-        packageTask.jdkVersion.set(checkRuntime.flatMap { it.targetJdkVersion })
+    checkRuntime?.let { task ->
+        packageTask.dependsOn(task)
+        packageTask.javaRuntimePropertiesFile.set(task.flatMap { it.javaRuntimePropertiesFile })
+        packageTask.jdkDir.set(task.flatMap { it.jdk })
+        packageTask.jdkVersion.set(task.flatMap { it.targetJdkVersion })
     }
 
     configurePlatformSettings(packageTask, unpackDefaultResources)
