@@ -149,6 +149,28 @@ class DesktopApplicationTest : GradlePluginTestBase() {
     }
 
     @Test
+    fun packageDefault() = with(testProject(TestProjects.jvm)) {
+        val packagingTask = ":pinpitPackageDefault"
+        gradle(packagingTask).build().checks { check ->
+            check.taskOutcome(packagingTask, TaskOutcome.SUCCESS)
+
+            val dirBuild = file("build").toPath()
+            val dirDeb = dirBuild.resolve("pinpit/binaries/main-default/linux/x64/deb")
+            val dirMsi = dirBuild.resolve("pinpit/binaries/main-default/windows/x64/msi")
+
+            val debUbuntu18 = dirDeb.resolve("test-package-ubuntu-18.04-x64-1.0.0.deb")
+            val debUbuntu20 = dirDeb.resolve("test-package-ubuntu-20.04-x64-1.0.0.deb")
+            val debDebianBullseye = dirDeb.resolve("test-package-debian-bullseye-x64-1.0.0.deb")
+            debUbuntu18.toFile().checkExists()
+            debUbuntu20.toFile().checkExists()
+            debDebianBullseye.toFile().checkExists()
+
+            val msi = dirMsi.resolve("TestPackage-x64-1.0.0.msi")
+            msi.toFile().checkExists()
+        }
+    }
+
+    @Test
     fun gradleBuildCache() = with(testProject(TestProjects.jvm)) {
         modifyGradleProperties {
             setProperty("org.gradle.caching", "true")

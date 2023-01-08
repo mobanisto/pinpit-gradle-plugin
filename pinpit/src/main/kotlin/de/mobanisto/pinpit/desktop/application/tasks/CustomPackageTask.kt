@@ -103,7 +103,6 @@ abstract class CustomPackageTask @Inject constructor(
     fun run(inputChanges: InputChanges) {
         initState()
 
-        fileOperations.delete(destinationDir)
         prepareWorkingDir(inputChanges)
 
         try {
