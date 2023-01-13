@@ -20,6 +20,7 @@ object TestProjects {
     const val defaultArgs = "application/defaultArgs"
     const val defaultArgsOverride = "application/defaultArgsOverride"
     const val unpackSkiko = "application/unpackSkiko"
+    const val skikoVariant = "application/skikoVariant"
     const val resources = "application/resources"
     const val jsMpp = "misc/jsMpp"
     const val jvmPreview = "misc/jvmPreview"

@@ -568,6 +568,21 @@ class DesktopApplicationTest : GradlePluginTestBase() {
     }
 
     @Test
+    fun skikoVariantsPackageJvm() = with(testProject(TestProjects.skikoVariant)) {
+        testPackageJvmDistributions()
+    }
+
+    @Test
+    fun skikoVariantsPackageLinuxDistributableArchive() = with(testProject(TestProjects.skikoVariant)) {
+        testPackageLinuxDistributableArchive()
+    }
+
+    @Test
+    fun skikoVariantsPackageWindowsDistributableArchive() = with(testProject(TestProjects.skikoVariant)) {
+        testPackageWindowsDistributableArchive()
+    }
+
+    @Test
     fun resources() = with(testProject(TestProjects.resources)) {
         gradle(":pinpitRun").build().checks { check ->
             check.taskOutcome(":pinpitRun", TaskOutcome.SUCCESS)

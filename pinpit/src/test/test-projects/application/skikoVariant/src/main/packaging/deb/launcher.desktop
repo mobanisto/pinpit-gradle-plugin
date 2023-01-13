@@ -1,0 +1,9 @@
+[Desktop Entry]
+Name=TestPackage
+Comment=Test description
+Exec=/opt/test-package/bin/TestPackage
+Icon=/opt/test-package/lib/TestPackage.png
+Terminal=false
+Type=Application
+Categories=System;Utility;
+MimeType=

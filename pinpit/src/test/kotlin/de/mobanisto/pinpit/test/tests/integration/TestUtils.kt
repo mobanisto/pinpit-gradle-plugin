@@ -97,6 +97,10 @@ object TestUtils {
 
             checkContainsSome(dirDistributableApp.toPath(), ".so")
             checkContainsNone(dirDistributableApp.toPath(), ".dll")
+
+            checkContainsSomePattern(dirDistributableApp.toPath(), "skiko-awt-.*.jar")
+            checkContainsSomePattern(dirDistributableApp.toPath(), "skiko-awt-runtime-linux-x64-.*.jar")
+            checkContainsNonePattern(dirDistributableApp.toPath(), "skiko-awt-runtime-windows-x64-.*.jar")
         }
     }
 
@@ -123,6 +127,10 @@ object TestUtils {
 
             checkContainsSome(dirDistributableApp.toPath(), ".dll")
             checkContainsNone(dirDistributableApp.toPath(), ".so")
+
+            checkContainsSomePattern(dirDistributableApp.toPath(), "skiko-awt-.*.jar")
+            checkContainsSomePattern(dirDistributableApp.toPath(), "skiko-awt-runtime-windows-x64-.*.jar")
+            checkContainsNonePattern(dirDistributableApp.toPath(), "skiko-awt-runtime-linux-x64-.*.jar")
         }
     }
 
@@ -151,6 +159,40 @@ object TestUtils {
                 override fun visitFile(file: Path, attrs: BasicFileAttributes): FileVisitResult {
                     assertFalse(file.name.endsWith(extension)) {
                         "Not expecting to find files with extension $extension, but found $file"
+                    }
+                    return CONTINUE
+                }
+            }
+        )
+    }
+
+    private fun checkContainsSomePattern(dir: Path, pattern: String) {
+        val regex = pattern.toRegex()
+        var found = 0
+        Files.walkFileTree(
+            dir,
+            object : SimpleFileVisitor<Path>() {
+                override fun visitFile(file: Path, attrs: BasicFileAttributes): FileVisitResult {
+                    if (regex.matches(file.name)) {
+                        found++
+                    }
+                    return CONTINUE
+                }
+            }
+        )
+        assertFalse(found == 0) {
+            "Expecting to find some files with extension $pattern, but found none"
+        }
+    }
+
+    private fun checkContainsNonePattern(dir: Path, pattern: String) {
+        val regex = pattern.toRegex()
+        Files.walkFileTree(
+            dir,
+            object : SimpleFileVisitor<Path>() {
+                override fun visitFile(file: Path, attrs: BasicFileAttributes): FileVisitResult {
+                    assertFalse(regex.matches(file.name)) {
+                        "Not expecting to find files with extension $pattern, but found $file"
                     }
                     return CONTINUE
                 }
