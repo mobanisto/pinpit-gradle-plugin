@@ -136,6 +136,7 @@ abstract class WindowsPlatformSettings : AbstractBasePlatformSettings() {
     var menuGroup: String? = null
     var upgradeUuid: String? = null
     var aumid: String? = null
+    var mainExeFileDescription: String? = null
     var msiPackageVersion: String? = null
     var exePackageVersion: String? = null
 

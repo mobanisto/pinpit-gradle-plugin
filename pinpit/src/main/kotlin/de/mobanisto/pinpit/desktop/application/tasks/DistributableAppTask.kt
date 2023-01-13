@@ -181,6 +181,10 @@ abstract class DistributableAppTask @Inject constructor(
     @get:Optional
     val winConsole: Property<Boolean?> = objects.nullableProperty()
 
+    @get:Input
+    @get:Optional
+    val winMainExeFileDescription: Property<String?> = objects.nullableProperty()
+
     @get:InputDirectory
     @get:Optional
     val runtimeImage: DirectoryProperty = objects.directoryProperty()
@@ -496,7 +500,7 @@ abstract class DistributableAppTask @Inject constructor(
                 packageVendor.orNull?.let { addAll(listOf("--company-name", it)) }
                 packageName.orNull?.let { addAll(listOf("--product-name", it)) }
                 packageCopyright.orNull?.let { addAll(listOf("--legal-copyright", it)) }
-                packageDescription.orNull?.let { addAll(listOf("--file-description", it)) }
+                winMainExeFileDescription.orNull?.let { addAll(listOf("--file-description", it)) }
             }
         )
     }

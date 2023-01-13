@@ -696,6 +696,7 @@ internal fun JvmApplicationContext.configurePlatformSettings(
         Windows -> {
             app.nativeDistributions.windows.also { win ->
                 packageTask.winConsole.set(provider { win.console })
+                packageTask.winMainExeFileDescription.set(provider { win.mainExeFileDescription })
                 packageTask.iconFile.set(win.iconFile.orElse(unpackDefaultResources.flatMap { it.resources.windowsIcon }))
             }
         }
