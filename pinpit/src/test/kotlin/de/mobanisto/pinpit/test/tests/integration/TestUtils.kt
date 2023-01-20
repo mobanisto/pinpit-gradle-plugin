@@ -74,7 +74,7 @@ object TestUtils {
         }
     }
 
-    internal fun TestProject.testPackageLinuxDistributableArchive() {
+    internal fun TestProject.testPackageLinuxX64DistributableArchive() {
         val project = projectName()
         val projectDir = projectDir()
         gradle("$project:pinpitPackageDefaultDistributableTarGzLinuxX64").build().let { result ->
@@ -100,6 +100,38 @@ object TestUtils {
 
             checkContainsSomePattern(dirDistributableApp.toPath(), "skiko-awt-.*.jar")
             checkContainsSomePattern(dirDistributableApp.toPath(), "skiko-awt-runtime-linux-x64-.*.jar")
+            checkContainsNonePattern(dirDistributableApp.toPath(), "skiko-awt-runtime-linux-arm64-.*.jar")
+            checkContainsNonePattern(dirDistributableApp.toPath(), "skiko-awt-runtime-windows-x64-.*.jar")
+        }
+    }
+
+    internal fun TestProject.testPackageLinuxArm64DistributableArchive() {
+        val project = projectName()
+        val projectDir = projectDir()
+        gradle("$project:pinpitPackageDefaultDistributableTarGzLinuxArm64").build().let { result ->
+            Assertions.assertEquals(
+                TaskOutcome.SUCCESS,
+                result.task("$project:pinpitPackageDefaultDistributableTarGzLinuxArm64")?.outcome
+            )
+
+            val resultFile =
+                file("${projectDir}build/pinpit/binaries/main-default/linux/arm64/distributableArchive/test-package-arm64-1.0.0.tar.gz")
+            resultFile.checkExists()
+
+            // TODO: add some in-depth verification similar to deb file verification
+//            resultFile.inputStream().use { fis ->
+//                ValidateDeb.validateDebContents(fis)
+//            }
+
+            val dirDistributableApp = file("${projectDir}build/pinpit/binaries/main-default/linux/arm64/distributableApp/")
+            dirDistributableApp.checkExists()
+
+            checkContainsSome(dirDistributableApp.toPath(), ".so")
+            checkContainsNone(dirDistributableApp.toPath(), ".dll")
+
+            checkContainsSomePattern(dirDistributableApp.toPath(), "skiko-awt-.*.jar")
+            checkContainsSomePattern(dirDistributableApp.toPath(), "skiko-awt-runtime-linux-arm64-.*.jar")
+            checkContainsNonePattern(dirDistributableApp.toPath(), "skiko-awt-runtime-linux-x64-.*.jar")
             checkContainsNonePattern(dirDistributableApp.toPath(), "skiko-awt-runtime-windows-x64-.*.jar")
         }
     }
@@ -131,6 +163,7 @@ object TestUtils {
             checkContainsSomePattern(dirDistributableApp.toPath(), "skiko-awt-.*.jar")
             checkContainsSomePattern(dirDistributableApp.toPath(), "skiko-awt-runtime-windows-x64-.*.jar")
             checkContainsNonePattern(dirDistributableApp.toPath(), "skiko-awt-runtime-linux-x64-.*.jar")
+            checkContainsNonePattern(dirDistributableApp.toPath(), "skiko-awt-runtime-linux-arm64-.*.jar")
         }
     }
 

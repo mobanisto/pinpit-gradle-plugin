@@ -17,7 +17,8 @@ import de.mobanisto.pinpit.desktop.application.internal.currentTarget
 import de.mobanisto.pinpit.desktop.application.tasks.linux.JvmDebPackager
 import de.mobanisto.pinpit.test.tests.integration.TestUtils.testPackageDebUbuntuFocal
 import de.mobanisto.pinpit.test.tests.integration.TestUtils.testPackageJvmDistributions
-import de.mobanisto.pinpit.test.tests.integration.TestUtils.testPackageLinuxDistributableArchive
+import de.mobanisto.pinpit.test.tests.integration.TestUtils.testPackageLinuxArm64DistributableArchive
+import de.mobanisto.pinpit.test.tests.integration.TestUtils.testPackageLinuxX64DistributableArchive
 import de.mobanisto.pinpit.test.tests.integration.TestUtils.testPackageMsi
 import de.mobanisto.pinpit.test.tests.integration.TestUtils.testPackageUberJar
 import de.mobanisto.pinpit.test.tests.integration.TestUtils.testPackageWindowsDistributableArchive
@@ -250,8 +251,13 @@ class DesktopApplicationTest : GradlePluginTestBase() {
     }
 
     @Test
-    fun packageLinuxDistributableArchive() = with(testProject(TestProjects.jvm)) {
-        testPackageLinuxDistributableArchive()
+    fun packageLinuxX64DistributableArchive() = with(testProject(TestProjects.jvm)) {
+        testPackageLinuxX64DistributableArchive()
+    }
+
+    @Test
+    fun packageLinuxArm64DistributableArchive() = with(testProject(TestProjects.jvm)) {
+        testPackageLinuxArm64DistributableArchive()
     }
 
     @Test
@@ -574,7 +580,7 @@ class DesktopApplicationTest : GradlePluginTestBase() {
 
     @Test
     fun skikoVariantsPackageLinuxDistributableArchive() = with(testProject(TestProjects.skikoVariant)) {
-        testPackageLinuxDistributableArchive()
+        testPackageLinuxX64DistributableArchive()
     }
 
     @Test

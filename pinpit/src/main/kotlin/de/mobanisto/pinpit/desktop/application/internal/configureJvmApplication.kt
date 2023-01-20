@@ -352,7 +352,7 @@ private fun JvmApplicationContext.configureCommonPackageTasks(
         jvmVendor.set(app.nativeDistributions.jvmVendor)
         jvmVersion.set(app.nativeDistributions.jvmVersion)
         this.os.set(target.os.id)
-        this.arch.set(target.arch.id)
+        this.arch.set(target.arch.altName)
     }.also { targetTasks.downloadJdkTasks[target] = it }
 
     val checkRuntime = targetTasks.checkRuntimeTasks[target] ?: tasks.register<AbstractCheckNativeDistributionRuntime>(

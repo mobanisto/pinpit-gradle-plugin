@@ -18,9 +18,12 @@ enum class OS(val id: String) {
     MacOS("macos")
 }
 
-enum class Arch(val id: String) {
-    X64("x64"),
-    Arm64("arm64")
+enum class Arch(
+    val id: String,
+    val altName: String, // This name is used when resolving the Temurin JDK and likely for other JDKs, too.
+) {
+    X64("x64", "x64"),
+    Arm64("arm64", "aarch64")
 }
 
 internal fun arch(arch: String?): Arch {
