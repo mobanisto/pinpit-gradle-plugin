@@ -38,8 +38,8 @@ abstract class SuggestDebDependenciesTask @Inject constructor() : AbstractPinpit
         // Determine package dependencies as in jdk.jpackage.internal.LibProvidersLookup and
         // jdk.jpackage.internal.LinuxDebBundler
         val packages = findPackageDependencies(debArch)
-        println("arch packages: ${packages.archPackages}")
-        println("other packages: ${packages.otherPackages}")
+        println("arch packages: ${packages.archPackages.toList().sorted()}")
+        println("other packages: ${packages.otherPackages.toList().sorted()}")
         println("if you ship an icon: xdg-utils")
     }
 
