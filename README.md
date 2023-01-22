@@ -341,9 +341,15 @@ be overriden with the environment variables.
 
 For example, to publish a snapshot version to Maven local, you can use this:
 
-```
-PINPIT_GRADLE_PLUGIN_VERSION=0.X.0-SNAPSHOT ./gradlew publishToMavenLocal
-```
+    PINPIT_GRADLE_PLUGIN_VERSION=0.X.0-SNAPSHOT ./gradlew publishToMavenLocal
+
+Before publishing to the plugin portal, add a tag:
+
+    git tag -a release-0.X.0 -m "Release 0.X.0"
+
+Then publish:
+
+    ./gradlew publishPlugins
 
 ## Undocumented options
 
