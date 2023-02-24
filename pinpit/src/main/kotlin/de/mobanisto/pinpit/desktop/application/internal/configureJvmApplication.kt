@@ -59,6 +59,7 @@ internal fun JvmApplicationContext.configureJvmApplication() {
         linux.debs.forEach { targets.addUnique(Target(Linux, arch(it.arch))) }
         windows.msis.forEach { targets.addUnique(Target(Windows, arch(it.arch))) }
     }
+    targets.add(currentTarget)
 
     if (app.isDefaultConfigurationEnabled) {
         configureDefaultApp()
@@ -139,6 +140,13 @@ private fun JvmApplicationContext.configurePackagingTasks(
                 configurePackageUberJar(this, target)
             }.also { allUberJarTasks.add(it) }
         }
+    }
+
+    targets.forEach { target ->
+        val targetBuild = TargetAndBuildType(target, buildType)
+        configureCommonPackageTasks(
+            tasks, jdkInfo, targetBuild, app, appTmpDir, targetTasks, commonTasks
+        )
     }
 
     app.nativeDistributions.windows.distributableArchives.forEach { archive ->
