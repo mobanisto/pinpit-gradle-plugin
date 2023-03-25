@@ -12,6 +12,7 @@ import de.mobanisto.pinpit.desktop.application.dsl.JvmApplicationBuildType
 import de.mobanisto.pinpit.desktop.application.dsl.MsiPlatformSettings
 import de.mobanisto.pinpit.desktop.application.dsl.TargetFormat.DistributableArchive
 import de.mobanisto.pinpit.desktop.application.internal.OS.Linux
+import de.mobanisto.pinpit.desktop.application.internal.OS.MacOS
 import de.mobanisto.pinpit.desktop.application.internal.OS.Windows
 import de.mobanisto.pinpit.desktop.application.internal.validation.validatePackageVersions
 import de.mobanisto.pinpit.desktop.application.tasks.AbstractCheckNativeDistributionRuntime
@@ -26,6 +27,7 @@ import de.mobanisto.pinpit.desktop.application.tasks.DownloadJdkTask
 import de.mobanisto.pinpit.desktop.application.tasks.linux.PackageDebTask
 import de.mobanisto.pinpit.desktop.application.tasks.linux.PackageLinuxDistributableArchiveTask
 import de.mobanisto.pinpit.desktop.application.tasks.linux.SuggestDebDependenciesTask
+import de.mobanisto.pinpit.desktop.application.tasks.macos.PackageMacosDistributableArchiveTask
 import de.mobanisto.pinpit.desktop.application.tasks.windows.PackageMsiTask
 import de.mobanisto.pinpit.desktop.application.tasks.windows.PackageWindowsDistributableArchiveTask
 import de.mobanisto.pinpit.desktop.application.tasks.windows.configurePeRebrander
@@ -260,6 +262,36 @@ private fun JvmApplicationContext.configurePackagingTasks(
         }.also { allPackageTasks.add(it) }
     }
 
+    app.nativeDistributions.macOS.distributableArchives.forEach { archive ->
+        val target = Target(MacOS, arch(archive.arch))
+        val targetBuild = TargetAndBuildType(target, buildType)
+
+        val packageTasks = configureCommonPackageTasks(
+            tasks, jdkInfo, targetBuild, app, appTmpDir, targetTasks, commonTasks
+        )
+
+        val format = determineArchiveFormat(archive)
+        val targetFormat = DistributableArchive(target.os, format)
+
+        tasks.register<PackageMacosDistributableArchiveTask>(
+            taskNameAction = "pinpitPackage",
+            taskNameObject = "distributable${format.name}${target.name}",
+            description = "Builds a distributable ${format.name} archive for ${target.name}.",
+            args = listOf(target, targetFormat),
+        ) {
+            configureCustomPackageTask(
+                this,
+                createDistributableApp = packageTasks.createDistributable,
+                checkRuntime = packageTasks.checkRuntime,
+                unpackDefaultResources = commonTasks.unpackDefaultResources
+            )
+            configurePlatformSettings(
+                this, unpackDefaultResources = commonTasks.unpackDefaultResources
+            )
+        }.also { allPackageTasks.add(it) }
+    }
+
+
     tasks.register<DefaultTask>(
         taskNameAction = "pinpitCreate",
         taskNameObject = "runtime",
@@ -359,8 +391,8 @@ private fun JvmApplicationContext.configureCommonPackageTasks(
     ) {
         jvmVendor.set(app.nativeDistributions.jvmVendor)
         jvmVersion.set(app.nativeDistributions.jvmVersion)
-        this.os.set(target.os.id)
-        this.arch.set(target.arch.altName)
+        os.set(target.os.id)
+        arch.set(target.arch.altName)
     }.also { targetTasks.downloadJdkTasks[target] = it }
 
     val checkRuntime = targetTasks.checkRuntimeTasks[target] ?: tasks.register<AbstractCheckNativeDistributionRuntime>(
@@ -372,6 +404,7 @@ private fun JvmApplicationContext.configureCommonPackageTasks(
         dependsOn(downloadJdk)
         targetJdkVersion.set(jdkInfo.major)
         javaHome.set(app.javaHomeProvider)
+        os.set(target.os)
         jdk.set(provider { downloadJdk.get().jdkDir })
     }.also { targetTasks.checkRuntimeTasks[target] = it }
 
@@ -618,6 +651,22 @@ internal fun JvmApplicationContext.configurePlatformSettings(
 }
 
 internal fun JvmApplicationContext.configurePlatformSettings(
+    packageTask: PackageMacosDistributableArchiveTask,
+    unpackDefaultResources: TaskProvider<AbstractUnpackDefaultComposeApplicationResourcesTask>
+) {
+    packageTask.destinationDir.set(
+        app.nativeDistributions.outputBaseDir.map {
+            it.dir("$appDirName/${packageTask.target.os.id}/${packageTask.target.arch.id}/distributableArchive")
+        }
+    )
+    packageTask.dependsOn(unpackDefaultResources)
+    app.nativeDistributions.macOS.also { macos ->
+        packageTask.macosPackageName.set(provider { macos.packageName })
+        packageTask.packageVersion.set(provider { macos.packageVersion ?: app.nativeDistributions.packageVersion })
+    }
+}
+
+internal fun JvmApplicationContext.configurePlatformSettings(
     packageTask: PackageWindowsDistributableArchiveTask,
     unpackDefaultResources: TaskProvider<AbstractUnpackDefaultComposeApplicationResourcesTask>
 ) {
@@ -709,7 +758,7 @@ internal fun JvmApplicationContext.configurePlatformSettings(
             }
         }
 
-        OS.MacOS -> {
+        MacOS -> {
             app.nativeDistributions.macOS.also { mac ->
                 packageTask.macPackageName.set(provider { mac.packageName })
                 packageTask.macDockName.set(

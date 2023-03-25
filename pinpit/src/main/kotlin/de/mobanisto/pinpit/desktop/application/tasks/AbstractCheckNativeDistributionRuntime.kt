@@ -6,6 +6,8 @@
 package de.mobanisto.pinpit.desktop.application.tasks
 
 import de.mobanisto.pinpit.desktop.application.internal.JvmRuntimeProperties
+import de.mobanisto.pinpit.desktop.application.internal.OS
+import de.mobanisto.pinpit.desktop.application.internal.OS.MacOS
 import de.mobanisto.pinpit.desktop.application.internal.executableName
 import de.mobanisto.pinpit.desktop.application.internal.ioFile
 import de.mobanisto.pinpit.desktop.application.internal.notNullProperty
@@ -40,6 +42,9 @@ abstract class AbstractCheckNativeDistributionRuntime : AbstractPinpitTask() {
 
     @Internal
     val targetJdkVersion: Property<Int> = objects.notNullProperty()
+
+    @Internal
+    val os: Property<OS> = objects.notNullProperty()
 
     private val taskDir = project.layout.buildDirectory.dir("pinpit/tmp/$name")
 
@@ -91,7 +96,12 @@ abstract class AbstractCheckNativeDistributionRuntime : AbstractPinpitTask() {
         }
 
         val dirJdk = jdk.get()
-        val dirJmods = dirJdk.resolve("jmods")
+        val dirJmods = if (os.get() == MacOS) {
+            val home = dirJdk.resolve("Contents/Home")
+            home.resolve("jmods")
+        } else {
+            dirJdk.resolve("jmods")
+        }
         Files.list(dirJmods).forEach { file ->
             val moduleName = file.fileName.toString().trim().substringBefore(".jmod")
             if (moduleName.isNotBlank()) {

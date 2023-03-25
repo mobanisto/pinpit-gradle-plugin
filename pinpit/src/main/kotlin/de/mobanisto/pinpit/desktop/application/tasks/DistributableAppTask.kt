@@ -64,6 +64,7 @@ import java.nio.file.StandardOpenOption.WRITE
 import java.util.zip.ZipFile
 import javax.inject.Inject
 import kotlin.io.path.copyTo
+import kotlin.io.path.createDirectories
 import kotlin.io.path.isRegularFile
 
 abstract class DistributableAppTask @Inject constructor(
@@ -396,11 +397,22 @@ abstract class DistributableAppTask @Inject constructor(
     override fun runTask() {
         val dir = destinationDir.asPath()
 
-        val dirDistributableApp = dir.resolve(packageName.get())
+        val dirName = if (target.os == MacOS) {
+            "${packageName.get()}.app"
+        } else {
+            packageName.get()
+        }
+        val dirDistributableApp = dir.resolve(dirName)
         createDirectories(dirDistributableApp)
         logger.lifecycle("distributable app: $dirDistributableApp")
 
-        val jpackageJMods = jdkDir.get().resolve("jmods/jdk.jpackage.jmod")
+        val dirJmods = if (target.os == MacOS) {
+            val home = jdkDir.get().resolve("Contents/Home")
+            home.resolve("jmods")
+        } else {
+            jdkDir.get().resolve("jmods")
+        }
+        val jpackageJMods = dirJmods.resolve("jdk.jpackage.jmod")
 
         when (target.os) {
             Linux -> {
@@ -412,7 +424,7 @@ abstract class DistributableAppTask @Inject constructor(
             }
 
             MacOS -> {
-                packageMacOs()
+                packageMacOs(dirDistributableApp, jpackageJMods)
             }
         }
     }
@@ -505,8 +517,62 @@ abstract class DistributableAppTask @Inject constructor(
         )
     }
 
-    private fun packageMacOs() {
-        // TODO: create binary by copying from JDK archive
+    private fun packageMacOs(dirDistributableApp: Path, jpackageJMods: Path) {
+        val dirContents = dirDistributableApp.resolve("Contents")
+
+        // Generate PkgInfo
+        val pkgInfo: Path = dirContents.resolve("PkgInfo")
+        // TODO: generate PkgInfo file
+
+        // Generate Info.plist
+        val infoPlist = dirContents.resolve("Info.plist")
+        // TODO: generate Info.plist file
+
+        val dirMacOs = dirContents.resolve("MacOS")
+        val dirApp = dirContents.resolve("app")
+        val dirRuntime = dirContents.resolve("runtime/Contents")
+        val dirResources = dirContents.resolve("Resources")
+
+        // Create launcher
+        dirMacOs.createDirectories()
+        val resAppLauncher = "classes/jdk/jpackage/internal/resources/jpackageapplauncher"
+        val launcher = dirMacOs.resolve(packageName.get())
+        extractZip(jpackageJMods, resAppLauncher, launcher)
+        if (currentOS.isUnix()) {
+            Files.setPosixFilePermissions(launcher, posixExecutable)
+        }
+
+        // Copy app
+        syncDir(libsDir.get().asPath(), dirApp)
+
+        // Create config file
+        val fileConfig = dirApp.resolve("${packageName.get()}.cfg")
+        createConfig(fileConfig)
+        if (currentOS.isUnix()) {
+            Files.setPosixFilePermissions(fileConfig, posixRegular)
+        }
+
+        // Copy icon
+        dirResources.createDirectories()
+        // TODO: copy icon
+
+        // Copy runtime
+        val dirRuntimeHome = dirRuntime.resolve("Home")
+        val dirRuntimeMacOs = dirRuntime.resolve("MacOS")
+        dirRuntime.createDirectories()
+        dirRuntimeMacOs.createDirectories()
+        syncDir(runtimeImage.asPath(), dirRuntimeHome)
+
+        // Generate Info.plist
+        val runtimeInfoPlist = dirRuntime.resolve("Info.plist")
+        // TODO: generate runtime Info.plist file
+
+        // File libjli.dylib needs to be copied to "MacOS"
+        val libjli = "libjli.dylib"
+        Files.walk(runtimeImage.asPath().resolve("lib")).use { walk ->
+            val jli = walk.filter { file: Path -> file.fileName.toString() == libjli }.findFirst().get()
+            jli.copyTo(dirRuntimeMacOs.resolve(libjli))
+        }
     }
 
     private fun extractZip(zipFile: Path, zipResource: String, targetFile: Path) {

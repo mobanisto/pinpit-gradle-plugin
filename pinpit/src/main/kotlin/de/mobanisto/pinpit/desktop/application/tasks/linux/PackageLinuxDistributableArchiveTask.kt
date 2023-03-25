@@ -22,16 +22,12 @@ import org.apache.commons.compress.archivers.tar.TarArchiveOutputStream
 import org.gradle.api.GradleException
 import org.gradle.api.file.Directory
 import org.gradle.api.file.DirectoryProperty
-import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.InputDirectory
-import org.gradle.api.tasks.InputFile
 import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.Optional
-import org.gradle.api.tasks.PathSensitive
-import org.gradle.api.tasks.PathSensitivity
 import org.gradle.process.ExecResult
 import java.nio.file.FileVisitResult
 import java.nio.file.Files
@@ -49,11 +45,6 @@ abstract class PackageLinuxDistributableArchiveTask @Inject constructor(
     target: Target,
     override val targetFormat: DistributableArchive,
 ) : CustomPackageTask(target, targetFormat) {
-
-    @get:InputFile
-    @get:Optional
-    @get:PathSensitive(PathSensitivity.ABSOLUTE)
-    val licenseFile: RegularFileProperty = objects.fileProperty()
 
     @get:Input
     @get:Optional

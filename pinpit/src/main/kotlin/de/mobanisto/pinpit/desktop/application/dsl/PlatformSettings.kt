@@ -66,6 +66,14 @@ abstract class JvmMacOSPlatformSettings : AbstractMacOSPlatformSettings() {
     fun infoPlist(fn: Action<InfoPlistSettings>) {
         fn.execute(infoPlistSettings)
     }
+
+    val distributableArchives: MutableList<DistributableArchiveSettings> = arrayListOf()
+    open fun distributableArchive(fn: Action<DistributableArchiveSettings>) {
+        val distributableArchive = objects.newInstance(DistributableArchiveSettings::class.java).also {
+            distributableArchives.add(it)
+        }
+        fn.execute(distributableArchive)
+    }
 }
 
 open class InfoPlistSettings {
