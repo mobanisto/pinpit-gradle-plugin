@@ -5,6 +5,10 @@
 
 package de.mobanisto.pinpit.desktop.application.tasks
 
+import com.dd.plist.NSDictionary
+import com.dd.plist.NSNumber
+import com.dd.plist.NSString
+import com.dd.plist.XMLPropertyListWriter
 import de.mobanisto.pinpit.desktop.application.dsl.MacOSSigningSettings
 import de.mobanisto.pinpit.desktop.application.internal.APP_RESOURCES_DIR
 import de.mobanisto.pinpit.desktop.application.internal.JvmRuntimeProperties
@@ -519,6 +523,7 @@ abstract class DistributableAppTask @Inject constructor(
 
     private fun packageMacOs(dirDistributableApp: Path, jpackageJMods: Path) {
         val dirContents = dirDistributableApp.resolve("Contents")
+        dirContents.createDirectories()
 
         // Generate PkgInfo
         val pkgInfo: Path = dirContents.resolve("PkgInfo")
@@ -526,7 +531,7 @@ abstract class DistributableAppTask @Inject constructor(
 
         // Generate Info.plist
         val infoPlist = dirContents.resolve("Info.plist")
-        // TODO: generate Info.plist file
+        createInfoPlist(infoPlist)
 
         val dirMacOs = dirContents.resolve("MacOS")
         val dirApp = dirContents.resolve("app")
@@ -554,7 +559,8 @@ abstract class DistributableAppTask @Inject constructor(
 
         // Copy icon
         dirResources.createDirectories()
-        // TODO: copy icon
+        val icon = iconFile.asPath()
+        icon.copyTo(dirResources.resolve(icon.fileName))
 
         // Copy runtime
         val dirRuntimeHome = dirRuntime.resolve("Home")
@@ -573,6 +579,34 @@ abstract class DistributableAppTask @Inject constructor(
             val jli = walk.filter { file: Path -> file.fileName.toString() == libjli }.findFirst().get()
             jli.copyTo(dirRuntimeMacOs.resolve(libjli))
         }
+    }
+
+    private fun createInfoPlist(infoPlist: Path) {
+        val dict = NSDictionary()
+
+        // See https://developer.apple.com/documentation/bundleresources/information_property_list
+        // for details on these properties.
+        dict["LSMinimumSystemVersion"] = NSString("10.11")
+        dict["CFBundleDevelopmentRegion"] = NSString("English")
+        dict["CFBundleAllowMixedLocalizations"] = NSNumber(true)
+        dict["CFBundleExecutable"] = NSString(packageName.get())
+        dict["CFBundleIconFile"] = NSString(iconFile.asPath().fileName.toString())
+        dict["CFBundleIdentifier"] = NSString(nonValidatedMacBundleID.get())
+        dict["CFBundleInfoDictionaryVersion"] = NSString("6.0")
+        dict["CFBundleName"] = NSString(packageName.get())
+        dict["CFBundlePackageType"] = NSString("APPL")
+        dict["CFBundleShortVersionString"] = NSString(packageVersion.get())
+        dict["CFBundleSignature"] = NSString("????")
+        if (macAppCategory.isPresent) {
+            dict["LSApplicationCategoryType"] = NSString(macAppCategory.get())
+        }
+        dict["CFBundleVersion"] = NSString(packageVersion.get())
+        dict["NSHumanReadableCopyright"] = NSString(packageCopyright.get())
+        dict["NSHighResolutionCapable"] = NSString("true")
+        dict["NSMicrophoneUsageDescription"] =
+            NSString("The application ${packageName.get()} is requesting access to the microphone.")
+
+        XMLPropertyListWriter.write(dict, infoPlist)
     }
 
     private fun extractZip(zipFile: Path, zipResource: String, targetFile: Path) {

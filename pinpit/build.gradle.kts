@@ -76,6 +76,7 @@ dependencies {
     embedded("org.jetbrains.kotlinx:kotlinx-serialization-core-jvm:${BuildProperties.serializationVersion}")
     embedded("org.tukaani:xz:1.9")
     embedded("org.apache.commons:commons-compress:1.22")
+    embedded("com.googlecode.plist:dd-plist:1.26")
 }
 
 val shadow = tasks.named<ShadowJar>("shadowJar") {
