@@ -527,7 +527,7 @@ abstract class DistributableAppTask @Inject constructor(
 
         // Generate PkgInfo
         val pkgInfo: Path = dirContents.resolve("PkgInfo")
-        // TODO: generate PkgInfo file
+        createPkgInfo(pkgInfo)
 
         // Generate Info.plist
         val infoPlist = dirContents.resolve("Info.plist")
@@ -578,6 +578,14 @@ abstract class DistributableAppTask @Inject constructor(
         Files.walk(runtimeImage.asPath().resolve("lib")).use { walk ->
             val jli = walk.filter { file: Path -> file.fileName.toString() == libjli }.findFirst().get()
             jli.copyTo(dirRuntimeMacOs.resolve(libjli))
+        }
+    }
+
+    private fun createPkgInfo(pkgInfo: Path) {
+        Files.newOutputStream(pkgInfo).use { fos ->
+            fos.bufferedWriter().use { br ->
+                br.write("APPL????")
+            }
         }
     }
 
