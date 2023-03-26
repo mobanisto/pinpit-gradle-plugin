@@ -571,7 +571,7 @@ abstract class DistributableAppTask @Inject constructor(
 
         // Generate Info.plist
         val runtimeInfoPlist = dirRuntime.resolve("Info.plist")
-        // TODO: generate runtime Info.plist file
+        createRuntimeInfoPlist(runtimeInfoPlist)
 
         // File libjli.dylib needs to be copied to "MacOS"
         val libjli = "libjli.dylib"
@@ -615,6 +615,23 @@ abstract class DistributableAppTask @Inject constructor(
             NSString("The application ${packageName.get()} is requesting access to the microphone.")
 
         XMLPropertyListWriter.write(dict, infoPlist)
+    }
+
+
+    private fun createRuntimeInfoPlist(runtimeInfoPlist: Path) {
+        val dict = NSDictionary()
+
+        dict["CFBundleDevelopmentRegion"] = NSString("English")
+        dict["CFBundleExecutable"] = NSString("libjli.dylib")
+        dict["CFBundleIdentifier"] = NSString("com.oracle.java." + nonValidatedMacBundleID.get())
+        dict["CFBundleInfoDictionaryVersion"] = NSString("7.0")
+        dict["CFBundleName"] = NSString("Java Runtime Image")
+        dict["CFBundlePackageType"] = NSString("BNDL")
+        dict["CFBundleShortVersionString"] = NSString(packageVersion.get())
+        dict["CFBundleSignature"] = NSString("????")
+        dict["CFBundleVersion"] = NSString(packageVersion.get())
+
+        XMLPropertyListWriter.write(dict, runtimeInfoPlist)
     }
 
     private fun extractZip(zipFile: Path, zipResource: String, targetFile: Path) {
