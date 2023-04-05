@@ -59,9 +59,12 @@ internal fun JvmApplicationContext.configureJvmApplication() {
     val targets = mutableListOf<Target>()
     app.nativeDistributions.apply {
         linux.debs.forEach { targets.addUnique(Target(Linux, arch(it.arch))) }
+        linux.distributableArchives.forEach { targets.addUnique(Target(Linux, arch(it.arch))) }
         windows.msis.forEach { targets.addUnique(Target(Windows, arch(it.arch))) }
+        windows.distributableArchives.forEach { targets.addUnique(Target(Windows, arch(it.arch))) }
+        macOS.distributableArchives.forEach { targets.addUnique(Target(MacOS, arch(it.arch))) }
     }
-    targets.add(currentTarget)
+    targets.addUnique(currentTarget)
 
     if (app.isDefaultConfigurationEnabled) {
         configureDefaultApp()
