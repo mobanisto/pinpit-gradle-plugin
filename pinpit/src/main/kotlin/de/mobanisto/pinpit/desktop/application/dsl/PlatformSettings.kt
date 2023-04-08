@@ -37,15 +37,21 @@ abstract class AbstractMacOSPlatformSettings : AbstractBasePlatformSettings() {
      */
     var bundleID: String? = null
 
-    val signing: MacOSSigningSettings = objects.newInstance(MacOSSigningSettings::class.java)
-    fun signing(fn: Action<MacOSSigningSettings>) {
-        fn.execute(signing)
-    }
+    /*
+     * Disable signing and notarization for now. Let's document how to sign and notarize a distributable
+     * package built on any platform as a final step on macOS. We can re-enable this potentially for use
+     * on builds running on macOS only, or find a cross-platform method for these steps.
+     */
 
-    val notarization: MacOSNotarizationSettings = objects.newInstance(MacOSNotarizationSettings::class.java)
-    fun notarization(fn: Action<MacOSNotarizationSettings>) {
-        fn.execute(notarization)
-    }
+//    val signing: MacOSSigningSettings = objects.newInstance(MacOSSigningSettings::class.java)
+//    fun signing(fn: Action<MacOSSigningSettings>) {
+//        fn.execute(signing)
+//    }
+
+//    val notarization: MacOSNotarizationSettings = objects.newInstance(MacOSNotarizationSettings::class.java)
+//    fun notarization(fn: Action<MacOSNotarizationSettings>) {
+//        fn.execute(notarization)
+//    }
 }
 
 abstract class NativeApplicationMacOSPlatformSettings : AbstractMacOSPlatformSettings()

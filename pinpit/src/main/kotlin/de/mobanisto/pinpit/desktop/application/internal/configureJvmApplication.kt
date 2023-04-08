@@ -14,10 +14,10 @@ import de.mobanisto.pinpit.desktop.application.dsl.TargetFormat.DistributableArc
 import de.mobanisto.pinpit.desktop.application.internal.OS.Linux
 import de.mobanisto.pinpit.desktop.application.internal.OS.MacOS
 import de.mobanisto.pinpit.desktop.application.internal.OS.Windows
+import de.mobanisto.pinpit.desktop.application.internal.validation.validateBundleID
 import de.mobanisto.pinpit.desktop.application.internal.validation.validatePackageVersions
 import de.mobanisto.pinpit.desktop.application.tasks.AbstractCheckNativeDistributionRuntime
 import de.mobanisto.pinpit.desktop.application.tasks.AbstractJLinkTask
-import de.mobanisto.pinpit.desktop.application.tasks.AbstractNotarizationTask
 import de.mobanisto.pinpit.desktop.application.tasks.AbstractProguardTask
 import de.mobanisto.pinpit.desktop.application.tasks.AbstractRunDistributableTask
 import de.mobanisto.pinpit.desktop.application.tasks.AbstractSuggestModulesTask
@@ -265,6 +265,13 @@ private fun JvmApplicationContext.configurePackagingTasks(
         }.also { allPackageTasks.add(it) }
     }
 
+    val hasMacOS = targets.fold(false) { temp, target ->
+        temp.or(target.os == MacOS)
+    }
+    if (hasMacOS) {
+        validateBundleID(app.nativeDistributions.macOS.bundleID)
+    }
+
     app.nativeDistributions.macOS.distributableArchives.forEach { archive ->
         val target = Target(MacOS, arch(archive.arch))
         val targetBuild = TargetAndBuildType(target, buildType)
@@ -293,7 +300,6 @@ private fun JvmApplicationContext.configurePackagingTasks(
             )
         }.also { allPackageTasks.add(it) }
     }
-
 
     tasks.register<DefaultTask>(
         taskNameAction = "pinpitCreate",
@@ -631,12 +637,12 @@ private fun JvmApplicationContext.configureDistributableAppTask(
     packageTask.launcherArgs.set(provider { app.args })
 }
 
-internal fun JvmApplicationContext.configureCommonNotarizationSettings(
-    notarizationTask: AbstractNotarizationTask
-) {
-    notarizationTask.nonValidatedBundleID.set(app.nativeDistributions.macOS.bundleID)
-    notarizationTask.nonValidatedNotarizationSettings = app.nativeDistributions.macOS.notarization
-}
+//internal fun JvmApplicationContext.configureCommonNotarizationSettings(
+//    notarizationTask: AbstractNotarizationTask
+//) {
+//    notarizationTask.nonValidatedBundleID.set(app.nativeDistributions.macOS.bundleID)
+//    notarizationTask.nonValidatedNotarizationSettings = app.nativeDistributions.macOS.notarization
+//}
 
 internal fun JvmApplicationContext.configurePlatformSettings(
     packageTask: PackageLinuxDistributableArchiveTask,
@@ -780,7 +786,7 @@ internal fun JvmApplicationContext.configurePlatformSettings(
                 packageTask.macProvisioningProfile.set(mac.provisioningProfile)
                 packageTask.macRuntimeProvisioningProfile.set(mac.runtimeProvisioningProfile)
                 packageTask.macExtraPlistKeysRawXml.set(provider { mac.infoPlistSettings.extraKeysRawXml })
-                packageTask.nonValidatedMacSigningSettings = app.nativeDistributions.macOS.signing
+//                packageTask.nonValidatedMacSigningSettings = app.nativeDistributions.macOS.signing
                 packageTask.iconFile.set(mac.iconFile.orElse(unpackDefaultResources.flatMap { it.resources.macIcon }))
             }
         }

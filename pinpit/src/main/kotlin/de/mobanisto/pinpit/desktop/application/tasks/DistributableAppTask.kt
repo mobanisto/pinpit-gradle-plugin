@@ -9,17 +9,14 @@ import com.dd.plist.NSDictionary
 import com.dd.plist.NSNumber
 import com.dd.plist.NSString
 import com.dd.plist.XMLPropertyListWriter
-import de.mobanisto.pinpit.desktop.application.dsl.MacOSSigningSettings
 import de.mobanisto.pinpit.desktop.application.internal.APP_RESOURCES_DIR
 import de.mobanisto.pinpit.desktop.application.internal.JvmRuntimeProperties
-import de.mobanisto.pinpit.desktop.application.internal.MacSigner
 import de.mobanisto.pinpit.desktop.application.internal.OS.Linux
 import de.mobanisto.pinpit.desktop.application.internal.OS.MacOS
 import de.mobanisto.pinpit.desktop.application.internal.OS.Windows
 import de.mobanisto.pinpit.desktop.application.internal.SKIKO_LIBRARY_PATH
 import de.mobanisto.pinpit.desktop.application.internal.Target
 import de.mobanisto.pinpit.desktop.application.internal.currentOS
-import de.mobanisto.pinpit.desktop.application.internal.files.MacJarSignFileCopyingProcessor
 import de.mobanisto.pinpit.desktop.application.internal.files.SimpleFileCopyingProcessor
 import de.mobanisto.pinpit.desktop.application.internal.files.asPath
 import de.mobanisto.pinpit.desktop.application.internal.files.findRelative
@@ -36,7 +33,6 @@ import de.mobanisto.pinpit.desktop.application.internal.notNullProperty
 import de.mobanisto.pinpit.desktop.application.internal.nullableProperty
 import de.mobanisto.pinpit.desktop.application.internal.provider
 import de.mobanisto.pinpit.desktop.application.internal.stacktraceToString
-import de.mobanisto.pinpit.desktop.application.internal.validation.validate
 import de.mobanisto.pinpit.desktop.application.tasks.windows.WindowsTask
 import org.gradle.api.file.ConfigurableFileCollection
 import org.gradle.api.file.Directory
@@ -52,7 +48,6 @@ import org.gradle.api.tasks.InputFile
 import org.gradle.api.tasks.InputFiles
 import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.LocalState
-import org.gradle.api.tasks.Nested
 import org.gradle.api.tasks.Optional
 import org.gradle.api.tasks.PathSensitive
 import org.gradle.api.tasks.PathSensitivity
@@ -212,9 +207,9 @@ abstract class DistributableAppTask @Inject constructor(
 
     private lateinit var jvmRuntimeInfo: JvmRuntimeProperties
 
-    @get:Optional
-    @get:Nested
-    internal var nonValidatedMacSigningSettings: MacOSSigningSettings? = null
+//    @get:Optional
+//    @get:Nested
+//    internal var nonValidatedMacSigningSettings: MacOSSigningSettings? = null
 
     @get:Internal
     val jdkDir: Property<Path> = objects.notNullProperty()
@@ -222,14 +217,14 @@ abstract class DistributableAppTask @Inject constructor(
     @get:Internal
     val jdkVersion: Property<Int> = objects.notNullProperty()
 
-    private val macSigner: MacSigner? by lazy {
-        val nonValidatedSettings = nonValidatedMacSigningSettings
-        if (currentOS == MacOS && nonValidatedSettings?.sign?.get() == true) {
-            val validatedSettings =
-                nonValidatedSettings.validate(nonValidatedMacBundleID, project, macAppStore)
-            MacSigner(validatedSettings, runExternalTool)
-        } else null
-    }
+//    private val macSigner: MacSigner? by lazy {
+//        val nonValidatedSettings = nonValidatedMacSigningSettings
+//        if (currentOS == MacOS && nonValidatedSettings?.sign?.get() == true) {
+//            val validatedSettings =
+//                nonValidatedSettings.validate(nonValidatedMacBundleID, project, macAppStore)
+//            MacSigner(validatedSettings, runExternalTool)
+//        } else null
+//    }
 
     @get:LocalState
     protected val signDir: Provider<Directory> = project.layout.buildDirectory.dir("pinpit/tmp/sign")
@@ -317,18 +312,18 @@ abstract class DistributableAppTask @Inject constructor(
 
     override fun prepareWorkingDir(inputChanges: InputChanges) {
         val libsDir = libsDir.ioFile
-        val fileProcessor =
-            macSigner?.let { signer ->
-                val tmpDirForSign = signDir.ioFile
-                fileOperations.delete(tmpDirForSign)
-                tmpDirForSign.mkdirs()
-
-                MacJarSignFileCopyingProcessor(
-                    signer,
-                    tmpDirForSign,
-                    jvmRuntimeVersion = 17 // TODO: hardcoded version
-                )
-            } ?: SimpleFileCopyingProcessor
+        val fileProcessor = SimpleFileCopyingProcessor
+//            macSigner?.let { signer ->
+//                val tmpDirForSign = signDir.ioFile
+//                fileOperations.delete(tmpDirForSign)
+//                tmpDirForSign.mkdirs()
+//
+//                MacJarSignFileCopyingProcessor(
+//                    signer,
+//                    tmpDirForSign,
+//                    jvmRuntimeVersion = 17 // TODO: hardcoded version
+//                )
+//            } ?: SimpleFileCopyingProcessor
 
         val mangleJarFilesNames = mangleJarFilesNames.get()
         fun copyFileToLibsDir(sourceFile: File): File {
