@@ -6,7 +6,6 @@
 package de.mobanisto.pinpit.desktop.application.tasks
 
 import de.mobanisto.pinpit.desktop.application.internal.JvmRuntimeProperties
-import de.mobanisto.pinpit.desktop.application.internal.OS
 import de.mobanisto.pinpit.desktop.application.internal.OS.MacOS
 import de.mobanisto.pinpit.desktop.application.internal.RuntimeCompressionLevel
 import de.mobanisto.pinpit.desktop.application.internal.Target

@@ -612,7 +612,6 @@ abstract class DistributableAppTask @Inject constructor(
         XMLPropertyListWriter.write(dict, infoPlist)
     }
 
-
     private fun createRuntimeInfoPlist(runtimeInfoPlist: Path) {
         val dict = NSDictionary()
 

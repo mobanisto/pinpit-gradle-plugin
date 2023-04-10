@@ -637,12 +637,12 @@ private fun JvmApplicationContext.configureDistributableAppTask(
     packageTask.launcherArgs.set(provider { app.args })
 }
 
-//internal fun JvmApplicationContext.configureCommonNotarizationSettings(
+// internal fun JvmApplicationContext.configureCommonNotarizationSettings(
 //    notarizationTask: AbstractNotarizationTask
-//) {
+// ) {
 //    notarizationTask.nonValidatedBundleID.set(app.nativeDistributions.macOS.bundleID)
 //    notarizationTask.nonValidatedNotarizationSettings = app.nativeDistributions.macOS.notarization
-//}
+// }
 
 internal fun JvmApplicationContext.configurePlatformSettings(
     packageTask: PackageLinuxDistributableArchiveTask,
