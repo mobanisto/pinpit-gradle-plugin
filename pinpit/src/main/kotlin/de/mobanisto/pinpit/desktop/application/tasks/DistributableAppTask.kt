@@ -677,6 +677,11 @@ abstract class DistributableAppTask @Inject constructor(
                     writeLn("java-options=$arg")
                 }
                 writeLn("java-options=-D$SKIKO_LIBRARY_PATH=${appDir()}")
+                if (target.os == MacOS) {
+                    macDockName.orNull?.let { dockName ->
+                        writeLn("java-options=-Xdock:name=$dockName")
+                    }
+                }
                 if (launcherArgs.get().isNotEmpty()) {
                     writeLn()
                     writeLn("[ArgOptions]")
