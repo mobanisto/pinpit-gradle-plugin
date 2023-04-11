@@ -27,6 +27,10 @@ configurations {
         extendsFrom implementation
         attributes { attribute(attributeUsage, "java-runtime") }
     }
+    macosArm64 {
+        extendsFrom implementation
+        attributes { attribute(attributeUsage, "java-runtime") }
+    }
 }
 
 sourceSets {
@@ -45,6 +49,7 @@ dependencies {
     windowsX64 compose.desktop.windows_x64
     linuxX64 compose.desktop.linux_x64
     linuxArm64 compose.desktop.linux_arm64
+    macosArm64 compose.desktop.macos_arm64
 }
 
 ext.versionCode = "1.0.0"
@@ -124,7 +129,14 @@ pinpit.desktop {
                 }
             }
             macOS {
-                dockName = "CustomDockName"
+                packageName = "TestPackage"
+                dockName = "TestPackage"
+                appCategory = "public.app-category.utilities"
+                bundleID = "de.mobanisto.test.package"
+                distributableArchive {
+                    format = "zip"
+                    arch = "arm64"
+                }
             }
         }
     }

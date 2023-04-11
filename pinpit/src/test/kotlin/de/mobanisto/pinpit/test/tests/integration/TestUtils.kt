@@ -46,7 +46,8 @@ object TestUtils {
                 ValidateDeb.validateDebContents(fis)
             }
 
-            val dirDistributableApp = file("${projectDir}build/pinpit/binaries/main-default/linux/x64/distributableApp/")
+            val dirDistributableApp =
+                file("${projectDir}build/pinpit/binaries/main-default/linux/x64/distributableApp/")
             dirDistributableApp.checkExists()
 
             checkContainsSome(dirDistributableApp.toPath(), ".so")
@@ -66,7 +67,8 @@ object TestUtils {
                 file("${projectDir}build/pinpit/binaries/main-default/windows/x64/msi/TestPackage-x64-1.0.0.msi")
             resultFile.checkExists()
 
-            val dirDistributableApp = file("${projectDir}build/pinpit/binaries/main-default/windows/x64/distributableApp/")
+            val dirDistributableApp =
+                file("${projectDir}build/pinpit/binaries/main-default/windows/x64/distributableApp/")
             dirDistributableApp.checkExists()
 
             checkContainsSome(dirDistributableApp.toPath(), ".dll")
@@ -92,7 +94,8 @@ object TestUtils {
 //                ValidateDeb.validateDebContents(fis)
 //            }
 
-            val dirDistributableApp = file("${projectDir}build/pinpit/binaries/main-default/linux/x64/distributableApp/")
+            val dirDistributableApp =
+                file("${projectDir}build/pinpit/binaries/main-default/linux/x64/distributableApp/")
             dirDistributableApp.checkExists()
 
             checkContainsSome(dirDistributableApp.toPath(), ".so")
@@ -123,7 +126,8 @@ object TestUtils {
 //                ValidateDeb.validateDebContents(fis)
 //            }
 
-            val dirDistributableApp = file("${projectDir}build/pinpit/binaries/main-default/linux/arm64/distributableApp/")
+            val dirDistributableApp =
+                file("${projectDir}build/pinpit/binaries/main-default/linux/arm64/distributableApp/")
             dirDistributableApp.checkExists()
 
             checkContainsSome(dirDistributableApp.toPath(), ".so")
@@ -154,7 +158,8 @@ object TestUtils {
 //                ValidateDeb.validateDebContents(fis)
 //            }
 
-            val dirDistributableApp = file("${projectDir}build/pinpit/binaries/main-default/windows/x64/distributableApp/")
+            val dirDistributableApp =
+                file("${projectDir}build/pinpit/binaries/main-default/windows/x64/distributableApp/")
             dirDistributableApp.checkExists()
 
             checkContainsSome(dirDistributableApp.toPath(), ".dll")
@@ -162,6 +167,40 @@ object TestUtils {
 
             checkContainsSomePattern(dirDistributableApp.toPath(), "skiko-awt-.*.jar")
             checkContainsSomePattern(dirDistributableApp.toPath(), "skiko-awt-runtime-windows-x64-.*.jar")
+            checkContainsNonePattern(dirDistributableApp.toPath(), "skiko-awt-runtime-linux-x64-.*.jar")
+            checkContainsNonePattern(dirDistributableApp.toPath(), "skiko-awt-runtime-linux-arm64-.*.jar")
+        }
+    }
+
+    internal fun TestProject.testPackageMacOSDistributableArchive() {
+        val project = projectName()
+        val projectDir = projectDir()
+        gradle("$project:pinpitPackageDefaultDistributableZipMacosArm64").build().let { result ->
+            Assertions.assertEquals(
+                TaskOutcome.SUCCESS,
+                result.task("$project:pinpitPackageDefaultDistributableZipMacosArm64")?.outcome
+            )
+
+            val resultFile =
+                file("${projectDir}build/pinpit/binaries/main-default/macos/arm64/distributableArchive/TestPackage-arm64-1.0.0.zip")
+            resultFile.checkExists()
+
+            // TODO: add some in-depth verification similar to deb file verification
+//            resultFile.inputStream().use { fis ->
+//                ValidateDeb.validateDebContents(fis)
+//            }
+
+            val dirDistributableApp =
+                file("${projectDir}build/pinpit/binaries/main-default/macos/arm64/distributableApp/")
+            dirDistributableApp.checkExists()
+
+            checkContainsSome(dirDistributableApp.toPath(), ".dylib")
+            checkContainsNone(dirDistributableApp.toPath(), ".dll")
+            checkContainsNone(dirDistributableApp.toPath(), ".so")
+
+            checkContainsSomePattern(dirDistributableApp.toPath(), "skiko-awt-.*.jar")
+            checkContainsSomePattern(dirDistributableApp.toPath(), "skiko-awt-runtime-macos-arm64-.*.jar")
+            checkContainsNonePattern(dirDistributableApp.toPath(), "skiko-awt-runtime-windows-x64-.*.jar")
             checkContainsNonePattern(dirDistributableApp.toPath(), "skiko-awt-runtime-linux-x64-.*.jar")
             checkContainsNonePattern(dirDistributableApp.toPath(), "skiko-awt-runtime-linux-arm64-.*.jar")
         }

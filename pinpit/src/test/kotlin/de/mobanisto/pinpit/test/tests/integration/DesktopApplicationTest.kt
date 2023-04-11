@@ -19,6 +19,7 @@ import de.mobanisto.pinpit.test.tests.integration.TestUtils.testPackageDebUbuntu
 import de.mobanisto.pinpit.test.tests.integration.TestUtils.testPackageJvmDistributions
 import de.mobanisto.pinpit.test.tests.integration.TestUtils.testPackageLinuxArm64DistributableArchive
 import de.mobanisto.pinpit.test.tests.integration.TestUtils.testPackageLinuxX64DistributableArchive
+import de.mobanisto.pinpit.test.tests.integration.TestUtils.testPackageMacOSDistributableArchive
 import de.mobanisto.pinpit.test.tests.integration.TestUtils.testPackageMsi
 import de.mobanisto.pinpit.test.tests.integration.TestUtils.testPackageUberJar
 import de.mobanisto.pinpit.test.tests.integration.TestUtils.testPackageWindowsDistributableArchive
@@ -263,6 +264,11 @@ class DesktopApplicationTest : GradlePluginTestBase() {
     @Test
     fun packageWindowsDistributableArchive() = with(testProject(TestProjects.jvm)) {
         testPackageWindowsDistributableArchive()
+    }
+
+    @Test
+    fun packageMacOSDistributableArchive() = with(testProject(TestProjects.jvm)) {
+        testPackageMacOSDistributableArchive()
     }
 
     @Test
