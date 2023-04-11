@@ -145,37 +145,37 @@ abstract class DistributableAppTask @Inject constructor(
     @get:Optional
     val macDockName: Property<String?> = objects.nullableProperty()
 
-    @get:Input
-    @get:Optional
-    val macAppStore: Property<Boolean?> = objects.nullableProperty()
+    // @get:Input
+    // @get:Optional
+    // val macAppStore: Property<Boolean?> = objects.nullableProperty()
 
     @get:Input
     @get:Optional
     val macAppCategory: Property<String?> = objects.nullableProperty()
 
-    @get:InputFile
-    @get:Optional
-    @get:PathSensitive(PathSensitivity.ABSOLUTE)
-    val macEntitlementsFile: RegularFileProperty = objects.fileProperty()
+    // @get:InputFile
+    // @get:Optional
+    // @get:PathSensitive(PathSensitivity.ABSOLUTE)
+    // val macEntitlementsFile: RegularFileProperty = objects.fileProperty()
 
-    @get:InputFile
-    @get:Optional
-    @get:PathSensitive(PathSensitivity.ABSOLUTE)
-    val macRuntimeEntitlementsFile: RegularFileProperty = objects.fileProperty()
+    // @get:InputFile
+    // @get:Optional
+    // @get:PathSensitive(PathSensitivity.ABSOLUTE)
+    // val macRuntimeEntitlementsFile: RegularFileProperty = objects.fileProperty()
 
     @get:Input
     @get:Optional
     val packageBuildVersion: Property<String?> = objects.nullableProperty()
 
-    @get:InputFile
-    @get:Optional
-    @get:PathSensitive(PathSensitivity.ABSOLUTE)
-    val macProvisioningProfile: RegularFileProperty = objects.fileProperty()
+    // @get:InputFile
+    // @get:Optional
+    // @get:PathSensitive(PathSensitivity.ABSOLUTE)
+    // val macProvisioningProfile: RegularFileProperty = objects.fileProperty()
 
-    @get:InputFile
-    @get:Optional
-    @get:PathSensitive(PathSensitivity.ABSOLUTE)
-    val macRuntimeProvisioningProfile: RegularFileProperty = objects.fileProperty()
+    // @get:InputFile
+    // @get:Optional
+    // @get:PathSensitive(PathSensitivity.ABSOLUTE)
+    // val macRuntimeProvisioningProfile: RegularFileProperty = objects.fileProperty()
 
     @get:Input
     @get:Optional

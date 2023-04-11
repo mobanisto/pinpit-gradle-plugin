@@ -777,16 +777,16 @@ internal fun JvmApplicationContext.configurePlatformSettings(
                     ).orElse(packageTask.packageName)
                     else provider { mac.dockName }
                 )
-                packageTask.macAppStore.set(mac.appStore)
+                // packageTask.macAppStore.set(mac.appStore)
                 packageTask.macAppCategory.set(mac.appCategory)
-                packageTask.macEntitlementsFile.set(mac.entitlementsFile)
-                packageTask.macRuntimeEntitlementsFile.set(mac.runtimeEntitlementsFile)
+                // packageTask.macEntitlementsFile.set(mac.entitlementsFile)
+                // packageTask.macRuntimeEntitlementsFile.set(mac.runtimeEntitlementsFile)
                 packageTask.packageBuildVersion.set(packageVersionFor(currentOS))
                 packageTask.nonValidatedMacBundleID.set(provider { mac.bundleID })
-                packageTask.macProvisioningProfile.set(mac.provisioningProfile)
-                packageTask.macRuntimeProvisioningProfile.set(mac.runtimeProvisioningProfile)
-                packageTask.macExtraPlistKeysRawXml.set(provider { mac.infoPlistSettings.extraKeysRawXml })
-//                packageTask.nonValidatedMacSigningSettings = app.nativeDistributions.macOS.signing
+                // packageTask.macProvisioningProfile.set(mac.provisioningProfile)
+                // packageTask.macRuntimeProvisioningProfile.set(mac.runtimeProvisioningProfile)
+                // packageTask.macExtraPlistKeysRawXml.set(provider { mac.infoPlistSettings.extraKeysRawXml })
+                // packageTask.nonValidatedMacSigningSettings = app.nativeDistributions.macOS.signing
                 packageTask.iconFile.set(mac.iconFile.orElse(unpackDefaultResources.flatMap { it.resources.macIcon }))
             }
         }

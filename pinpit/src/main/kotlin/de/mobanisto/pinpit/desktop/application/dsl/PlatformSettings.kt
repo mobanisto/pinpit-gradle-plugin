@@ -23,9 +23,9 @@ abstract class AbstractBasePlatformSettings : AbstractPlatformSettings() {
 abstract class AbstractMacOSPlatformSettings : AbstractBasePlatformSettings() {
     var packageName: String? = null
 
-    var packageBuildVersion: String? = null
-    var dmgPackageVersion: String? = null
-    var dmgPackageBuildVersion: String? = null
+    // var packageBuildVersion: String? = null
+    // var dmgPackageVersion: String? = null
+    // var dmgPackageBuildVersion: String? = null
     var appCategory: String? = null
 
     /**
@@ -59,19 +59,19 @@ abstract class NativeApplicationMacOSPlatformSettings : AbstractMacOSPlatformSet
 abstract class JvmMacOSPlatformSettings : AbstractMacOSPlatformSettings() {
     var dockName: String? = null
     var setDockNameSameAsPackageName: Boolean = true
-    var appStore: Boolean = false
-    var entitlementsFile: RegularFileProperty = objects.fileProperty()
-    var runtimeEntitlementsFile: RegularFileProperty = objects.fileProperty()
-    var pkgPackageVersion: String? = null
-    var pkgPackageBuildVersion: String? = null
+    // var appStore: Boolean = false
+    // var entitlementsFile: RegularFileProperty = objects.fileProperty()
+    // var runtimeEntitlementsFile: RegularFileProperty = objects.fileProperty()
+    // var pkgPackageVersion: String? = null
+    // var pkgPackageBuildVersion: String? = null
 
-    val provisioningProfile: RegularFileProperty = objects.fileProperty()
-    val runtimeProvisioningProfile: RegularFileProperty = objects.fileProperty()
+    // val provisioningProfile: RegularFileProperty = objects.fileProperty()
+    // val runtimeProvisioningProfile: RegularFileProperty = objects.fileProperty()
 
-    internal val infoPlistSettings = InfoPlistSettings()
-    fun infoPlist(fn: Action<InfoPlistSettings>) {
-        fn.execute(infoPlistSettings)
-    }
+    // internal val infoPlistSettings = InfoPlistSettings()
+    // fun infoPlist(fn: Action<InfoPlistSettings>) {
+    //     fn.execute(infoPlistSettings)
+    // }
 
     val distributableArchives: MutableList<DistributableArchiveSettings> = arrayListOf()
     open fun distributableArchive(fn: Action<DistributableArchiveSettings>) {
