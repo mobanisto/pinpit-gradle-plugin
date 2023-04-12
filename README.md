@@ -278,6 +278,84 @@ or build a distributable ZIP for macOS:
 ./gradlew pinpitPackageDefaultDistributableZipMacosArm64
 ```
 
+### Signing and notarization
+
+The distributable zip built for macOS needs to be signed and notarized so
+that it can be executed on machines to which it gets downloaded from the
+web.
+You can use the script below to first sign the package using your
+Apple developer key and then upload it for notarization:
+
+```
+#/bin/zsh
+
+set -e
+
+TEAM="ABCDE12345"
+APPLE_ID="user@example.com"
+PASSWORD="abcd-1234-abcd-1234"
+
+IDENTITY="Yoyodyne"
+
+SOURCE="HelloWorld-arm64-1.1.0-unsigned.zip"
+TARGET="HelloWorld-arm64-1.1.0.zip"
+APP="HelloWorld.app"
+ENTITLEMENTS="entitlements.plist"
+LOG="HelloWorld.log"
+
+echo "Deleting target $TARGET"
+rm -f "$TARGET"
+
+echo "Deleting app dir $APP"
+rm -rf "$APP"
+
+echo "Unzipping source file $SOURCE"
+unzip "$SOURCE"
+
+echo "Signing app $APP"
+codesign -f -s "$IDENTITY" --options runtime --entitlements "$ENTITLEMENTS" $(find "$APP" -name "*.dylib" -or -name jspawnhelper)
+codesign -f -s "$IDENTITY" --options runtime --entitlements "$ENTITLEMENTS" "$APP"
+codesign -vvv --deep --strict "$APP"
+
+echo "Zipping app to $TARGET"
+ditto -c -k --keepParent "$APP" "$TARGET"
+
+echo "Uploading to notary service"
+ID=$(xcrun notarytool submit "$TARGET" --team-id "$TEAM" --apple-id "$APPLE_ID" --password "$PASSWORD" --no-progress | grep "id:" | awk '{ print $2 }')
+echo "Received ID: $ID"
+
+echo "Waiting for notarization to complete"
+xcrun notarytool wait --team-id "$TEAM" --apple-id "$APPLE_ID" --password "$PASSWORD" "$ID"
+
+echo "Fetching notarization log to $LOG"
+xcrun notarytool log --team-id "$TEAM" --apple-id "$APPLE_ID" --password "$PASSWORD" "$ID" "$LOG"
+```
+
+Where `entitlements.plist` should be a file such as this:
+
+```
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>com.apple.security.app-sandbox</key>
+    <false/>
+    <key>com.apple.security.cs.allow-jit</key>
+    <true/>
+    <key>com.apple.security.cs.allow-unsigned-executable-memory</key>
+    <true/>
+    <key>com.apple.security.cs.disable-library-validation</key>
+    <true/>
+    <key>com.apple.security.cs.allow-dyld-environment-variables</key>
+    <true/>
+    <key>com.apple.security.cs.debugger</key>
+    <true/>
+    <key>com.apple.security.device.audio-input</key>
+    <true/>
+</dict>
+</plist>
+```
+
 ## Platform compatibility
 
 It's currently possible to build Linux packages cross-platform from any host
