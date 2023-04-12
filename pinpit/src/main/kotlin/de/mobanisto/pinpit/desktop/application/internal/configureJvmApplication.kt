@@ -12,11 +12,12 @@ import de.mobanisto.pinpit.desktop.application.dsl.JvmApplicationBuildType
 import de.mobanisto.pinpit.desktop.application.dsl.MsiPlatformSettings
 import de.mobanisto.pinpit.desktop.application.dsl.TargetFormat.DistributableArchive
 import de.mobanisto.pinpit.desktop.application.internal.OS.Linux
+import de.mobanisto.pinpit.desktop.application.internal.OS.MacOS
 import de.mobanisto.pinpit.desktop.application.internal.OS.Windows
+import de.mobanisto.pinpit.desktop.application.internal.validation.validateBundleID
 import de.mobanisto.pinpit.desktop.application.internal.validation.validatePackageVersions
 import de.mobanisto.pinpit.desktop.application.tasks.AbstractCheckNativeDistributionRuntime
 import de.mobanisto.pinpit.desktop.application.tasks.AbstractJLinkTask
-import de.mobanisto.pinpit.desktop.application.tasks.AbstractNotarizationTask
 import de.mobanisto.pinpit.desktop.application.tasks.AbstractProguardTask
 import de.mobanisto.pinpit.desktop.application.tasks.AbstractRunDistributableTask
 import de.mobanisto.pinpit.desktop.application.tasks.AbstractSuggestModulesTask
@@ -26,6 +27,7 @@ import de.mobanisto.pinpit.desktop.application.tasks.DownloadJdkTask
 import de.mobanisto.pinpit.desktop.application.tasks.linux.PackageDebTask
 import de.mobanisto.pinpit.desktop.application.tasks.linux.PackageLinuxDistributableArchiveTask
 import de.mobanisto.pinpit.desktop.application.tasks.linux.SuggestDebDependenciesTask
+import de.mobanisto.pinpit.desktop.application.tasks.macos.PackageMacosDistributableArchiveTask
 import de.mobanisto.pinpit.desktop.application.tasks.windows.PackageMsiTask
 import de.mobanisto.pinpit.desktop.application.tasks.windows.PackageWindowsDistributableArchiveTask
 import de.mobanisto.pinpit.desktop.application.tasks.windows.configurePeRebrander
@@ -57,8 +59,12 @@ internal fun JvmApplicationContext.configureJvmApplication() {
     val targets = mutableListOf<Target>()
     app.nativeDistributions.apply {
         linux.debs.forEach { targets.addUnique(Target(Linux, arch(it.arch))) }
+        linux.distributableArchives.forEach { targets.addUnique(Target(Linux, arch(it.arch))) }
         windows.msis.forEach { targets.addUnique(Target(Windows, arch(it.arch))) }
+        windows.distributableArchives.forEach { targets.addUnique(Target(Windows, arch(it.arch))) }
+        macOS.distributableArchives.forEach { targets.addUnique(Target(MacOS, arch(it.arch))) }
     }
+    targets.addUnique(currentTarget)
 
     if (app.isDefaultConfigurationEnabled) {
         configureDefaultApp()
@@ -139,6 +145,13 @@ private fun JvmApplicationContext.configurePackagingTasks(
                 configurePackageUberJar(this, target)
             }.also { allUberJarTasks.add(it) }
         }
+    }
+
+    targets.forEach { target ->
+        val targetBuild = TargetAndBuildType(target, buildType)
+        configureCommonPackageTasks(
+            tasks, jdkInfo, targetBuild, app, appTmpDir, targetTasks, commonTasks
+        )
     }
 
     app.nativeDistributions.windows.distributableArchives.forEach { archive ->
@@ -252,6 +265,42 @@ private fun JvmApplicationContext.configurePackagingTasks(
         }.also { allPackageTasks.add(it) }
     }
 
+    val hasMacOS = targets.fold(false) { temp, target ->
+        temp.or(target.os == MacOS)
+    }
+    if (hasMacOS) {
+        validateBundleID(app.nativeDistributions.macOS.bundleID)
+    }
+
+    app.nativeDistributions.macOS.distributableArchives.forEach { archive ->
+        val target = Target(MacOS, arch(archive.arch))
+        val targetBuild = TargetAndBuildType(target, buildType)
+
+        val packageTasks = configureCommonPackageTasks(
+            tasks, jdkInfo, targetBuild, app, appTmpDir, targetTasks, commonTasks
+        )
+
+        val format = determineArchiveFormat(archive)
+        val targetFormat = DistributableArchive(target.os, format)
+
+        tasks.register<PackageMacosDistributableArchiveTask>(
+            taskNameAction = "pinpitPackage",
+            taskNameObject = "distributable${format.name}${target.name}",
+            description = "Builds a distributable ${format.name} archive for ${target.name}.",
+            args = listOf(target, targetFormat),
+        ) {
+            configureCustomPackageTask(
+                this,
+                createDistributableApp = packageTasks.createDistributable,
+                checkRuntime = packageTasks.checkRuntime,
+                unpackDefaultResources = commonTasks.unpackDefaultResources
+            )
+            configurePlatformSettings(
+                this, unpackDefaultResources = commonTasks.unpackDefaultResources
+            )
+        }.also { allPackageTasks.add(it) }
+    }
+
     tasks.register<DefaultTask>(
         taskNameAction = "pinpitCreate",
         taskNameObject = "runtime",
@@ -351,8 +400,8 @@ private fun JvmApplicationContext.configureCommonPackageTasks(
     ) {
         jvmVendor.set(app.nativeDistributions.jvmVendor)
         jvmVersion.set(app.nativeDistributions.jvmVersion)
-        this.os.set(target.os.id)
-        this.arch.set(target.arch.altName)
+        os.set(target.os.id)
+        arch.set(target.arch.altName)
     }.also { targetTasks.downloadJdkTasks[target] = it }
 
     val checkRuntime = targetTasks.checkRuntimeTasks[target] ?: tasks.register<AbstractCheckNativeDistributionRuntime>(
@@ -364,6 +413,7 @@ private fun JvmApplicationContext.configureCommonPackageTasks(
         dependsOn(downloadJdk)
         targetJdkVersion.set(jdkInfo.major)
         javaHome.set(app.javaHomeProvider)
+        os.set(target.os)
         jdk.set(provider { downloadJdk.get().jdkDir })
     }.also { targetTasks.checkRuntimeTasks[target] = it }
 
@@ -411,7 +461,8 @@ private fun JvmApplicationContext.configureCommonPackageTasks(
     val createRuntimeImage = targetTasks.runtimeTasks[targetBuild] ?: tasks.register<AbstractJLinkTask>(
         taskNameAction = "pinpitCreate",
         taskNameObject = "runtimeImage${target.name}",
-        description = "Creates a runtime image from the JVM for ${target.name} using jlink."
+        description = "Creates a runtime image from the JVM for ${target.name} using jlink.",
+        args = listOf(target),
     ) {
         dependsOn(checkRuntime)
         dependsOn(downloadJdk)
@@ -586,12 +637,12 @@ private fun JvmApplicationContext.configureDistributableAppTask(
     packageTask.launcherArgs.set(provider { app.args })
 }
 
-internal fun JvmApplicationContext.configureCommonNotarizationSettings(
-    notarizationTask: AbstractNotarizationTask
-) {
-    notarizationTask.nonValidatedBundleID.set(app.nativeDistributions.macOS.bundleID)
-    notarizationTask.nonValidatedNotarizationSettings = app.nativeDistributions.macOS.notarization
-}
+// internal fun JvmApplicationContext.configureCommonNotarizationSettings(
+//    notarizationTask: AbstractNotarizationTask
+// ) {
+//    notarizationTask.nonValidatedBundleID.set(app.nativeDistributions.macOS.bundleID)
+//    notarizationTask.nonValidatedNotarizationSettings = app.nativeDistributions.macOS.notarization
+// }
 
 internal fun JvmApplicationContext.configurePlatformSettings(
     packageTask: PackageLinuxDistributableArchiveTask,
@@ -606,6 +657,22 @@ internal fun JvmApplicationContext.configurePlatformSettings(
     app.nativeDistributions.linux.also { linux ->
         packageTask.linuxPackageName.set(provider { linux.packageName })
         packageTask.packageVersion.set(provider { linux.packageVersion ?: app.nativeDistributions.packageVersion })
+    }
+}
+
+internal fun JvmApplicationContext.configurePlatformSettings(
+    packageTask: PackageMacosDistributableArchiveTask,
+    unpackDefaultResources: TaskProvider<AbstractUnpackDefaultComposeApplicationResourcesTask>
+) {
+    packageTask.destinationDir.set(
+        app.nativeDistributions.outputBaseDir.map {
+            it.dir("$appDirName/${packageTask.target.os.id}/${packageTask.target.arch.id}/distributableArchive")
+        }
+    )
+    packageTask.dependsOn(unpackDefaultResources)
+    app.nativeDistributions.macOS.also { macos ->
+        packageTask.macosPackageName.set(provider { macos.packageName })
+        packageTask.packageVersion.set(provider { macos.packageVersion ?: app.nativeDistributions.packageVersion })
     }
 }
 
@@ -701,7 +768,7 @@ internal fun JvmApplicationContext.configurePlatformSettings(
             }
         }
 
-        OS.MacOS -> {
+        MacOS -> {
             app.nativeDistributions.macOS.also { mac ->
                 packageTask.macPackageName.set(provider { mac.packageName })
                 packageTask.macDockName.set(
@@ -710,16 +777,16 @@ internal fun JvmApplicationContext.configurePlatformSettings(
                     ).orElse(packageTask.packageName)
                     else provider { mac.dockName }
                 )
-                packageTask.macAppStore.set(mac.appStore)
+                // packageTask.macAppStore.set(mac.appStore)
                 packageTask.macAppCategory.set(mac.appCategory)
-                packageTask.macEntitlementsFile.set(mac.entitlementsFile)
-                packageTask.macRuntimeEntitlementsFile.set(mac.runtimeEntitlementsFile)
+                // packageTask.macEntitlementsFile.set(mac.entitlementsFile)
+                // packageTask.macRuntimeEntitlementsFile.set(mac.runtimeEntitlementsFile)
                 packageTask.packageBuildVersion.set(packageVersionFor(currentOS))
                 packageTask.nonValidatedMacBundleID.set(provider { mac.bundleID })
-                packageTask.macProvisioningProfile.set(mac.provisioningProfile)
-                packageTask.macRuntimeProvisioningProfile.set(mac.runtimeProvisioningProfile)
-                packageTask.macExtraPlistKeysRawXml.set(provider { mac.infoPlistSettings.extraKeysRawXml })
-                packageTask.nonValidatedMacSigningSettings = app.nativeDistributions.macOS.signing
+                // packageTask.macProvisioningProfile.set(mac.provisioningProfile)
+                // packageTask.macRuntimeProvisioningProfile.set(mac.runtimeProvisioningProfile)
+                // packageTask.macExtraPlistKeysRawXml.set(provider { mac.infoPlistSettings.extraKeysRawXml })
+                // packageTask.nonValidatedMacSigningSettings = app.nativeDistributions.macOS.signing
                 packageTask.iconFile.set(mac.iconFile.orElse(unpackDefaultResources.flatMap { it.resources.macIcon }))
             }
         }

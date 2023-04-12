@@ -5,17 +5,18 @@
 
 package de.mobanisto.pinpit.desktop.application.tasks
 
-import de.mobanisto.pinpit.desktop.application.dsl.MacOSSigningSettings
+import com.dd.plist.NSDictionary
+import com.dd.plist.NSNumber
+import com.dd.plist.NSString
+import com.dd.plist.XMLPropertyListWriter
 import de.mobanisto.pinpit.desktop.application.internal.APP_RESOURCES_DIR
 import de.mobanisto.pinpit.desktop.application.internal.JvmRuntimeProperties
-import de.mobanisto.pinpit.desktop.application.internal.MacSigner
 import de.mobanisto.pinpit.desktop.application.internal.OS.Linux
 import de.mobanisto.pinpit.desktop.application.internal.OS.MacOS
 import de.mobanisto.pinpit.desktop.application.internal.OS.Windows
 import de.mobanisto.pinpit.desktop.application.internal.SKIKO_LIBRARY_PATH
 import de.mobanisto.pinpit.desktop.application.internal.Target
 import de.mobanisto.pinpit.desktop.application.internal.currentOS
-import de.mobanisto.pinpit.desktop.application.internal.files.MacJarSignFileCopyingProcessor
 import de.mobanisto.pinpit.desktop.application.internal.files.SimpleFileCopyingProcessor
 import de.mobanisto.pinpit.desktop.application.internal.files.asPath
 import de.mobanisto.pinpit.desktop.application.internal.files.findRelative
@@ -32,7 +33,6 @@ import de.mobanisto.pinpit.desktop.application.internal.notNullProperty
 import de.mobanisto.pinpit.desktop.application.internal.nullableProperty
 import de.mobanisto.pinpit.desktop.application.internal.provider
 import de.mobanisto.pinpit.desktop.application.internal.stacktraceToString
-import de.mobanisto.pinpit.desktop.application.internal.validation.validate
 import de.mobanisto.pinpit.desktop.application.tasks.windows.WindowsTask
 import org.gradle.api.file.ConfigurableFileCollection
 import org.gradle.api.file.Directory
@@ -48,7 +48,6 @@ import org.gradle.api.tasks.InputFile
 import org.gradle.api.tasks.InputFiles
 import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.LocalState
-import org.gradle.api.tasks.Nested
 import org.gradle.api.tasks.Optional
 import org.gradle.api.tasks.PathSensitive
 import org.gradle.api.tasks.PathSensitivity
@@ -64,6 +63,7 @@ import java.nio.file.StandardOpenOption.WRITE
 import java.util.zip.ZipFile
 import javax.inject.Inject
 import kotlin.io.path.copyTo
+import kotlin.io.path.createDirectories
 import kotlin.io.path.isRegularFile
 
 abstract class DistributableAppTask @Inject constructor(
@@ -145,37 +145,37 @@ abstract class DistributableAppTask @Inject constructor(
     @get:Optional
     val macDockName: Property<String?> = objects.nullableProperty()
 
-    @get:Input
-    @get:Optional
-    val macAppStore: Property<Boolean?> = objects.nullableProperty()
+    // @get:Input
+    // @get:Optional
+    // val macAppStore: Property<Boolean?> = objects.nullableProperty()
 
     @get:Input
     @get:Optional
     val macAppCategory: Property<String?> = objects.nullableProperty()
 
-    @get:InputFile
-    @get:Optional
-    @get:PathSensitive(PathSensitivity.ABSOLUTE)
-    val macEntitlementsFile: RegularFileProperty = objects.fileProperty()
+    // @get:InputFile
+    // @get:Optional
+    // @get:PathSensitive(PathSensitivity.ABSOLUTE)
+    // val macEntitlementsFile: RegularFileProperty = objects.fileProperty()
 
-    @get:InputFile
-    @get:Optional
-    @get:PathSensitive(PathSensitivity.ABSOLUTE)
-    val macRuntimeEntitlementsFile: RegularFileProperty = objects.fileProperty()
+    // @get:InputFile
+    // @get:Optional
+    // @get:PathSensitive(PathSensitivity.ABSOLUTE)
+    // val macRuntimeEntitlementsFile: RegularFileProperty = objects.fileProperty()
 
     @get:Input
     @get:Optional
     val packageBuildVersion: Property<String?> = objects.nullableProperty()
 
-    @get:InputFile
-    @get:Optional
-    @get:PathSensitive(PathSensitivity.ABSOLUTE)
-    val macProvisioningProfile: RegularFileProperty = objects.fileProperty()
+    // @get:InputFile
+    // @get:Optional
+    // @get:PathSensitive(PathSensitivity.ABSOLUTE)
+    // val macProvisioningProfile: RegularFileProperty = objects.fileProperty()
 
-    @get:InputFile
-    @get:Optional
-    @get:PathSensitive(PathSensitivity.ABSOLUTE)
-    val macRuntimeProvisioningProfile: RegularFileProperty = objects.fileProperty()
+    // @get:InputFile
+    // @get:Optional
+    // @get:PathSensitive(PathSensitivity.ABSOLUTE)
+    // val macRuntimeProvisioningProfile: RegularFileProperty = objects.fileProperty()
 
     @get:Input
     @get:Optional
@@ -207,9 +207,9 @@ abstract class DistributableAppTask @Inject constructor(
 
     private lateinit var jvmRuntimeInfo: JvmRuntimeProperties
 
-    @get:Optional
-    @get:Nested
-    internal var nonValidatedMacSigningSettings: MacOSSigningSettings? = null
+//    @get:Optional
+//    @get:Nested
+//    internal var nonValidatedMacSigningSettings: MacOSSigningSettings? = null
 
     @get:Internal
     val jdkDir: Property<Path> = objects.notNullProperty()
@@ -217,14 +217,14 @@ abstract class DistributableAppTask @Inject constructor(
     @get:Internal
     val jdkVersion: Property<Int> = objects.notNullProperty()
 
-    private val macSigner: MacSigner? by lazy {
-        val nonValidatedSettings = nonValidatedMacSigningSettings
-        if (currentOS == MacOS && nonValidatedSettings?.sign?.get() == true) {
-            val validatedSettings =
-                nonValidatedSettings.validate(nonValidatedMacBundleID, project, macAppStore)
-            MacSigner(validatedSettings, runExternalTool)
-        } else null
-    }
+//    private val macSigner: MacSigner? by lazy {
+//        val nonValidatedSettings = nonValidatedMacSigningSettings
+//        if (currentOS == MacOS && nonValidatedSettings?.sign?.get() == true) {
+//            val validatedSettings =
+//                nonValidatedSettings.validate(nonValidatedMacBundleID, project, macAppStore)
+//            MacSigner(validatedSettings, runExternalTool)
+//        } else null
+//    }
 
     @get:LocalState
     protected val signDir: Provider<Directory> = project.layout.buildDirectory.dir("pinpit/tmp/sign")
@@ -312,18 +312,18 @@ abstract class DistributableAppTask @Inject constructor(
 
     override fun prepareWorkingDir(inputChanges: InputChanges) {
         val libsDir = libsDir.ioFile
-        val fileProcessor =
-            macSigner?.let { signer ->
-                val tmpDirForSign = signDir.ioFile
-                fileOperations.delete(tmpDirForSign)
-                tmpDirForSign.mkdirs()
-
-                MacJarSignFileCopyingProcessor(
-                    signer,
-                    tmpDirForSign,
-                    jvmRuntimeVersion = 17 // TODO: hardcoded version
-                )
-            } ?: SimpleFileCopyingProcessor
+        val fileProcessor = SimpleFileCopyingProcessor
+//            macSigner?.let { signer ->
+//                val tmpDirForSign = signDir.ioFile
+//                fileOperations.delete(tmpDirForSign)
+//                tmpDirForSign.mkdirs()
+//
+//                MacJarSignFileCopyingProcessor(
+//                    signer,
+//                    tmpDirForSign,
+//                    jvmRuntimeVersion = 17 // TODO: hardcoded version
+//                )
+//            } ?: SimpleFileCopyingProcessor
 
         val mangleJarFilesNames = mangleJarFilesNames.get()
         fun copyFileToLibsDir(sourceFile: File): File {
@@ -396,11 +396,22 @@ abstract class DistributableAppTask @Inject constructor(
     override fun runTask() {
         val dir = destinationDir.asPath()
 
-        val dirDistributableApp = dir.resolve(packageName.get())
+        val dirName = if (target.os == MacOS) {
+            "${packageName.get()}.app"
+        } else {
+            packageName.get()
+        }
+        val dirDistributableApp = dir.resolve(dirName)
         createDirectories(dirDistributableApp)
         logger.lifecycle("distributable app: $dirDistributableApp")
 
-        val jpackageJMods = jdkDir.get().resolve("jmods/jdk.jpackage.jmod")
+        val dirJmods = if (target.os == MacOS) {
+            val home = jdkDir.get().resolve("Contents/Home")
+            home.resolve("jmods")
+        } else {
+            jdkDir.get().resolve("jmods")
+        }
+        val jpackageJMods = dirJmods.resolve("jdk.jpackage.jmod")
 
         when (target.os) {
             Linux -> {
@@ -412,7 +423,7 @@ abstract class DistributableAppTask @Inject constructor(
             }
 
             MacOS -> {
-                packageMacOs()
+                packageMacOs(dirDistributableApp, jpackageJMods)
             }
         }
     }
@@ -505,8 +516,116 @@ abstract class DistributableAppTask @Inject constructor(
         )
     }
 
-    private fun packageMacOs() {
-        // TODO: create binary by copying from JDK archive
+    private fun packageMacOs(dirDistributableApp: Path, jpackageJMods: Path) {
+        val dirContents = dirDistributableApp.resolve("Contents")
+        dirContents.createDirectories()
+
+        // Generate PkgInfo
+        val pkgInfo: Path = dirContents.resolve("PkgInfo")
+        createPkgInfo(pkgInfo)
+
+        // Generate Info.plist
+        val infoPlist = dirContents.resolve("Info.plist")
+        createInfoPlist(infoPlist)
+
+        val dirMacOs = dirContents.resolve("MacOS")
+        val dirApp = dirContents.resolve("app")
+        val dirRuntime = dirContents.resolve("runtime/Contents")
+        val dirResources = dirContents.resolve("Resources")
+
+        // Create launcher
+        dirMacOs.createDirectories()
+        val resAppLauncher = "classes/jdk/jpackage/internal/resources/jpackageapplauncher"
+        val launcher = dirMacOs.resolve(packageName.get())
+        extractZip(jpackageJMods, resAppLauncher, launcher)
+        if (currentOS.isUnix()) {
+            Files.setPosixFilePermissions(launcher, posixExecutable)
+        }
+
+        // Copy app
+        syncDir(libsDir.get().asPath(), dirApp)
+
+        // Create config file
+        val fileConfig = dirApp.resolve("${packageName.get()}.cfg")
+        createConfig(fileConfig)
+        if (currentOS.isUnix()) {
+            Files.setPosixFilePermissions(fileConfig, posixRegular)
+        }
+
+        // Copy icon
+        dirResources.createDirectories()
+        val icon = iconFile.asPath()
+        icon.copyTo(dirResources.resolve(icon.fileName))
+
+        // Copy runtime
+        val dirRuntimeHome = dirRuntime.resolve("Home")
+        val dirRuntimeMacOs = dirRuntime.resolve("MacOS")
+        dirRuntime.createDirectories()
+        dirRuntimeMacOs.createDirectories()
+        syncDir(runtimeImage.asPath(), dirRuntimeHome)
+
+        // Generate Info.plist
+        val runtimeInfoPlist = dirRuntime.resolve("Info.plist")
+        createRuntimeInfoPlist(runtimeInfoPlist)
+
+        // File libjli.dylib needs to be copied to "MacOS"
+        val libjli = "libjli.dylib"
+        Files.walk(runtimeImage.asPath().resolve("lib")).use { walk ->
+            val jli = walk.filter { file: Path -> file.fileName.toString() == libjli }.findFirst().get()
+            jli.copyTo(dirRuntimeMacOs.resolve(libjli))
+        }
+    }
+
+    private fun createPkgInfo(pkgInfo: Path) {
+        Files.newOutputStream(pkgInfo).use { fos ->
+            fos.bufferedWriter().use { br ->
+                br.write("APPL????")
+            }
+        }
+    }
+
+    private fun createInfoPlist(infoPlist: Path) {
+        val dict = NSDictionary()
+
+        // See https://developer.apple.com/documentation/bundleresources/information_property_list
+        // for details on these properties.
+        dict["LSMinimumSystemVersion"] = NSString("10.11")
+        dict["CFBundleDevelopmentRegion"] = NSString("English")
+        dict["CFBundleAllowMixedLocalizations"] = NSNumber(true)
+        dict["CFBundleExecutable"] = NSString(packageName.get())
+        dict["CFBundleIconFile"] = NSString(iconFile.asPath().fileName.toString())
+        dict["CFBundleIdentifier"] = NSString(nonValidatedMacBundleID.get())
+        dict["CFBundleInfoDictionaryVersion"] = NSString("6.0")
+        dict["CFBundleName"] = NSString(packageName.get())
+        dict["CFBundlePackageType"] = NSString("APPL")
+        dict["CFBundleShortVersionString"] = NSString(packageVersion.get())
+        dict["CFBundleSignature"] = NSString("????")
+        if (macAppCategory.isPresent) {
+            dict["LSApplicationCategoryType"] = NSString(macAppCategory.get())
+        }
+        dict["CFBundleVersion"] = NSString(packageVersion.get())
+        dict["NSHumanReadableCopyright"] = NSString(packageCopyright.get())
+        dict["NSHighResolutionCapable"] = NSString("true")
+        dict["NSMicrophoneUsageDescription"] =
+            NSString("The application ${packageName.get()} is requesting access to the microphone.")
+
+        XMLPropertyListWriter.write(dict, infoPlist)
+    }
+
+    private fun createRuntimeInfoPlist(runtimeInfoPlist: Path) {
+        val dict = NSDictionary()
+
+        dict["CFBundleDevelopmentRegion"] = NSString("English")
+        dict["CFBundleExecutable"] = NSString("libjli.dylib")
+        dict["CFBundleIdentifier"] = NSString("com.oracle.java." + nonValidatedMacBundleID.get())
+        dict["CFBundleInfoDictionaryVersion"] = NSString("7.0")
+        dict["CFBundleName"] = NSString("Java Runtime Image")
+        dict["CFBundlePackageType"] = NSString("BNDL")
+        dict["CFBundleShortVersionString"] = NSString(packageVersion.get())
+        dict["CFBundleSignature"] = NSString("????")
+        dict["CFBundleVersion"] = NSString(packageVersion.get())
+
+        XMLPropertyListWriter.write(dict, runtimeInfoPlist)
     }
 
     private fun extractZip(zipFile: Path, zipResource: String, targetFile: Path) {
@@ -558,6 +677,11 @@ abstract class DistributableAppTask @Inject constructor(
                     writeLn("java-options=$arg")
                 }
                 writeLn("java-options=-D$SKIKO_LIBRARY_PATH=${appDir()}")
+                if (target.os == MacOS) {
+                    macDockName.orNull?.let { dockName ->
+                        writeLn("java-options=-Xdock:name=$dockName")
+                    }
+                }
                 if (launcherArgs.get().isNotEmpty()) {
                     writeLn()
                     writeLn("[ArgOptions]")

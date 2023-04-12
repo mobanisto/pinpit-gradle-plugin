@@ -71,15 +71,18 @@ dependencies {
     // include relocated download task to avoid potential runtime conflicts
     embedded("de.undercouch:gradle-download-task:4.1.1")
 
+    // When adding more embedded dependencies, do not forget to add included packages to the list
+    // in the 'shadowJar' task below.
     embedded("org.jetbrains.kotlinx:kotlinx-serialization-json:${BuildProperties.serializationVersion}")
     embedded("org.jetbrains.kotlinx:kotlinx-serialization-core:${BuildProperties.serializationVersion}")
     embedded("org.jetbrains.kotlinx:kotlinx-serialization-core-jvm:${BuildProperties.serializationVersion}")
     embedded("org.tukaani:xz:1.9")
     embedded("org.apache.commons:commons-compress:1.22")
+    embedded("com.googlecode.plist:dd-plist:1.26")
 }
 
 val shadow = tasks.named<ShadowJar>("shadowJar") {
-    for (fromPackage in listOf("de.undercouch", "org.apache.commons.compress", "org.tukaani.xz")) {
+    for (fromPackage in listOf("de.undercouch", "org.apache.commons.compress", "org.tukaani.xz", "com.dd.plist")) {
         relocate(fromPackage, "de.mobanisto.pinpit.$fromPackage")
     }
     archiveClassifier.set("shadow")

@@ -51,7 +51,7 @@ abstract class DownloadJdkTask @Inject constructor() : AbstractPinpitTask() {
         val osToExtension = mapOf(
             "linux" to "tar.gz",
             "windows" to "zip",
-            "mac" to "tar.gz",
+            "macos" to "tar.gz",
         )
     }
 
@@ -69,10 +69,11 @@ abstract class DownloadJdkTask @Inject constructor() : AbstractPinpitTask() {
         val vendor = jvmVendor.get()
         val info = jdkInfo(jvmVendor.get(), jvmVersion.get()) ?: return
         if (vendor == "adoptium") {
+            val osSource = if (os == "macos") "mac" else os
             val fileVersion = jvmVersion.get().replace("+", "_")
             val urlVersion = URLEncoder.encode(jvmVersion.get(), Charsets.UTF_8)
             val url = "https://github.com/adoptium/temurin${info.major}-binaries/releases/download/" +
-                "jdk-$urlVersion/OpenJDK${info.major}U-jdk_${arch}_${os}_hotspot_$fileVersion.$extension"
+                "jdk-$urlVersion/OpenJDK${info.major}U-jdk_${arch}_${osSource}_hotspot_$fileVersion.$extension"
             val nameFile = "OpenJDK${info.major}U-jdk_${arch}_${os}_hotspot_$fileVersion.$extension"
             val nameDir = "OpenJDK${info.major}U-jdk_${arch}_${os}_hotspot_$fileVersion"
             val nameDirContent = "jdk-${info.major}.${info.minor}.${info.patch}+${info.build}"

@@ -23,7 +23,7 @@ internal fun MacOSNotarizationSettings?.validate(
         ERR_NOTARIZATION_SETTINGS_ARE_NOT_PROVIDED
     }
 
-    val bundleID = validateBundleID(bundleIDProvider)
+    val bundleID = validateBundleID(bundleIDProvider.orNull)
     check(!appleID.orNull.isNullOrEmpty()) {
         ERR_APPLE_ID_IS_EMPTY
     }

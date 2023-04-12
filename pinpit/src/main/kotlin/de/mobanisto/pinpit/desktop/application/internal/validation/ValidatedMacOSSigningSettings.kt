@@ -39,7 +39,7 @@ internal fun MacOSSigningSettings.validate(
 ): ValidatedMacOSSigningSettings {
     check(currentOS == OS.MacOS) { ERR_WRONG_OS }
 
-    val bundleID = validateBundleID(bundleIDProvider)
+    val bundleID = validateBundleID(bundleIDProvider.orNull)
     val signPrefix = this.prefix.orNull
         ?: (bundleID.substringBeforeLast(".") + ".").takeIf { bundleID.contains('.') }
         ?: error(ERR_UNKNOWN_PREFIX)
@@ -72,10 +72,10 @@ private val ERR_UNKNOWN_PREFIX =
     """|$ERR_PREFIX Could not infer signing prefix. To specify:
        |  * Set bundleID to reverse DNS notation (e.g. "com.mycompany.myapp");
        |  * Use '${PinpitProperties.MAC_SIGN_PREFIX}' Gradle property;
-       |  * Use 'nativeExecutables.macOS.signing.prefix' DSL property;
+       |  * Use 'nativeDistributions.macOS.signing.prefix' DSL property;
     """.trimMargin()
 private val ERR_UNKNOWN_SIGN_ID =
     """|$ERR_PREFIX signing identity is null or empty. To specify:
        |  * Use '${PinpitProperties.MAC_SIGN_ID}' Gradle property;
-       |  * Use 'nativeExecutables.macOS.signing.identity' DSL property;
+       |  * Use 'nativeDistributions.macOS.signing.identity' DSL property;
     """.trimMargin()

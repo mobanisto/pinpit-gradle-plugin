@@ -23,9 +23,9 @@ abstract class AbstractBasePlatformSettings : AbstractPlatformSettings() {
 abstract class AbstractMacOSPlatformSettings : AbstractBasePlatformSettings() {
     var packageName: String? = null
 
-    var packageBuildVersion: String? = null
-    var dmgPackageVersion: String? = null
-    var dmgPackageBuildVersion: String? = null
+    // var packageBuildVersion: String? = null
+    // var dmgPackageVersion: String? = null
+    // var dmgPackageBuildVersion: String? = null
     var appCategory: String? = null
 
     /**
@@ -37,15 +37,21 @@ abstract class AbstractMacOSPlatformSettings : AbstractBasePlatformSettings() {
      */
     var bundleID: String? = null
 
-    val signing: MacOSSigningSettings = objects.newInstance(MacOSSigningSettings::class.java)
-    fun signing(fn: Action<MacOSSigningSettings>) {
-        fn.execute(signing)
-    }
+    /*
+     * Disable signing and notarization for now. Let's document how to sign and notarize a distributable
+     * package built on any platform as a final step on macOS. We can re-enable this potentially for use
+     * on builds running on macOS only, or find a cross-platform method for these steps.
+     */
 
-    val notarization: MacOSNotarizationSettings = objects.newInstance(MacOSNotarizationSettings::class.java)
-    fun notarization(fn: Action<MacOSNotarizationSettings>) {
-        fn.execute(notarization)
-    }
+//    val signing: MacOSSigningSettings = objects.newInstance(MacOSSigningSettings::class.java)
+//    fun signing(fn: Action<MacOSSigningSettings>) {
+//        fn.execute(signing)
+//    }
+
+//    val notarization: MacOSNotarizationSettings = objects.newInstance(MacOSNotarizationSettings::class.java)
+//    fun notarization(fn: Action<MacOSNotarizationSettings>) {
+//        fn.execute(notarization)
+//    }
 }
 
 abstract class NativeApplicationMacOSPlatformSettings : AbstractMacOSPlatformSettings()
@@ -53,18 +59,26 @@ abstract class NativeApplicationMacOSPlatformSettings : AbstractMacOSPlatformSet
 abstract class JvmMacOSPlatformSettings : AbstractMacOSPlatformSettings() {
     var dockName: String? = null
     var setDockNameSameAsPackageName: Boolean = true
-    var appStore: Boolean = false
-    var entitlementsFile: RegularFileProperty = objects.fileProperty()
-    var runtimeEntitlementsFile: RegularFileProperty = objects.fileProperty()
-    var pkgPackageVersion: String? = null
-    var pkgPackageBuildVersion: String? = null
+    // var appStore: Boolean = false
+    // var entitlementsFile: RegularFileProperty = objects.fileProperty()
+    // var runtimeEntitlementsFile: RegularFileProperty = objects.fileProperty()
+    // var pkgPackageVersion: String? = null
+    // var pkgPackageBuildVersion: String? = null
 
-    val provisioningProfile: RegularFileProperty = objects.fileProperty()
-    val runtimeProvisioningProfile: RegularFileProperty = objects.fileProperty()
+    // val provisioningProfile: RegularFileProperty = objects.fileProperty()
+    // val runtimeProvisioningProfile: RegularFileProperty = objects.fileProperty()
 
-    internal val infoPlistSettings = InfoPlistSettings()
-    fun infoPlist(fn: Action<InfoPlistSettings>) {
-        fn.execute(infoPlistSettings)
+    // internal val infoPlistSettings = InfoPlistSettings()
+    // fun infoPlist(fn: Action<InfoPlistSettings>) {
+    //     fn.execute(infoPlistSettings)
+    // }
+
+    val distributableArchives: MutableList<DistributableArchiveSettings> = arrayListOf()
+    open fun distributableArchive(fn: Action<DistributableArchiveSettings>) {
+        val distributableArchive = objects.newInstance(DistributableArchiveSettings::class.java).also {
+            distributableArchives.add(it)
+        }
+        fn.execute(distributableArchive)
     }
 }
 

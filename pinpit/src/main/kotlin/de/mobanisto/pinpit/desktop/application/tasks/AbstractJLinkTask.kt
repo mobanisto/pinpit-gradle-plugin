@@ -6,7 +6,9 @@
 package de.mobanisto.pinpit.desktop.application.tasks
 
 import de.mobanisto.pinpit.desktop.application.internal.JvmRuntimeProperties
+import de.mobanisto.pinpit.desktop.application.internal.OS.MacOS
 import de.mobanisto.pinpit.desktop.application.internal.RuntimeCompressionLevel
+import de.mobanisto.pinpit.desktop.application.internal.Target
 import de.mobanisto.pinpit.desktop.application.internal.cliArg
 import de.mobanisto.pinpit.desktop.application.internal.ioFile
 import de.mobanisto.pinpit.desktop.application.internal.notNullProperty
@@ -20,10 +22,13 @@ import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.Optional
 import java.io.File
 import java.nio.file.Path
+import javax.inject.Inject
 
 // todo: public DSL
 // todo: deduplicate if multiple runtimes are created
-abstract class AbstractJLinkTask : AbstractJvmToolOperationTask("jlink") {
+abstract class AbstractJLinkTask @Inject constructor(
+    @Input val target: Target,
+) : AbstractJvmToolOperationTask("jlink") {
     @Internal
     val jdk: Property<Path> = objects.notNullProperty()
 
@@ -61,7 +66,14 @@ abstract class AbstractJLinkTask : AbstractJvmToolOperationTask("jlink") {
             cliArg("--add-modules", m)
         }
 
-        val jmods = jdk.get().resolve("jmods")
+        val dirJdk = jdk.get()
+        val jmods = if (target.os == MacOS) {
+            val home = dirJdk.resolve("Contents/Home")
+            home.resolve("jmods")
+        } else {
+            dirJdk.resolve("jmods")
+        }
+
         cliArg("--module-path", jmods)
 
         cliArg("--strip-debug", stripDebug)

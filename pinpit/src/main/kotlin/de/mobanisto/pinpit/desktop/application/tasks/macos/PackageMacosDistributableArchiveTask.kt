@@ -3,15 +3,17 @@
  * Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE.txt file.
  */
 
-package de.mobanisto.pinpit.desktop.application.tasks.windows
+package de.mobanisto.pinpit.desktop.application.tasks.macos
 
 import de.mobanisto.pinpit.desktop.application.dsl.ArchiveFormat
 import de.mobanisto.pinpit.desktop.application.dsl.TargetFormat.DistributableArchive
 import de.mobanisto.pinpit.desktop.application.internal.JvmRuntimeProperties
 import de.mobanisto.pinpit.desktop.application.internal.Target
+import de.mobanisto.pinpit.desktop.application.internal.currentOS
 import de.mobanisto.pinpit.desktop.application.internal.files.asPath
 import de.mobanisto.pinpit.desktop.application.internal.files.findOutputFileOrDir
 import de.mobanisto.pinpit.desktop.application.internal.ioFile
+import de.mobanisto.pinpit.desktop.application.internal.isUnix
 import de.mobanisto.pinpit.desktop.application.internal.nullableProperty
 import de.mobanisto.pinpit.desktop.application.internal.provider
 import de.mobanisto.pinpit.desktop.application.tasks.CustomPackageTask
@@ -32,13 +34,27 @@ import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.SimpleFileVisitor
 import java.nio.file.attribute.BasicFileAttributes
+import java.nio.file.attribute.PosixFilePermission
+import java.nio.file.attribute.PosixFilePermission.GROUP_EXECUTE
+import java.nio.file.attribute.PosixFilePermission.GROUP_READ
+import java.nio.file.attribute.PosixFilePermission.GROUP_WRITE
+import java.nio.file.attribute.PosixFilePermission.OTHERS_EXECUTE
+import java.nio.file.attribute.PosixFilePermission.OTHERS_READ
+import java.nio.file.attribute.PosixFilePermission.OTHERS_WRITE
+import java.nio.file.attribute.PosixFilePermission.OWNER_EXECUTE
+import java.nio.file.attribute.PosixFilePermission.OWNER_READ
+import java.nio.file.attribute.PosixFilePermission.OWNER_WRITE
 import javax.inject.Inject
 import kotlin.io.path.isRegularFile
 
-abstract class PackageWindowsDistributableArchiveTask @Inject constructor(
+abstract class PackageMacosDistributableArchiveTask @Inject constructor(
     target: Target,
     override val targetFormat: DistributableArchive,
 ) : CustomPackageTask(target, targetFormat) {
+
+    @get:Input
+    @get:Optional
+    val macosPackageName: Property<String?> = objects.nullableProperty()
 
     @get:Input
     @get:Optional
@@ -71,33 +87,32 @@ abstract class PackageWindowsDistributableArchiveTask @Inject constructor(
         logger.lifecycle("destination: $destination")
         destination.asFile.mkdirs()
 
-        val distributableApp = distributableApp.get().dir(packageName).get()
+        val appName = "${packageName.get()}.app"
+        val distributableApp = distributableApp.asPath().resolve(appName)
         logger.lifecycle("distributable app: $distributableApp")
 
         logger.lifecycle("working dir: ${workingDir.get()}")
         fileOperations.delete(workingDir)
 
-        val fullName = "${packageName.get()}-${target.arch.id}-${packageVersion.get()}"
+        val fullName = "${macosPackageName.get()}-${target.arch.id}-${packageVersion.get()}"
         val archive = destination.file("$fullName.${targetFormat.fileExt}")
 
-        val pathDistributableApp = distributableApp.asPath()
-
         if (targetFormat.archiveFormat != ArchiveFormat.Zip) {
-            throw GradleException("Invalid archive format for Windows: ${targetFormat.archiveFormat}. Please use 'zip'")
+            throw GradleException("Invalid archive format for MacOS: ${targetFormat.archiveFormat}. Please use 'zip'")
         }
 
         archive.asFile.outputStream().use { fis ->
             ZipArchiveOutputStream(fis).use { zip ->
                 Files.walkFileTree(
-                    pathDistributableApp,
+                    distributableApp,
                     object : SimpleFileVisitor<Path>() {
                         override fun preVisitDirectory(dir: Path, attrs: BasicFileAttributes): FileVisitResult {
-                            zip.packageFile(pathDistributableApp, dir, fullName)
+                            zip.packageFile(distributableApp, dir, appName)
                             return FileVisitResult.CONTINUE
                         }
 
                         override fun visitFile(file: Path, attrs: BasicFileAttributes): FileVisitResult {
-                            zip.packageFile(pathDistributableApp, file, fullName)
+                            zip.packageFile(distributableApp, file, appName)
                             return FileVisitResult.CONTINUE
                         }
                     }
@@ -106,10 +121,33 @@ abstract class PackageWindowsDistributableArchiveTask @Inject constructor(
         }
     }
 
+    private val permissions = arrayOf(
+        OWNER_READ, OWNER_WRITE, OWNER_EXECUTE,
+        GROUP_READ, GROUP_WRITE, GROUP_EXECUTE,
+        OTHERS_READ, OTHERS_WRITE, OTHERS_EXECUTE
+    )
+
+    private fun mode(posix: MutableSet<PosixFilePermission>): Int {
+        var mode = 0
+        for (i in permissions.indices) {
+            if (posix.contains(permissions[i])) {
+                mode = mode.or(1 shl (permissions.size - i - 1))
+            }
+        }
+        return mode
+    }
+
     private fun ZipArchiveOutputStream.packageFile(dir: Path, file: Path, prefix: String) {
         val relative = dir.relativize(file)
         val entry = createArchiveEntry(file, "$prefix/$relative") as ZipArchiveEntry
+        val mode = if (currentOS.isUnix()) {
+            mode(Files.getPosixFilePermissions(file))
+        } else {
+            // TODO: set permissions based on rules like for Linux
+            "0755".toInt(8)
+        }
         putArchiveEntry(entry)
+        entry.unixMode = mode
         if (file.isRegularFile()) {
             Files.copy(file, this)
         }
