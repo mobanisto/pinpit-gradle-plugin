@@ -206,36 +206,58 @@ installer and a distributable zip archive:
             }
 ```
 
+And macOS-specific options so that we can also package a distributable zip archive:
+```kotlin
+            macOS {
+                packageName = "PinpitComposeHelloWorld"
+                bundleID = "de.mobanisto.hello.world"
+                appCategory = "public.app-category.utilities"
+                distributableArchive {
+                    format = "zip"
+                    arch = "arm64"
+                }
+            }
+```
+
 This will add a set of tasks to your build:
 ```
 Pinpit tasks
 ------------
 pinpitCheckRuntimeLinuxX64 - Checks that the JDK used for building is compatible with the distribution JVM.
+pinpitCheckRuntimeMacosArm64 - Checks that the JDK used for building is compatible with the distribution JVM.
 pinpitCheckRuntimeWindowsX64 - Checks that the JDK used for building is compatible with the distribution JVM.
 pinpitCreateDefaultDistributable - Creates a directory for each system and architecture containing all files to be distributed including launcher, app and runtime image.
 pinpitCreateDefaultDistributableLinuxX64 - Creates a directory for LinuxX64 containing all files to be distributed including launcher, app and runtime image.
+pinpitCreateDefaultDistributableMacosArm64 - Creates a directory for MacosArm64 containing all files to be distributed including launcher, app and runtime image.
 pinpitCreateDefaultDistributableWindowsX64 - Creates a directory for WindowsX64 containing all files to be distributed including launcher, app and runtime image.
 pinpitCreateDefaultRuntime - Creates a runtime image for each system and architecture using jlink.
 pinpitCreateDefaultRuntimeImageLinuxX64 - Creates a runtime image from the JVM for LinuxX64 using jlink.
+pinpitCreateDefaultRuntimeImageMacosArm64 - Creates a runtime image from the JVM for MacosArm64 using jlink.
 pinpitCreateDefaultRuntimeImageWindowsX64 - Creates a runtime image from the JVM for WindowsX64 using jlink.
 pinpitDownloadJdkLinuxX64 - Downloads the JDK for LinuxX64 that is used to derive a runtime to distribute with the app.
+pinpitDownloadJdkMacosArm64 - Downloads the JDK for MacosArm64 that is used to derive a runtime to distribute with the app.
 pinpitDownloadJdkWindowsX64 - Downloads the JDK for WindowsX64 that is used to derive a runtime to distribute with the app.
 pinpitPackageDefault - Builds packages for all systems and architectures.
 pinpitPackageDefaultDebUbuntuBionicX64 - Builds a DEB package for LinuxX64.
 pinpitPackageDefaultDebUbuntuFocalX64 - Builds a DEB package for LinuxX64.
 pinpitPackageDefaultDistributableTarGzLinuxX64 - Builds a distributable TarGz archive for LinuxX64.
+pinpitPackageDefaultDistributableZipMacosArm64 - Builds a distributable Zip archive for MacosArm64.
 pinpitPackageDefaultDistributableZipWindowsX64 - Builds a distributable Zip archive for WindowsX64.
 pinpitPackageDefaultMsiX64 - Builds an MSI package for WindowsX64.
 pinpitPackageDefaultUberJar - Packages an Uber-Jar for each system and architecture.
 pinpitPackageDefaultUberJarForLinuxX64 - Packages an Uber-Jar for LinuxX64.
+pinpitPackageDefaultUberJarForMacosArm64 - Packages an Uber-Jar for MacosArm64.
 pinpitPackageDefaultUberJarForWindowsX64 - Packages an Uber-Jar for WindowsX64.
 pinpitPrepareAppResourcesLinuxX64 - Merge all app resources for LinuxX64 into a single build directory.
+pinpitPrepareAppResourcesMacosArm64 - Merge all app resources for MacosArm64 into a single build directory.
 pinpitPrepareAppResourcesWindowsX64 - Merge all app resources for WindowsX64 into a single build directory.
 pinpitRun - Runs the application.
 pinpitRunDefaultDistributableLinuxX64 - Runs the app from the created distributable directory for LinuxX64.
+pinpitRunDefaultDistributableMacosArm64 - Runs the app from the created distributable directory for MacosArm64.
 pinpitRunDefaultDistributableWindowsX64 - Runs the app from the created distributable directory for WindowsX64.
 pinpitSuggestDebDependencies - Suggests Debian package dependencies to use for the current OS using dpkg.
 pinpitSuggestRuntimeModulesLinuxX64 - Suggests JVM modules to include for the distribution using jdeps.
+pinpitSuggestRuntimeModulesMacosArm64 - Suggests JVM modules to include for the distribution using jdeps.
 pinpitSuggestRuntimeModulesWindowsX64 - Suggests JVM modules to include for the distribution using jdeps.
 pinpitUnpackDefaultComposeDesktopJvmApplicationResources - Unpacks the default Compose resources such as launcher icons.
 ```
@@ -250,11 +272,21 @@ or build the MSI for Windows:
 ./gradlew pinpitPackageDefaultMsiX64
 ```
 
+or build a distributable ZIP for macOS:
+
+```
+./gradlew pinpitPackageDefaultDistributableZipMacosArm64
+```
+
 ## Platform compatibility
 
-It's currently possible to build Linux and Windows packages
-cross-platform from both a Linux and a Windows host system.
-All other combinations do not work yet.
+It's currently possible to build Linux packages cross-platform from any host
+system.
+Building Windows packages works on both Windows and Linux (using Wine).
+Packages for macOS can be built on any platform, however signing and
+notarization currently still requires a macOS device.
+Only distributable zip is supported for macOS, however this format can
+be converted to DMG and PKG on macOS with relatively simple scripts.
 
 One building block for bundling packages for any platform is creating
 a JDK runtime image to ship with the application.
@@ -281,26 +313,19 @@ and install that using `wine msiexec /i wine-mono-7.4.0-x86.msi`.
 Here's a summary of the supported build hosts and target formats and what
 we plan to work on:
 
-| Build host              | Debian/Ubuntu       | Windows | macOS   |
-|:------------------------|---------------------|---------|---------|
-| Target: Linux (deb)     | yes                 | yes     | planned |
-| Target: Linux (tar.gz)  | yes                 | yes     | planned |
-| Target: Windows (MSI)   | yes (Wine required) | yes     | no      |
-| Target: Windows (zip)   | yes (Wine required) | yes     | no      |
-| Target: macOS (PKG)     | planned for Q1 2023 | no      | planned |
-| Target: macOS (DMG)     | planned for Q1 2023 | no      | planned |
-
-Building Debian packages should already be possible on macOS but it has not
-been tested yet.
+| Build host              | Debian/Ubuntu       | Windows | macOS           |
+|:------------------------|---------------------|---------|-----------------|
+| Target: Linux (deb)     | yes                 | yes     | yes             |
+| Target: Linux (tar.gz)  | yes                 | yes     | yes             |
+| Target: Windows (MSI)   | yes (Wine required) | yes     | no              |
+| Target: Windows (zip)   | yes (Wine required) | yes     | no              |
+| Target: macOS (zip)     | yes                 | yes     | yes             |
+| Target: macOS (PKG)     | planned             | no      | postprocess zip |
+| Target: macOS (DMG)     | planned             | no      | postprocess zip |
 
 Building MSI installers on macOS can work on systems for which Wine is
 available. See https://github.com/mobanisto/pinpit-gradle-plugin/issues/11
 for details.
-
-Building macOS packages is planned to be worked on in Q1 2023. While it
-should be defintely possible to re-enable this for building on macOS itself
-our goal here would be to implement this for Linux-based systems in order
-to be able to produce packages on the Linux-CI.
 
 ### Future work
 
@@ -328,6 +353,13 @@ on like [AppImage](https://appimage.org/) and
 For Windows, there are different tools than Wix like Inno Setup or the
 Nullsoft Scriptable Install System (NSIS) that could be used to build
 alternative installers for Windows.
+
+For macOS, signing and notarization still requires the zip files produced
+on any platform to be postprocessed on a macOS box.
+It would be good to implement this in a cross-platform manner.
+There apparently are ways to sign packages cross-platform and Apple has
+release an API that can be used to submit packages for notarization.
+This is being worked on under https://github.com/mobanisto/pinpit-gradle-plugin/issues/23.
 
 ## Development and publishing notes
 
