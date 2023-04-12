@@ -346,6 +346,7 @@ For example, to publish a snapshot version to Maven local, you can use this:
 Before publishing to the plugin portal, add a tag:
 
     git tag -a release-0.X.0 -m "Release 0.X.0"
+    git push --tags
 
 Then publish:
 
