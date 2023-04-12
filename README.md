@@ -10,11 +10,11 @@ old Linux box and also on a CI machine.
 
 It comes as a Gradle plugin and is intended to work for all kinds of
 applications and UI toolkits, however focus is currently put on
-Swing and [Compose for Desktop](https://github.com/JetBrains/compose-jb)
+Swing and [Compose for Desktop](https://github.com/JetBrains/compose-multiplatform)
 as UI toolkits.
 
 pinpit is based on the Compose plugin developed by Jetbrains that lives in
-the [JetBrains/compose-jb](https://github.com/JetBrains/compose-jb)
+the [JetBrains/compose-multiplatform](https://github.com/JetBrains/compose-multiplatform)
 repository.
 We found a bunch of shortcomings while working on some Compose-based
 applications and decided to create a fork detached from the rest of the
