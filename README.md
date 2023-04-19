@@ -87,6 +87,11 @@ val linuxX64: Configuration by configurations.creating {
     extendsFrom(configurations.implementation.get())
     attributes { attribute(attributeUsage, "java-runtime") }
 }
+
+val macosArm64: Configuration by configurations.creating {
+    extendsFrom(configurations.implementation.get())
+    attributes { attribute(attributeUsage, "java-runtime") }
+}
 ```
 
 The main source set is associated with the `currentOs` configuration so
@@ -112,6 +117,7 @@ dependencies {
     currentOs(compose.desktop.currentOs)
     windowsX64(compose.desktop.windows_x64)
     linuxX64(compose.desktop.linux_x64)
+    macosArm64(compose.desktop.macos_arm64)
 }
 ```
 
