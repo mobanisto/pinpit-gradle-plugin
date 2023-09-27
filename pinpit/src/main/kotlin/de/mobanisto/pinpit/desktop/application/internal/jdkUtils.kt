@@ -9,12 +9,24 @@ import org.gradle.api.GradleException
 
 internal fun jdkInfo(jdkVendor: String, jdkVersion: String): JdkInfo? {
     if (jdkVendor == "adoptium") {
-        val match = "(\\d+).(\\d+).(\\d+)\\+(\\d+)".toRegex().matchEntire(jdkVersion)
+        val match = "(\\d+)(\\.\\d+)+\\+(\\d+)".toRegex().matchEntire(jdkVersion)
             ?: throw GradleException("Invalid JDK version: $jdkVersion")
-        val (full, major, minor, patch, build) = match.groupValues
-        return JdkInfo(full, major.toInt(), minor, patch, build)
+        val values = match.groupValues
+        if (values.size < 3) throw GradleException("Invalid JDK version: $jdkVersion")
+        val full = values[0]
+        val feature = values[1]
+        val more = values.subList(2, values.size - 2)
+        val build = values[values.size - 1]
+        return JdkInfo(full, feature.toInt(), more, build)
     }
     return null
 }
 
-data class JdkInfo(val full: String, val major: Int, val minor: String, val patch: String, val build: String)
+// As of JEP322 the name of the first element is 'feature'. There can be an arbitrary number
+// of versions after that.
+data class JdkInfo(
+    val full: String,
+    val feature: Int,
+    val more: List<String>,
+    val build: String
+)

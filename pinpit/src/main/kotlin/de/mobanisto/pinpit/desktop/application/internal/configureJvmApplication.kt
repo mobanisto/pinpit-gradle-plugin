@@ -411,7 +411,7 @@ private fun JvmApplicationContext.configureCommonPackageTasks(
         useBuildTypeForTaskName = false,
     ) {
         dependsOn(downloadJdk)
-        targetJdkVersion.set(jdkInfo.major)
+        targetJdkVersion.set(jdkInfo.feature)
         javaHome.set(app.javaHomeProvider)
         os.set(target.os)
         jdk.set(provider { downloadJdk.get().jdkDir })

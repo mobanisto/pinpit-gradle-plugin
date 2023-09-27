@@ -24,9 +24,7 @@ class JdkVersionsTest : GradlePluginTestBase() {
     }
 
     @Test
-    fun jdk18() = with(customJdkProject(18, "18.0.2+9")) {
-        // Latest released version is actually jdk-18.0.2.1+1, but we currently do not support another dot and number
-        // after the patch version.
+    fun jdk18() = with(customJdkProject(18, "18.0.2.1+1")) {
         testPackageJvmDistributions()
     }
 
