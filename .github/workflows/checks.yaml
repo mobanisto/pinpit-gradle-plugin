@@ -25,8 +25,8 @@ jobs:
            sudo apt update &&
            sudo apt install winehq-stable
     - name: Install Wine Mono
-      run: wget https://dl.winehq.org/wine/wine-mono/7.4.0/wine-mono-7.4.0-x86.msi &&
-           wine msiexec /i wine-mono-7.4.0-x86.msi
+      run: wget https://dl.winehq.org/wine/wine-mono/8.0.0/wine-mono-8.0.0-x86.msi &&
+           wine msiexec /i wine-mono-8.0.0-x86.msi
     - name: Run Gradle tests
       run: ./gradlew check --info --stacktrace
   build-windows:
