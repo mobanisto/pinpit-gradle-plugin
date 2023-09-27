@@ -35,7 +35,6 @@ import de.mobanisto.pinpit.validation.deb.DebContent
 import de.mobanisto.pinpit.validation.deb.DebContentBuilder
 import de.mobanisto.pinpit.validation.deb.NativeDebPackager
 import de.mobanisto.pinpit.validation.deb.ValidateDeb.checkDebsAreEqual
-import org.gradle.internal.impldep.org.testng.Assert
 import org.gradle.testkit.runner.TaskOutcome
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
@@ -429,7 +428,7 @@ class DesktopApplicationTest : GradlePluginTestBase() {
                 val expectedInfoPlist = file("Expected-Info.Plist")
                 val actualInfoPlistNormalized = actualInfoPlist.readText().normalized()
                 val expectedInfoPlistNormalized = expectedInfoPlist.readText().normalized()
-                Assert.assertEquals(actualInfoPlistNormalized, expectedInfoPlistNormalized)
+                assertEquals(actualInfoPlistNormalized, expectedInfoPlistNormalized)
             }
         }
     }
@@ -480,7 +479,7 @@ class DesktopApplicationTest : GradlePluginTestBase() {
                         |${appDir.absolutePath}: valid on disk
                         |${appDir.absolutePath}: satisfies its Designated Requirement
                     """.trimMargin().trim()
-                    Assert.assertEquals(expectedOutput, actualOutput)
+                    assertEquals(expectedOutput, actualOutput)
                 }
 
                 gradle(":pinpitRunDistributable$targetName").build().checks { check ->
