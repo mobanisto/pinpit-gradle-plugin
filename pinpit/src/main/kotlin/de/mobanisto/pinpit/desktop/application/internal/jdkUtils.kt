@@ -9,13 +9,12 @@ import org.gradle.api.GradleException
 
 internal fun jdkInfo(jdkVendor: String, jdkVersion: String): JdkInfo? {
     if (jdkVendor == "adoptium") {
-        val match = "(\\d+)(\\.\\d+)+\\+(\\d+)".toRegex().matchEntire(jdkVersion)
+        val match = "(\\d+)((\\.\\d+)+)?\\+(\\d+)".toRegex().matchEntire(jdkVersion)
             ?: throw GradleException("Invalid JDK version: $jdkVersion")
         val values = match.groupValues
-        if (values.size < 3) throw GradleException("Invalid JDK version: $jdkVersion")
         val full = values[0]
         val feature = values[1]
-        val more = values.subList(2, values.size - 2)
+        val more = values[2].split(".").filterNot { it.isBlank() }
         val build = values[values.size - 1]
         return JdkInfo(full, feature.toInt(), more, build)
     }
