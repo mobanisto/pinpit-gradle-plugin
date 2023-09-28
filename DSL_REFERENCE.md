@@ -74,6 +74,9 @@ Windows options go into a `windows` block:
 * `console`: Boolean (default: `false`) - when set to true, launching the
   app will bring up an additional console window where the user can see
   stdout. Equivalent of JPackage's `--win-console` option.
+* `upgradeUuid`: String - a GUID (MS-specific ID similar to UUID) that needs to
+  remain constant for a single app across updates.
+  Can be generated using online tools, but uppercased regular UUIDs also seem to work fine: `uuidgen | tr a-z A-Z`.
 
 ### MSI options
 
