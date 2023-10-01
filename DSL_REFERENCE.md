@@ -22,6 +22,30 @@ pinpit.desktop {
 }
 ```
 
+### Modules
+
+Each JDK supports a number of modules that can be packaged into the
+application. You can see the list of modules supported by your JVM by
+running `java --list-modules`.
+
+You can specify which modules to bundle with the application like this:
+
+```
+        nativeDistributions {
+            modules("java.sql")
+            modules("java.naming")
+            …
+        }
+```
+
+If you forget to bundle a required module with your application, you're
+going to see exceptions on the console output when running your packaged
+application.
+
+It can be cumbersome to figure out which modules you need to include.
+Pinpit can help you to figure out the modules by running
+`./gradlew pinpitSuggestRuntimeModulesLinuxX64` (on Linux).
+
 ## Linux options
 
 Linux options go into a `linux` block:
