@@ -153,7 +153,6 @@ archive:
                 shortcut = true
                 packageName = "pinpit-compose-hello-world"
                 debMaintainer = "example@example.com"
-                menuGroup = "pinpit"
                 debPackageVersion = versionCode
                 appCategory = "utils"
                 menuGroup = "System;Utility"
