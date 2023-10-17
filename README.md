@@ -13,6 +13,10 @@ applications and UI toolkits, however focus is currently put on
 Swing and [Compose for Desktop](https://github.com/JetBrains/compose-multiplatform)
 as UI toolkits.
 
+This repository hosts the pinpit Gradle plugin. To get started quickly,
+take a look at the main [pinpit](https://github.com/mobanisto/pinpit)
+project that provides tools for setting up working projects easily.
+
 pinpit is based on the Compose plugin developed by Jetbrains that lives in
 the [JetBrains/compose-multiplatform](https://github.com/JetBrains/compose-multiplatform)
 repository.
@@ -58,6 +62,11 @@ or learn from an existing multiplatform app that uses pinpit:
 [sebkur/lanchat](https://github.com/sebkur/lanchat).
 For more details, have a look at the [DSL reference](DSL_REFERENCE.md)
 where we build a description of all available options offered by the DSL.
+
+It can also make sense to create a working project including assets such
+as icons and installer images using the
+[main project](https://github.com/mobanisto/pinpit)'s
+command line interface.
 
 Apply the plugin like this:
 ```kotlin
