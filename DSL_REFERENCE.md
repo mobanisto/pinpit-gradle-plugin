@@ -58,12 +58,22 @@ Linux options go into a `linux` block:
 ```
 
 * `packageName`: String - first part for name of generated `.deb` files.
+* `appCategory`: String - a section to categorize the debian package.
+   See the relevant [chapter](https://www.debian.org/doc/debian-policy/ch-archive.html#sections)
+   on sections in the Debian Policy Manual for details.
+* `menuGroup`: String - a list of menu groups where the launcher will be
+   shown, such as 'Office' or 'Office;WordProcessor'. See the relevant
+   [chapter](https://specifications.freedesktop.org/menu-spec/latest/apa.html)
+   of the Desktop Menu Specification for a list of possible values.
+* `iconFile`: File - an icon image file for the launcher.
+   Use a 500 x 500 pixels PNG image.
+* `debMaintainer`: String - package maintainer email address.
 * `debPackageVersion`: File - fourth part for name of generated `.deb` files.
-* `debPreInst`: File - custom pre-installation script to use
-* `debPostInst`: File - custom post-installation script to use
-* `debPreRm`: File - custom pre-removal script to use
-* `debPostRm`: File - custom post-removal script to use
-* `debLauncher`: File - custom launcher file to include
+* `debPreInst`: File - custom pre-installation script to use.
+* `debPostInst`: File - custom post-installation script to use.
+* `debPreRm`: File - custom pre-removal script to use.
+* `debPostRm`: File - custom post-removal script to use.
+* `debLauncher`: File - custom launcher file to include.
 
 ### DEB options
 
