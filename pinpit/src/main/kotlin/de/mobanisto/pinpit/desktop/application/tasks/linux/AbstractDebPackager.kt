@@ -31,6 +31,7 @@ abstract class AbstractDebPackager constructor(
     private val linuxPackageName: String,
     private val packageVersion: String,
     private val appCategory: String,
+    private val menuGroup: String?,
     private val packageVendor: String,
     private val debMaintainer: String,
     private val packageDescription: String,
@@ -61,7 +62,13 @@ abstract class AbstractDebPackager constructor(
         val dirShareDoc = dirPackage.resolve("share/doc/")
         dirShareDoc.createDirectories(asFileAttribute(posixExecutable))
         debCopyright?.copy(dirShareDoc.resolve("copyright"), posixRegular)
-        debLauncher?.copy(dirLib.resolve("$linuxPackageName-$packageName.desktop"), posixRegular)
+
+        val fileLauncher = dirLib.resolve("$linuxPackageName-$packageName.desktop")
+        if (debLauncher == null) {
+            createLauncherFile(fileLauncher)
+        } else {
+            debLauncher.copy(fileLauncher, posixRegular)
+        }
 
         syncDir(distributableApp.resolve("bin"), dirBin)
         syncDir(distributableApp.resolve("lib"), dirLib) {
@@ -88,6 +95,24 @@ abstract class AbstractDebPackager constructor(
         } else {
             Files.copy(this, target)
             target.setPosixFilePermissions(permissions)
+        }
+    }
+
+    private fun createLauncherFile(fileLauncher: Path) {
+        newBufferedWriter(fileLauncher).use { writer ->
+            writer.apply {
+                writeLn("[Desktop Entry]")
+                writeLn("Name=$packageName")
+                writeLn("Comment=$packageDescription")
+                writeLn("Exec=/opt/$linuxPackageName/bin/$packageName")
+                writeLn("Icon=/opt/$linuxPackageName/lib/$packageName.png")
+                writeLn("Terminal=false")
+                writeLn("Type=Application")
+                if (menuGroup != null) {
+                    writeLn("Categories=$menuGroup")
+                }
+                writeLn("MimeType=")
+            }
         }
     }
 

@@ -43,6 +43,7 @@ class JvmDebPackager constructor(
     linuxPackageName: String,
     packageVersion: String,
     appCategory: String,
+    menuGroup: String?,
     packageVendor: String,
     debMaintainer: String,
     packageDescription: String,
@@ -59,6 +60,7 @@ class JvmDebPackager constructor(
     linuxPackageName,
     packageVersion,
     appCategory,
+    menuGroup,
     packageVendor,
     debMaintainer,
     packageDescription,
@@ -207,7 +209,7 @@ class JvmDebPackager constructor(
             DATA -> {
                 // some shared objects that are shipped in data.tar.xz
                 val lib = setOf("libapplauncher.so") // in /opt/package-name/lib/
-                val runtimeLib = setOf("jexec", "jspawnhelper") // in /opt/package-name/lib/runtime/
+                val runtimeLib = setOf("jexec", "jspawnhelper") // in 6/package-name/lib/runtime/
 
                 // we don't have the path /opt/package-name available at this point, so guess only based on
                 // parent directories "bin/", "lib/", "runtime/lib"
