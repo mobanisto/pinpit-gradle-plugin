@@ -139,7 +139,7 @@ abstract class DistributableAppTask @Inject constructor(
 
     @get:Input
     @get:Optional
-    val macPackageName: Property<String?> = objects.nullableProperty()
+    val macosPackageName: Property<String?> = objects.nullableProperty()
 
     @get:Input
     @get:Optional
@@ -397,7 +397,12 @@ abstract class DistributableAppTask @Inject constructor(
         val dir = destinationDir.asPath()
 
         val dirName = if (target.os == MacOS) {
-            "${packageName.get()}.app"
+            val packageName = if (macosPackageName.isPresent) {
+                macosPackageName.get()
+            } else {
+                packageName.get()
+            }
+            "${packageName}.app"
         } else {
             packageName.get()
         }

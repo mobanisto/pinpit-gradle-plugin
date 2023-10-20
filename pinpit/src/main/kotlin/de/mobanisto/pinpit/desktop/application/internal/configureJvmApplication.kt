@@ -770,10 +770,10 @@ internal fun JvmApplicationContext.configurePlatformSettings(
 
         MacOS -> {
             app.nativeDistributions.macOS.also { mac ->
-                packageTask.macPackageName.set(provider { mac.packageName })
+                packageTask.macosPackageName.set(provider { mac.packageName })
                 packageTask.macDockName.set(
                     if (mac.setDockNameSameAsPackageName) provider { mac.dockName }.orElse(
-                        packageTask.macPackageName
+                        packageTask.macosPackageName
                     ).orElse(packageTask.packageName)
                     else provider { mac.dockName }
                 )
