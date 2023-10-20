@@ -99,6 +99,7 @@ abstract class AbstractDebPackager constructor(
     }
 
     private fun createLauncherFile(fileLauncher: Path) {
+        fileLauncher.parent.createDirectories(asFileAttribute(posixExecutable))
         newBufferedWriter(fileLauncher).use { writer ->
             writer.apply {
                 writeLn("[Desktop Entry]")
