@@ -73,7 +73,13 @@ Linux options go into a `linux` block:
 * `debPostInst`: File - custom post-installation script to use.
 * `debPreRm`: File - custom pre-removal script to use.
 * `debPostRm`: File - custom post-removal script to use.
-* `debLauncher`: File - custom launcher file to include.
+* `debLauncher`: File - custom launcher file to include. By default pinpit
+  will generate such as file for your app using the other values such as
+  `packageName`, `packageDescription` and `menuGroup`.
+  If you need to apply more specific customizations, you can supply your
+  own handcrafted file here. See the
+  [Desktop Entry Specification](https://specifications.freedesktop.org/desktop-entry-spec/desktop-entry-spec-latest.html)
+  for details.
 
 ### DEB options
 
