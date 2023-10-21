@@ -402,7 +402,7 @@ abstract class DistributableAppTask @Inject constructor(
             } else {
                 packageName.get()
             }
-            "${packageName}.app"
+            "$packageName.app"
         } else {
             packageName.get()
         }

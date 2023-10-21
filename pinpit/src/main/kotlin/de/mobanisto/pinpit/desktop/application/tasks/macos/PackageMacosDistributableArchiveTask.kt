@@ -93,14 +93,14 @@ abstract class PackageMacosDistributableArchiveTask @Inject constructor(
             packageName.get()
         }
 
-        val appName = "${packageName}.app"
+        val appName = "$packageName.app"
         val distributableApp = distributableApp.asPath().resolve(appName)
         logger.lifecycle("distributable app: $distributableApp")
 
         logger.lifecycle("working dir: ${workingDir.get()}")
         fileOperations.delete(workingDir)
 
-        val fullName = "${packageName}-${target.arch.id}-${packageVersion.get()}"
+        val fullName = "$packageName-${target.arch.id}-${packageVersion.get()}"
         val archive = destination.file("$fullName.${targetFormat.fileExt}")
 
         if (targetFormat.archiveFormat != ArchiveFormat.Zip) {
