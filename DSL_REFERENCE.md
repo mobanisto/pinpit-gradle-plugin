@@ -138,3 +138,21 @@ MSI options go into an `msi` block:
 * `bitmapBanner`: Fie - a 493 x 58 pixels bmp image file used as a top
   banner on other dialogs
   (see [Wix UI Customization Guide](https://wixtoolset.org/docs/v3/wixui/wixui_customizations/#replacing-the-default-bitmaps))
+
+## macOS options
+
+macOS options go into a `macOS` block:
+```kotlin
+        nativeDistributions {
+            macOS {
+                …
+            }
+        }
+```
+
+* `bundleID`: String - a unique identifier for your app.
+* `appCategory`: String - a category for your app. See the
+  [reference](https://developer.apple.com/documentation/bundleresources/information_property_list/lsapplicationcategorytype)
+  for possible values.
+* `iconFile`: File - an icon image file for the launcher.
+   Use an ICNS image that contains various image versions with different sizes.
