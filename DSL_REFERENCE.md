@@ -117,6 +117,8 @@ Windows options go into a `windows` block:
 * `upgradeUuid`: String - a GUID (MS-specific ID similar to UUID) that needs to
   remain constant for a single app across updates.
   Can be generated using online tools, but uppercased regular UUIDs also seem to work fine: `uuidgen | tr a-z A-Z`.
+* `iconFile`: File - an icon image file for the launcher.
+   Use an ICO image with image versions of sizes 16, 32, 48, 256.
 
 ### MSI options
 
