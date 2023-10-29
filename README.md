@@ -292,6 +292,12 @@ or build a distributable ZIP for macOS:
 ./gradlew pinpitPackageDefaultDistributableZipMacosArm64
 ```
 
+To build all packages and installers configured, run this:
+
+```
+./gradlew pinpitPackageDefault
+```
+
 ### Signing and notarization
 
 The distributable zip built for macOS needs to be signed and notarized so
