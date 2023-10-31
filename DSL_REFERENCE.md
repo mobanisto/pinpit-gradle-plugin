@@ -22,6 +22,21 @@ pinpit.desktop {
 }
 ```
 
+You can add JVM arguments like this:
+
+```
+        nativeDistributions {
+            jvmArgs("-Xmx4G")
+        }
+```
+like that, you can also specify options such as this one:
+
+```
+        nativeDistributions {
+            jvmArgs("--add-opens", "java.desktop/sun.awt=ALL-UNNAMED")
+        }
+```
+
 ### Modules
 
 Each JDK supports a number of modules that can be packaged into the
