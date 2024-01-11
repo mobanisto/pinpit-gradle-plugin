@@ -9,7 +9,7 @@ import org.gradle.api.GradleException
 
 internal fun jdkInfo(jdkVendor: String, jdkVersion: String): JdkInfo? {
     if (jdkVendor == "adoptium") {
-        val match = "(\\d+)((\\.\\d+)+)?\\+(\\d+)".toRegex().matchEntire(jdkVersion)
+        val match = "(\\d+)((\\.\\d+)+)?\\+(\\d+)((\\.\\d+)+)?".toRegex().matchEntire(jdkVersion)
             ?: throw GradleException("Invalid JDK version: $jdkVersion")
         val values = match.groupValues
         val full = values[0]
