@@ -15,8 +15,8 @@ import java.io.File
 import java.nio.file.Files.exists
 import java.nio.file.Paths
 
-internal const val DOWNLOAD_PE_REBRANDER_TASK_NAME = "downloadPeRebrander"
-internal const val UNZIP_PE_REBRANDER_TASK_NAME = "unzipPeRebrander"
+internal const val DOWNLOAD_PE_REBRANDER_TASK_NAME = "pinpitDownloadPeRebrander"
+internal const val UNZIP_PE_REBRANDER_TASK_NAME = "pinpitUnzipPeRebrander"
 internal const val PE_REBRANDER_PATH_ENV_VAR = "PE_REBRANDER_PATH"
 internal const val DOWNLOAD_PE_REBRANDER_PROPERTY = "compose.desktop.application.downloadPeRebrander"
 
