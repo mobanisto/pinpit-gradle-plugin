@@ -156,7 +156,7 @@ abstract class PackageDebTask @Inject constructor(
             linuxPackageName.get(),
             debPackageVersion.get(),
             appCategory.get(),
-            menuGroup.get(),
+            menuGroup.orNull,
             packageVendor.get(),
             debMaintainer.get(),
             packageDescription.get(),
