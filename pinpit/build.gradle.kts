@@ -67,6 +67,7 @@ dependencies {
     testImplementation(kotlin("gradle-plugin-api"))
     testImplementation("commons-codec:commons-codec:1.15")
     testImplementation("io.github.java-diff-utils:java-diff-utils:4.12")
+    testImplementation("org.apache.httpcomponents.client5:httpclient5:5.3")
 
     // include relocated download task to avoid potential runtime conflicts
     embedded("de.undercouch:gradle-download-task:4.1.1")

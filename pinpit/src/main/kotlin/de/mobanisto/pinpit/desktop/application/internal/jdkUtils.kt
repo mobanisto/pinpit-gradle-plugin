@@ -6,6 +6,7 @@
 package de.mobanisto.pinpit.desktop.application.internal
 
 import org.gradle.api.GradleException
+import java.net.URLEncoder
 
 internal fun jdkInfo(jdkVendor: String, jdkVersion: String): JdkInfo? {
     if (jdkVendor == "adoptium") {
@@ -29,3 +30,17 @@ data class JdkInfo(
     val more: List<String>,
     val build: String
 )
+
+fun adoptiumUrl(
+    info: JdkInfo,
+    osSource: String,
+    arch: String,
+    jvmVersion: String,
+    fileVersion: String,
+    extension: String
+): String {
+    val urlVersion = URLEncoder.encode(jvmVersion, Charsets.UTF_8)
+    val url = "https://github.com/adoptium/temurin${info.feature}-binaries/releases/download/" +
+        "jdk-$urlVersion/OpenJDK${info.feature}U-jdk_${arch}_${osSource}_hotspot_$fileVersion.$extension"
+    return url
+}

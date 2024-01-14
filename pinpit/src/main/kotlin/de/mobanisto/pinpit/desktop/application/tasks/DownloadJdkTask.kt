@@ -1,5 +1,6 @@
 package de.mobanisto.pinpit.desktop.application.tasks
 
+import de.mobanisto.pinpit.desktop.application.internal.adoptiumUrl
 import de.mobanisto.pinpit.desktop.application.internal.currentOS
 import de.mobanisto.pinpit.desktop.application.internal.isUnix
 import de.mobanisto.pinpit.desktop.application.internal.jdkInfo
@@ -15,7 +16,6 @@ import org.gradle.api.provider.Property
 import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.TaskAction
 import java.net.URL
-import java.net.URLEncoder
 import java.nio.file.Files
 import java.nio.file.Files.createDirectories
 import java.nio.file.Path
@@ -71,9 +71,7 @@ abstract class DownloadJdkTask @Inject constructor() : AbstractPinpitTask() {
         if (vendor == "adoptium") {
             val osSource = if (os == "macos") "mac" else os
             val fileVersion = jvmVersion.get().replace("+", "_")
-            val urlVersion = URLEncoder.encode(jvmVersion.get(), Charsets.UTF_8)
-            val url = "https://github.com/adoptium/temurin${info.feature}-binaries/releases/download/" +
-                "jdk-$urlVersion/OpenJDK${info.feature}U-jdk_${arch}_${osSource}_hotspot_$fileVersion.$extension"
+            val url = adoptiumUrl(info, osSource, arch, jvmVersion.get(), fileVersion, extension)
             val nameFile = "OpenJDK${info.feature}U-jdk_${arch}_${os}_hotspot_$fileVersion.$extension"
             val nameDir = "OpenJDK${info.feature}U-jdk_${arch}_${os}_hotspot_$fileVersion"
             val nameDirContent = "jdk-${info.full}"
