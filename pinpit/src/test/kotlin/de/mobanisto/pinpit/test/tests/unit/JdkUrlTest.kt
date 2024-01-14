@@ -23,6 +23,9 @@ class JdkUrlTest {
     fun `jdk17_0_5+8`() = test("17.0.5+8")
 
     @Test
+    fun `jdk17_0_9+9`() = test("17.0.9+9")
+
+    @Test
     fun `jdk18_0_2_1+1`() = test("18.0.2.1+1")
 
     @Test

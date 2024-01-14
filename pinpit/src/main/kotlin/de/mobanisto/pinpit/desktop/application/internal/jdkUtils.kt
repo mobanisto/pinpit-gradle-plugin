@@ -39,7 +39,11 @@ fun adoptiumUrl(
     fileVersion: String,
     extension: String
 ): String {
-    val urlVersion = URLEncoder.encode(jvmVersion, Charsets.UTF_8)
+    val urlJvmVersion = when {
+        (osSource == "windows" && jvmVersion == "17.0.9+9") -> "17.0.9+9.1"
+        else -> jvmVersion
+    }
+    val urlVersion = URLEncoder.encode(urlJvmVersion, Charsets.UTF_8)
     val url = "https://github.com/adoptium/temurin${info.feature}-binaries/releases/download/" +
         "jdk-$urlVersion/OpenJDK${info.feature}U-jdk_${arch}_${osSource}_hotspot_$fileVersion.$extension"
     return url
