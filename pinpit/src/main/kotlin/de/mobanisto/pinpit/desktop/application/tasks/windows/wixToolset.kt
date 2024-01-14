@@ -14,8 +14,8 @@ import java.io.File
 import java.nio.file.Files.exists
 import java.nio.file.Paths
 
-internal const val DOWNLOAD_WIX_TOOLSET_TASK_NAME = "downloadWix"
-internal const val UNZIP_WIX_TOOLSET_TASK_NAME = "unzipWix"
+internal const val DOWNLOAD_WIX_TOOLSET_TASK_NAME = "pinpitDownloadWix"
+internal const val UNZIP_WIX_TOOLSET_TASK_NAME = "pinpitUnzipWix"
 internal const val WIX_PATH_ENV_VAR = "WIX_PATH"
 internal const val DOWNLOAD_WIX_PROPERTY = "compose.desktop.application.downloadWix"
 
