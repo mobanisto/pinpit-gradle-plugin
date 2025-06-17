@@ -25,7 +25,7 @@ import java.nio.file.attribute.PosixFilePermissions.asFileAttribute
 import kotlin.io.path.readText
 import kotlin.io.path.writeText
 
-abstract class AbstractDebPackager constructor(
+abstract class AbstractDebPackager(
     workingDir: Path,
     private val packageName: String,
     private val linuxPackageName: String,
