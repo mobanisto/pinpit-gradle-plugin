@@ -10,6 +10,7 @@ import de.mobanisto.pinpit.desktop.application.dsl.DebianPlatformSettings
 import de.mobanisto.pinpit.desktop.application.dsl.DistributableArchiveSettings
 import de.mobanisto.pinpit.desktop.application.dsl.JvmApplicationBuildType
 import de.mobanisto.pinpit.desktop.application.dsl.MsiPlatformSettings
+import de.mobanisto.pinpit.desktop.application.dsl.TargetFormat.AppImage
 import de.mobanisto.pinpit.desktop.application.dsl.TargetFormat.DistributableArchive
 import de.mobanisto.pinpit.desktop.application.internal.OS.Linux
 import de.mobanisto.pinpit.desktop.application.internal.OS.MacOS
@@ -24,6 +25,7 @@ import de.mobanisto.pinpit.desktop.application.tasks.AbstractSuggestModulesTask
 import de.mobanisto.pinpit.desktop.application.tasks.CustomPackageTask
 import de.mobanisto.pinpit.desktop.application.tasks.DistributableAppTask
 import de.mobanisto.pinpit.desktop.application.tasks.DownloadJdkTask
+import de.mobanisto.pinpit.desktop.application.tasks.linux.PackageAppImageTask
 import de.mobanisto.pinpit.desktop.application.tasks.linux.PackageDebTask
 import de.mobanisto.pinpit.desktop.application.tasks.linux.PackageLinuxDistributableArchiveTask
 import de.mobanisto.pinpit.desktop.application.tasks.linux.SuggestDebDependenciesTask
@@ -60,6 +62,7 @@ internal fun JvmApplicationContext.configureJvmApplication() {
     app.nativeDistributions.apply {
         linux.debs.forEach { targets.addUnique(Target(Linux, arch(it.arch))) }
         linux.distributableArchives.forEach { targets.addUnique(Target(Linux, arch(it.arch))) }
+        linux.appImages.forEach { targets.addUnique(Target(Linux, arch(it.arch))) }
         windows.msis.forEach { targets.addUnique(Target(Windows, arch(it.arch))) }
         windows.distributableArchives.forEach { targets.addUnique(Target(Windows, arch(it.arch))) }
         macOS.distributableArchives.forEach { targets.addUnique(Target(MacOS, arch(it.arch))) }
@@ -224,6 +227,34 @@ private fun JvmApplicationContext.configurePackagingTasks(
             taskNameAction = "pinpitPackage",
             taskNameObject = "distributable${format.name}${target.name}",
             description = "Builds a distributable ${format.name} archive for ${target.name}.",
+            args = listOf(target, targetFormat),
+        ) {
+            configureCustomPackageTask(
+                this,
+                createDistributableApp = packageTasks.createDistributable,
+                checkRuntime = packageTasks.checkRuntime,
+                unpackDefaultResources = commonTasks.unpackDefaultResources
+            )
+            configurePlatformSettings(
+                this, unpackDefaultResources = commonTasks.unpackDefaultResources
+            )
+        }.also { allPackageTasks.add(it) }
+    }
+
+    app.nativeDistributions.linux.appImages.forEach { appImage ->
+        val target = Target(Linux, arch(appImage.arch))
+        val targetBuild = TargetAndBuildType(target, buildType)
+
+        val packageTasks = configureCommonPackageTasks(
+            tasks, jdkInfo, targetBuild, app, appTmpDir, targetTasks, commonTasks
+        )
+
+        val targetFormat = AppImage()
+
+        tasks.register<PackageAppImageTask>(
+            taskNameAction = "pinpitPackage",
+            taskNameObject = "appImage${target.name}",
+            description = "Builds an AppImage self contained executable for ${target.name}.",
             args = listOf(target, targetFormat),
         ) {
             configureCustomPackageTask(
@@ -651,6 +682,22 @@ internal fun JvmApplicationContext.configurePlatformSettings(
     packageTask.destinationDir.set(
         app.nativeDistributions.outputBaseDir.map {
             it.dir("$appDirName/${packageTask.target.os.id}/${packageTask.target.arch.id}/distributableArchive")
+        }
+    )
+    packageTask.dependsOn(unpackDefaultResources)
+    app.nativeDistributions.linux.also { linux ->
+        packageTask.linuxPackageName.set(provider { linux.packageName })
+        packageTask.packageVersion.set(provider { linux.packageVersion ?: app.nativeDistributions.packageVersion })
+    }
+}
+
+internal fun JvmApplicationContext.configurePlatformSettings(
+    packageTask: PackageAppImageTask,
+    unpackDefaultResources: TaskProvider<AbstractUnpackDefaultComposeApplicationResourcesTask>
+) {
+    packageTask.destinationDir.set(
+        app.nativeDistributions.outputBaseDir.map {
+            it.dir("$appDirName/${packageTask.target.os.id}/${packageTask.target.arch.id}/appImage")
         }
     )
     packageTask.dependsOn(unpackDefaultResources)

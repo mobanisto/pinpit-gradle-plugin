@@ -62,7 +62,7 @@ private class ErrorsCollector {
             }
             appendLine(
                 "  * You can specify the correct version using DSL properties: " +
-                    dslPropertiesFor(target).joinToString(", ")
+                        dslPropertiesFor(target).joinToString(", ")
             )
         }
         myErrors.add(msg)
@@ -100,6 +100,7 @@ private fun dslPropertiesFor(targetFormat: TargetFormat): List<String> {
         is TargetFormat.DistributableArchive -> null
         is TargetFormat.Deb -> "$linux.debPackageVersion"
         is TargetFormat.Rpm -> "$linux.rpmPackageVersion"
+        is TargetFormat.AppImage -> "$linux.appImagePackageVersion"
         is TargetFormat.Dmg -> "$macOS.dmgPackageVersion"
         is TargetFormat.Pkg -> "$macOS.pkgPackageVersion"
         is TargetFormat.Exe -> "$windows.exePackageVersion"
@@ -135,10 +136,10 @@ private object DebVersionChecker : VersionChecker {
         version.matches(debRegex)
 
     private val debRegex = (
-        "([0-9]+:)?" /* EPOCH */ +
-            "[0-9][0-9a-zA-Z.+\\-~]*" /* UPSTREAM_VERSION */ +
-            "(-[0-9a-zA-Z.+~]+)?" /* DEBIAN_REVISION */
-        ).toRegex()
+            "([0-9]+:)?" /* EPOCH */ +
+                    "[0-9][0-9a-zA-Z.+\\-~]*" /* UPSTREAM_VERSION */ +
+                    "(-[0-9a-zA-Z.+~]+)?" /* DEBIAN_REVISION */
+            ).toRegex()
 }
 
 private object RpmVersionChecker : VersionChecker {
@@ -160,8 +161,8 @@ private object WindowsVersionChecker : VersionChecker {
         if (parts.size != 3) return false
 
         return parts[0].isIntInRange(0, 255) &&
-            parts[1].isIntInRange(0, 255) &&
-            parts[2].isIntInRange(0, 65535)
+                parts[1].isIntInRange(0, 255) &&
+                parts[2].isIntInRange(0, 65535)
     }
 
     private fun Int?.isIntInRange(min: Int, max: Int) =
@@ -179,7 +180,7 @@ private object MacVersionChecker : VersionChecker {
         val parts = version.split(".").map { it.toIntOrNull() }
 
         return parts.isNotEmpty() &&
-            parts.size <= 3 &&
-            parts.all { it != null && it >= 0 }
+                parts.size <= 3 &&
+                parts.all { it != null && it >= 0 }
     }
 }
