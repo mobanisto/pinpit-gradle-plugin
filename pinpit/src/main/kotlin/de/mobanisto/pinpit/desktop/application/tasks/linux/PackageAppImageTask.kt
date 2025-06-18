@@ -6,6 +6,7 @@
 package de.mobanisto.pinpit.desktop.application.tasks.linux
 
 import de.mobanisto.pinpit.desktop.application.dsl.TargetFormat
+import de.mobanisto.pinpit.desktop.application.internal.Arch
 import de.mobanisto.pinpit.desktop.application.internal.JvmRuntimeProperties
 import de.mobanisto.pinpit.desktop.application.internal.Target
 import de.mobanisto.pinpit.desktop.application.internal.files.asPath
@@ -92,7 +93,11 @@ abstract class PackageAppImageTask @Inject constructor(
         logger.lifecycle("Temporary squash fs: $filePreImage")
 
         // Download appimage runtime
-        val urlRuntime = "https://github.com/AppImage/type2-runtime/releases/download/continuous/runtime-x86_64"
+        val urlRuntime = "https://github.com/AppImage/type2-runtime/releases/download/continuous/" +
+            when (target.arch) {
+                Arch.X64 -> "runtime-x86_64"
+                Arch.Arm64 -> "runtime-aarch64"
+            }
         val dataRuntime = URL(urlRuntime).openStream().use {
             it.readBytes()
         }
