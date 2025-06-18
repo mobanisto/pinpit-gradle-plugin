@@ -8,6 +8,7 @@ package de.mobanisto.pinpit.desktop.application.tasks.linux
 import de.mobanisto.pinpit.desktop.application.dsl.TargetFormat
 import de.mobanisto.pinpit.desktop.application.internal.Arch
 import de.mobanisto.pinpit.desktop.application.internal.JvmRuntimeProperties
+import de.mobanisto.pinpit.desktop.application.internal.SquashConvertDirectory
 import de.mobanisto.pinpit.desktop.application.internal.Target
 import de.mobanisto.pinpit.desktop.application.internal.files.asPath
 import de.mobanisto.pinpit.desktop.application.internal.files.findOutputFileOrDir
@@ -15,8 +16,8 @@ import de.mobanisto.pinpit.desktop.application.internal.ioFile
 import de.mobanisto.pinpit.desktop.application.internal.nullableProperty
 import de.mobanisto.pinpit.desktop.application.internal.provider
 import de.mobanisto.pinpit.desktop.application.tasks.CustomPackageTask
+import de.topobyte.squashfs.SquashFsWriter
 import de.topobyte.squashfs.compression.ZstdCompression
-import de.topobyte.squashfs.tools.SquashConvertDirectory
 import org.gradle.api.file.Directory
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.provider.Property
@@ -28,9 +29,10 @@ import org.gradle.api.tasks.Optional
 import org.gradle.process.ExecResult
 import java.net.URL
 import java.nio.file.Files
-import java.nio.file.Paths
 import java.nio.file.StandardCopyOption
 import java.nio.file.StandardOpenOption
+import java.time.Instant
+import java.util.concurrent.atomic.AtomicReference
 import javax.inject.Inject
 
 
@@ -103,14 +105,24 @@ abstract class PackageAppImageTask @Inject constructor(
         }
         logger.lifecycle("Size of appimage runtime: {}", dataRuntime.size)
 
-        // TODO: Create copy
         val pathImage = pathDistributableApp
-        Files.createSymbolicLink(pathImage.resolve("AppRun"), Paths.get("bin/${packageName.get()}"))
+
+        val symlinkAppRun = "bin/${packageName.get()}"
 
         val task = SquashConvertDirectory()
         task.convertToSquashFs(
-            pathImage, filePreImage, ZstdCompression(8), dataRuntime.size
-        )
+            pathImage,
+            filePreImage,
+            ZstdCompression(8),
+            dataRuntime.size
+        ) { writer: SquashFsWriter, modDate: AtomicReference<Instant> ->
+            val tb = writer.entry("/AppRun")
+                .uid(0).gid(0).permissions("777".toShort(radix = 8))
+            logger.info("symlink: $symlinkAppRun")
+            tb.symlink(symlinkAppRun)
+            tb.build()
+            1
+        }
 
         // Replace target file with the one we just created
         Files.copy(
