@@ -141,6 +141,7 @@ fun checkJarContainsExpectedPackages(jar: ZipFile) {
     val expectedPackages = arrayOf(
         "kotlinx/serialization",
         "de/mobanisto/pinpit",
+        "com/github/luben/zstd",
     )
     val unexpectedClasses = arrayListOf<String>()
 
