@@ -35,7 +35,6 @@ import java.time.Instant
 import java.util.concurrent.atomic.AtomicReference
 import javax.inject.Inject
 
-
 abstract class PackageAppImageTask @Inject constructor(
     target: Target,
     override val targetFormat: TargetFormat,

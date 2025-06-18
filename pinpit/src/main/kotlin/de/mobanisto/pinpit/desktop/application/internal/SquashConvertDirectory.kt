@@ -37,8 +37,10 @@ class SquashConvertDirectory {
 
     @Throws(IOException::class)
     fun convertToSquashFs(
-        inputFile: Path, outputFile: Path,
-        compression: Compression?, offset: Int,
+        inputFile: Path,
+        outputFile: Path,
+        compression: Compression?,
+        offset: Int,
         additionalFiles: (
             writer: SquashFsWriter,
             modDate: AtomicReference<Instant>
@@ -65,7 +67,10 @@ class SquashConvertDirectory {
 
     @Throws(IOException::class)
     private fun walk(
-        root: Path, path: Path, depth: Int, writer: SquashFsWriter,
+        root: Path,
+        path: Path,
+        depth: Int,
+        writer: SquashFsWriter,
         modDate: AtomicReference<Instant>
     ): Int {
         var count = 0
@@ -85,7 +90,9 @@ class SquashConvertDirectory {
 
     @Throws(IOException::class)
     private fun processFile(
-        root: Path, file: Path, writer: SquashFsWriter,
+        root: Path,
+        file: Path,
+        writer: SquashFsWriter,
         modDate: AtomicReference<Instant>
     ) {
         val posix = readAttributes(file, PosixFileAttributes::class.java, LinkOption.NOFOLLOW_LINKS)
@@ -124,4 +131,3 @@ class SquashConvertDirectory {
         tb.build()
     }
 }
-

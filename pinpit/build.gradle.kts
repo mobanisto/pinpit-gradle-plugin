@@ -86,13 +86,15 @@ dependencies {
 }
 
 val shadow = tasks.named<ShadowJar>("shadowJar") {
-    for (fromPackage in listOf(
-        "de.undercouch",
-        "org.apache.commons.compress",
-        "org.tukaani.xz",
-        "com.dd.plist",
-        "de.topobyte.squashfs",
-    )) {
+    for (
+        fromPackage in listOf(
+            "de.undercouch",
+            "org.apache.commons.compress",
+            "org.tukaani.xz",
+            "com.dd.plist",
+            "de.topobyte.squashfs",
+        )
+    ) {
         relocate(fromPackage, "de.mobanisto.pinpit.$fromPackage")
     }
     archiveClassifier.set("shadow")
