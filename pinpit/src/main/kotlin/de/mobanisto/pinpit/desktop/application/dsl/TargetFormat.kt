@@ -23,6 +23,7 @@ sealed class TargetFormat(val targetOS: OS) : Serializable {
     class DistributableArchive(os: OS, val archiveFormat: ArchiveFormat) : TargetFormat(os)
     class Deb : TargetFormat(Linux)
     class Rpm : TargetFormat(Linux)
+    class AppImage : TargetFormat(Linux)
     class Dmg : TargetFormat(MacOS)
     class Pkg : TargetFormat(MacOS)
     class Exe : TargetFormat(Windows)
@@ -36,6 +37,7 @@ sealed class TargetFormat(val targetOS: OS) : Serializable {
         get() = when (this) {
             is DistributableApp -> "app"
             is DistributableArchive -> archiveFormat.extension
+            is AppImage -> "appImage"
             is Deb -> "deb"
             is Rpm -> "rpm"
             is Dmg -> "dmg"
@@ -49,6 +51,7 @@ sealed class TargetFormat(val targetOS: OS) : Serializable {
             return when (this) {
                 is DistributableApp -> throw IllegalStateException("DistributableApp does not have a file extension")
                 is DistributableArchive -> archiveFormat.extension
+                is AppImage -> ".AppImage"
                 is Deb -> ".deb"
                 is Rpm -> ".rpm"
                 is Dmg -> ".dmg"

@@ -35,7 +35,7 @@ import kotlin.io.path.outputStream
 /**
  * A class for creating a DEB package without using native tools.
  */
-class JvmDebPackager constructor(
+class JvmDebPackager(
     private val distributableApp: Path,
     private val destinationDeb: Path,
     workingDir: Path,

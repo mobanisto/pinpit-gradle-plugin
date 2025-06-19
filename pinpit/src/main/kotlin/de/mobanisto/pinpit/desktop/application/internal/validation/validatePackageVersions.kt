@@ -100,6 +100,7 @@ private fun dslPropertiesFor(targetFormat: TargetFormat): List<String> {
         is TargetFormat.DistributableArchive -> null
         is TargetFormat.Deb -> "$linux.debPackageVersion"
         is TargetFormat.Rpm -> "$linux.rpmPackageVersion"
+        is TargetFormat.AppImage -> "$linux.appImagePackageVersion"
         is TargetFormat.Dmg -> "$macOS.dmgPackageVersion"
         is TargetFormat.Pkg -> "$macOS.pkgPackageVersion"
         is TargetFormat.Exe -> "$windows.exePackageVersion"

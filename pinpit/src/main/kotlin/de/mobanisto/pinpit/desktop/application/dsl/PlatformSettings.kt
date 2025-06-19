@@ -125,6 +125,14 @@ abstract class LinuxPlatformSettings : AbstractBasePlatformSettings() {
         }
         fn.execute(deb)
     }
+
+    val appImages: MutableList<AppImagePlatformSettings> = arrayListOf()
+    open fun appImage(fn: Action<AppImagePlatformSettings>) {
+        val appImage = objects.newInstance(AppImagePlatformSettings::class.java).also {
+            appImages.add(it)
+        }
+        fn.execute(appImage)
+    }
 }
 
 abstract class DistributableArchiveSettings : AbstractPlatformSettings() {
@@ -140,6 +148,10 @@ abstract class DebianPlatformSettings : AbstractPlatformSettings() {
     fun depends(vararg depends: String) {
         this.depends.addAll(depends.toList())
     }
+}
+
+abstract class AppImagePlatformSettings : AbstractPlatformSettings() {
+    var arch: String? = null
 }
 
 abstract class WindowsPlatformSettings : AbstractBasePlatformSettings() {

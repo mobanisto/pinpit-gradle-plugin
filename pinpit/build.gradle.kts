@@ -80,10 +80,21 @@ dependencies {
     embedded("org.tukaani:xz:1.9")
     embedded("org.apache.commons:commons-compress:1.22")
     embedded("com.googlecode.plist:dd-plist:1.26")
+    embedded("de.topobyte:squashfs-tools:0.1.0")
+    // this one is a dependency of squashfs-tools, it won't work when relocated
+    embedded("com.github.luben:zstd-jni:1.5.6-8")
 }
 
 val shadow = tasks.named<ShadowJar>("shadowJar") {
-    for (fromPackage in listOf("de.undercouch", "org.apache.commons.compress", "org.tukaani.xz", "com.dd.plist")) {
+    for (
+        fromPackage in listOf(
+            "de.undercouch",
+            "org.apache.commons.compress",
+            "org.tukaani.xz",
+            "com.dd.plist",
+            "de.topobyte.squashfs",
+        )
+    ) {
         relocate(fromPackage, "de.mobanisto.pinpit.$fromPackage")
     }
     archiveClassifier.set("shadow")
@@ -130,6 +141,7 @@ fun checkJarContainsExpectedPackages(jar: ZipFile) {
     val expectedPackages = arrayOf(
         "kotlinx/serialization",
         "de/mobanisto/pinpit",
+        "com/github/luben/zstd",
     )
     val unexpectedClasses = arrayListOf<String>()
 
