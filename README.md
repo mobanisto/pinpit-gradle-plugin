@@ -462,7 +462,7 @@ For macOS, signing and notarization still requires the zip files produced
 on any platform to be postprocessed on a macOS box.
 It would be good to implement this in a cross-platform manner.
 There apparently are ways to sign packages cross-platform and Apple has
-release an API that can be used to submit packages for notarization.
+released an API that can be used to submit packages for notarization.
 This is being worked on under https://github.com/mobanisto/pinpit-gradle-plugin/issues/23.
 
 ## Development and publishing notes
