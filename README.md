@@ -51,6 +51,8 @@ Notable differences:
   Hence the work that JPackage usually does is
   mostly replaced by custom code that emulates its behavior and where
   relevant improves on it and offers better configurability.
+* **Additional release binary formats.** We're working on additional
+  releaseable file formats such as [AppImage](https://appimage.org/).
 
 ## Usage
 
@@ -194,6 +196,9 @@ archive:
                      format = "tar.gz"
                      arch = "x64"
                 }
+                appImage {
+                     arch = "x64"
+                }
             }
 ```
 
@@ -252,6 +257,7 @@ pinpitDownloadJdkLinuxX64 - Downloads the JDK for LinuxX64 that is used to deriv
 pinpitDownloadJdkMacosArm64 - Downloads the JDK for MacosArm64 that is used to derive a runtime to distribute with the app.
 pinpitDownloadJdkWindowsX64 - Downloads the JDK for WindowsX64 that is used to derive a runtime to distribute with the app.
 pinpitPackageDefault - Builds packages for all systems and architectures.
+pinpitPackageDefaultAppImageLinuxX64 - Builds an AppImage self contained executable for LinuxX64.
 pinpitPackageDefaultDebUbuntuBionicX64 - Builds a DEB package for LinuxX64.
 pinpitPackageDefaultDebUbuntuFocalX64 - Builds a DEB package for LinuxX64.
 pinpitPackageDefaultDistributableTarGzLinuxX64 - Builds a distributable TarGz archive for LinuxX64.
@@ -411,15 +417,16 @@ and install that using `wine msiexec /i wine-mono-8.0.0-x86.msi`.
 Here's a summary of the supported build hosts and target formats and what
 we plan to work on:
 
-| Build host              | Debian/Ubuntu       | Windows | macOS           |
-|:------------------------|---------------------|---------|-----------------|
-| Target: Linux (deb)     | yes                 | yes     | yes             |
-| Target: Linux (tar.gz)  | yes                 | yes     | yes             |
-| Target: Windows (MSI)   | yes (Wine required) | yes     | no              |
-| Target: Windows (zip)   | yes (Wine required) | yes     | no              |
-| Target: macOS (zip)     | yes                 | yes     | yes             |
-| Target: macOS (PKG)     | planned             | no      | postprocess zip |
-| Target: macOS (DMG)     | planned             | no      | postprocess zip |
+| Build host                | Debian/Ubuntu       | Windows         | macOS           |
+|:--------------------------|---------------------|-----------------|-----------------|
+| Target: Linux (deb)       | yes                 | yes             | yes             |
+| Target: Linux (tar.gz)    | yes                 | yes             | yes             |
+| Target: Linux (AppImage)  | yes                 | untested        | should work     |
+| Target: Windows (MSI)     | yes (Wine required) | yes             | no              |
+| Target: Windows (zip)     | yes (Wine required) | yes             | no              |
+| Target: macOS (zip)       | yes                 | yes             | yes             |
+| Target: macOS (PKG)       | planned             | no              | postprocess zip |
+| Target: macOS (DMG)       | planned             | no              | postprocess zip |
 
 Building MSI installers on macOS can work on systems for which Wine is
 available. See https://github.com/mobanisto/pinpit-gradle-plugin/issues/11
@@ -445,8 +452,7 @@ cross-platform solution for building RPMs like it is possible with Debian
 packages.
 
 For Linux there are new cross-distro packaging formats that could be worked
-on like [AppImage](https://appimage.org/) and
-[Flatpak](https://flatpak.org/).
+on like [Flatpak](https://flatpak.org/).
 
 For Windows, there are different tools than Wix like Inno Setup or the
 Nullsoft Scriptable Install System (NSIS) that could be used to build

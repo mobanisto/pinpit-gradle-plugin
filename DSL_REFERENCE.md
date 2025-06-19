@@ -115,6 +115,22 @@ The package file name is constructed like this:
 * `depends`: vararg\<String> - list of system packages that the `.deb` will
   depend on (ends up in the `control` file's `Depends:` section)
 
+### AppImage options
+
+AppImage options go into an `appImage` block:
+```kotlin
+            linux {
+                appImage {
+                    …
+                }
+            }
+```
+
+The package file name is constructed like this:
+`${linux.packageName}-${appImage.arch}-${packageVersion}.deb`
+
+* `arch`: String - third part for name of generated `.deb` files.
+
 ## Windows options
 
 Windows options go into a `windows` block:
