@@ -254,7 +254,7 @@ private fun JvmApplicationContext.configurePackagingTasks(
         tasks.register<PackageAppImageTask>(
             taskNameAction = "pinpitPackage",
             taskNameObject = "appImage${target.name}",
-            description = "Builds an AppImage self contained executable for ${target.name}.",
+            description = "Builds an AppImage self-contained executable for ${target.name}.",
             args = listOf(target, targetFormat),
         ) {
             configureCustomPackageTask(
