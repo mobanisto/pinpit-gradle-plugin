@@ -127,9 +127,9 @@ AppImage options go into an `appImage` block:
 ```
 
 The package file name is constructed like this:
-`${linux.packageName}-${appImage.arch}-${packageVersion}.deb`
+`${linux.packageName}-${appImage.arch}-${packageVersion}.AppImage`
 
-* `arch`: String - third part for name of generated `.deb` files.
+* `arch`: String - second part for name of generated `.AppImage` files.
 
 ## Windows options
 
